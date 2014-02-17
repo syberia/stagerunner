@@ -76,18 +76,20 @@ test_that("it finds two stages by partial match", {
 
 test_that("it finds two stages by partial match, one a nested reference", {
   context <- new.env()
-  context$x <- 1; context$y <- 1; context$z <- 1; context$w <- 1
+  context$x <- 1; context$y <- 1; context$z <- 1; context$w <- 1; context$r <- 1
   sr2 <- stageRunner$new(context, list(substage_one = function(cx) cx$x <- 2,
-                                       substage_two = function(cx) cx$w <- 0))
+                                       substage_two = function(cx) cx$w <- 0,
+                                       substage_three = function(cx) cx$r <- 0))
   sr <- stageRunner$new(context, list(stage_one = sr2,
                                       stage_two = function(cx) cx$y <- 3,
                                       stage_three = function(cx) cx$z <- 4))
-  sr$run(list('one/one', 'three'))
+  sr$run(list('one/one', 'three', 'one/three'))
   # Expect only stages 1 and 3 to have been run
   expect_equal(2, context$x, info = "x differs")
   expect_equal(1, context$y, info = "y differs")
   expect_equal(4, context$z, info = "z differs")
   expect_equal(1, context$w, info = "w differs")
+  expect_equal(0, context$r, info = "r differs")
 })
 
 test_that("it disallows running stages out of order", {
