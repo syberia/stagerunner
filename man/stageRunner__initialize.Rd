@@ -2,7 +2,7 @@
 \alias{stageRunner__initialize}
 \title{Initialize a stageRunner object.}
 \usage{
-stageRunner__initialize(context, stages, remember)
+stageRunner__initialize(context, stages, remember = FALSE)
 }
 \arguments{
   \item{context}{an environment. The initial environment
@@ -16,7 +16,8 @@ stageRunner__initialize(context, stages, remember)
   context and its contents throughout each stage for
   debugging purposes--this makes it easy to go back and
   investigate a stage. This could be optimized by
-  developing a package for "diffing" two environments.}
+  developing a package for "diffing" two environments. The
+  default is \code{FALSE}.}
 }
 \description{
 stageRunner objects are used for executing a linear

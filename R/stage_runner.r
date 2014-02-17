@@ -17,7 +17,16 @@
 stageRunner__initialize <- function(context, stages, remember = FALSE) {
   context <<- context
   stages <<- stages
-  stopifnot(all(vapply(stages, is.function, logical(1))))
+  stopifnot(all(vapply(stages,
+    function(s) is.function(s) || is.stagerunner(s), logical(1))))
+
+  if (any(violators <- grepl('/', names(stages)))) {
+    msg <- paste0("Stage names may not have a '/' character. The following do not ",
+      "satisfy this constraint: '",
+      paste0(names(stages)[violators], collapse = "', '"), "'")
+    stop(msg)
+  }
+
   remember <<- remember
 }
 
@@ -27,39 +36,34 @@ stageRunner__initialize <- function(context, stages, remember = FALSE) {
 #'   (or re-run). This can be a regular expression. The default is \code{NULL},
 #'   which runs the whole sequences of stages. If the character is of
 #'   length greater than 1, all matching stages will attempt to be run.
-stageRunner__run <- function(stage_key = NULL) {
-  active_stages <- if (missing(stage_key) || is.null(stage_key)) {
-    seq_along(stages)
-  } else {
-    if (is.logical(stage_key)) {
-      stopifnot(length(stage_key) == length(stages))
-      seq_along(stages)[stage_key]
-    } else {
-      seqs <- seq_along(stages)
-      vapply(stage_key, function(key) {
-        if (is.numeric(key) && abs(key) %in% seqs) as.integer(key)
-        else if (is.character(key)) {
-          finds <- grepl(key, names(stages))
-          if (length(finds) == 0) stop("No stage with key '", key, "' found")
-          else if (sum(finds) > 1)
-            stop("Multiple stages with key '", key, "', found: ",
-                 names(stages)[finds])
-          else which(finds)
-        } else stop("Invalid stage key")
-      }, integer(1))
-    }
-  } # End active_stages assignment
+#' @param normalized logical. A convenience recursion performance helper. If
+#'   \code{TRUE}, stageRunner will assume the \code{stage_key} argument is a
+#'   nested list of logicals.
+stageRunner__run <- function(stage_key = NULL, normalized = FALSE) {
+  if (identical(normalized, FALSE))
+    stage_key <- normalize_stage_keys(stage_key, stages)
 
   # Now that we have determined which stages to run, cycle through them all.
   # It is up to the user to determine that context changes make sense.
   # We also sort the stages to ensure linearity is preserved. Stagerunner
   # enforces the linearity and directionality set in the stage definitions.
-  if (TRUE != all.equal(sorted_stages <- sort(active_stages), active_stages))
-    warning("Stages ", paste0(active_stages, collapse = ", "), " were ",
-            "requested to be run out of order. Coercing them to run in the ",
-            "order they were originally defined.")
   
-  lapply(stages[sorted_stages], function(stage) stage(context))
+  #if (TRUE != all.equal(sorted_stages <- sort(active_stages), active_stages))
+  #  warning("Stages ", paste0(active_stages, collapse = ", "), " were ",
+  #          "requested to be run out of order. Coercing them to run in the ",
+  #          "order they were originally defined.")
+  
+  lapply(seq_along(stage_key), function(stage_index) 
+    if (identical(stage_key[[stage_index]], TRUE)) {
+      stage <- stages[[stage_index]]
+      if (is.stagerunner(stage)) stage$run() else stage(context)
+    } else if (is.list(stage_key[[stage_index]])) {
+      if (!is.stagerunner(stages[[stage_index]]))
+        stop("Invalid stage key: attempted to make a nested stage reference ",
+             "to a non-existent stage")
+      stages[[stage_index]]$run(stage_key[[stage_index]])
+    }
+  )
   TRUE
 }
 
@@ -67,6 +71,7 @@ stageRunner__run <- function(stage_key = NULL) {
 #' a linear sequence of actions.
 #' 
 #' @docType class 
+#' @export
 #' @name stageRunner
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical'),
@@ -74,7 +79,35 @@ stageRunner <- setRefClass('stageRunner',
     initialize = stageRunner__initialize,
     run        = stageRunner__run
   )
-
 )
 
+#' Check whether an R object is a stageRunner object
+#'
+#' @export
+#' @param obj any object. \code{TRUE} if the object is of class
+#'    \code{stageRunner}, \code{FALSE} otherwise.
+is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
 
+
+
+#  active_stages <- if (missing(stage_key) || is.null(stage_key)) {
+#    seq_along(stages)
+#  } else {
+#    if (is.logical(stage_key)) {
+#      stopifnot(length(stage_key) == length(stages))
+#      seq_along(stages)[stage_key]
+#    } else {
+#      seqs <- seq_along(stages)
+#      lapply(stage_key, function(key) {
+#        if (is.numeric(key) && abs(key) %in% seqs) as.integer(key)
+#        else if (is.character(key)) {
+#          finds <- grepl(key, names(stages))
+#          if (length(finds) == 0) stop("No stage with key '", key, "' found")
+#          else if (sum(finds) > 1)
+#            stop("Multiple stages with key '", key, "', found: ",
+#                 names(stages)[finds])
+#          else which(finds)
+#        } else stop("Invalid stage key")
+#      }, integer(1))
+#    }
+#  } # End active_stages assignment
