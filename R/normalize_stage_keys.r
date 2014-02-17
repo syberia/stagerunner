@@ -41,7 +41,7 @@ normalize_stage_keys <- function(keys, stages, parent_key = "") {
       rest_keys <- key[-1]
       key <- key[[1]]
       if (is.logical(key)) {
-        normalized_keys[[key_index]] <<- TRUE
+        normalized_keys[[key_index]] <<- key
       } else if (is.numeric(key) && key %in% seqs) {
         # Recursively process any potential extra keys
         normalized_keys[[as.integer(key)]] <<-

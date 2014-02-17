@@ -32,10 +32,26 @@ stageRunner__initialize <- function(context, stages, remember = FALSE) {
 
 #' Run the stages in a stageRunner object.
 #'
-#' @param stage_key character. A string representing the stage to run
-#'   (or re-run). This can be a regular expression. The default is \code{NULL},
-#'   which runs the whole sequences of stages. If the character is of
-#'   length greater than 1, all matching stages will attempt to be run.
+#' @param stage_key an indexing parameter. Many forms are accepted, but the
+#'   easiest is the name of the stage. For example, if we have
+#'   \code{stageRunner$new(context, list(stage_one = some_fn, stage_two = some_other_fn))}
+#'   then using \code{run('stage_one')} will execute \code{some_fn}.
+#'   Additional indexing forms are logical (which stages to execute),
+#'   numeric (which stages to execute by indices), negative (all but the
+#'   given stages), character (as above), and nested forms of these.
+#'   The latter refers to instances of the following:
+#'   \code{stageRunner$new(context, list(stage_one =
+#'     stageRunner$new(context, substage_one = some_fn, substage_two = other_fn),
+#'     stage_two = another_fn))}.
+#'   Here, the following all execute only substage_two:
+#'   \code{run(list(list(FALSE, TRUE), FALSE))},
+#'   \code{run(list(list(1, 2)))},
+#'   \code{run('stage_one/substage_two')},
+#'   \code{run('one/two')},
+#'   \code{run(list(list('one', 'two')))},
+#'   \code{run(list(list('one', 2)))}
+#'   Notice that regular expressions are allowed for characters.
+#'   The default is \code{NULL}, which runs the whole sequences of stages.
 #' @param normalized logical. A convenience recursion performance helper. If
 #'   \code{TRUE}, stageRunner will assume the \code{stage_key} argument is a
 #'   nested list of logicals.
@@ -45,13 +61,8 @@ stageRunner__run <- function(stage_key = NULL, normalized = FALSE) {
 
   # Now that we have determined which stages to run, cycle through them all.
   # It is up to the user to determine that context changes make sense.
-  # We also sort the stages to ensure linearity is preserved. Stagerunner
-  # enforces the linearity and directionality set in the stage definitions.
-  
-  #if (TRUE != all.equal(sorted_stages <- sort(active_stages), active_stages))
-  #  warning("Stages ", paste0(active_stages, collapse = ", "), " were ",
-  #          "requested to be run out of order. Coercing them to run in the ",
-  #          "order they were originally defined.")
+  # We also implicitly sort the stages to ensure linearity is preserved.
+  # Stagerunner enforces the linearity and directionality set in the stage definitions.
   
   lapply(seq_along(stage_key), function(stage_index) 
     if (identical(stage_key[[stage_index]], TRUE)) {
