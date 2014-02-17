@@ -58,7 +58,7 @@ normalize_stage_keys <- function(keys, stages, parent_key = "") {
           stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
         else if (sum(finds) > 1)
           stop("Multiple stages with key '", paste0(parent_key, key[[1]]),
-                 "', found: ", paste0(parent_key, names(stages)[finds]))
+                 "', found: ", paste0(parent_key, names(stages)[finds], collapse = ', '))
         finds <- which(finds) # now an integer of length 1
         normalized_keys[[finds]] <<- special_or_lists(
           normalized_keys[[finds]],
