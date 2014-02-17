@@ -2,7 +2,7 @@
 #'
 #' stageRunner objects are used for executing a linear sequence of
 #' actions on a context (an environment). For example, if we have an
-#' environment \code{e} containing \code{x = 1, y = 2}, then if
+#' environment \code{e} containing \code{x = 1, y = 2}, then using
 #' \code{stages = list(function(e) e$x <- e$x + 1, function(e) e$y <- e$y - e$x)}
 #' will cause \code{x = 2, y = 0} after running the stages.
 #'
