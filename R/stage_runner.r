@@ -88,26 +88,3 @@ stageRunner <- setRefClass('stageRunner',
 #'    \code{stageRunner}, \code{FALSE} otherwise.
 is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
 
-
-
-#  active_stages <- if (missing(stage_key) || is.null(stage_key)) {
-#    seq_along(stages)
-#  } else {
-#    if (is.logical(stage_key)) {
-#      stopifnot(length(stage_key) == length(stages))
-#      seq_along(stages)[stage_key]
-#    } else {
-#      seqs <- seq_along(stages)
-#      lapply(stage_key, function(key) {
-#        if (is.numeric(key) && abs(key) %in% seqs) as.integer(key)
-#        else if (is.character(key)) {
-#          finds <- grepl(key, names(stages))
-#          if (length(finds) == 0) stop("No stage with key '", key, "' found")
-#          else if (sum(finds) > 1)
-#            stop("Multiple stages with key '", key, "', found: ",
-#                 names(stages)[finds])
-#          else which(finds)
-#        } else stop("Invalid stage key")
-#      }, integer(1))
-#    }
-#  } # End active_stages assignment
