@@ -87,10 +87,14 @@ stageRunner__run <- function(stage_key = NULL, normalized = FALSE) {
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical'),
   methods = list(
-    initialize = stageRunner__initialize,
-    run        = stageRunner__run
+    initialize = stagerunner:::stageRunner__initialize,
+    run        = stagerunner:::stageRunner__run
   )
 )
+
+#' @name stageRunner
+#' @export
+NULL
 
 #' Check whether an R object is a stageRunner object
 #'
