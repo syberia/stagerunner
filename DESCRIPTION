@@ -1,4 +1,4 @@
-Package: Stage Runner
+Package: Stagerunner
 Title: Parametrization and execution of linear sequences of actions
 Description: Stage Runner is an R package that helps with parametrizing
     and executing linear sequences of actions, common in the various

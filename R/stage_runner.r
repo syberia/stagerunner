@@ -12,11 +12,12 @@
 #' @param remember a logical. Whether to keep a copy of the context and its
 #'    contents throughout each stage for debugging purposes--this makes it
 #'    easy to go back and investigate a stage. This could be optimized by
-#'    developing a package for "diffing" two environments.
-stageRunner__initialize <- function(context, stages, remember) {
+#'    developing a package for "diffing" two environments. The default is
+#'    \code{FALSE}.
+stageRunner__initialize <- function(context, stages, remember = FALSE) {
   context <<- context
   stages <<- stages
-  stopifnot(do.call(all, lapply(stages, is.function)))
+  stopifnot(all(vapply(stages, is.function, logical(1))))
   remember <<- remember
 }
 
@@ -35,23 +36,30 @@ stageRunner__run <- function(stage_key = NULL) {
       seq_along(stages)[stage_key]
     } else {
       seqs <- seq_along(stages)
-      lapply(stage_key, function(key) {
-        if (is.integer(key) && key %in% seqs) key
+      vapply(stage_key, function(key) {
+        if (is.numeric(key) && abs(key) %in% seqs) as.integer(key)
         else if (is.character(key)) {
           finds <- grepl(key, names(stages))
           if (length(finds) == 0) stop("No stage with key '", key, "' found")
-          else if (length(finds) > 1)
+          else if (sum(finds) > 1)
             stop("Multiple stages with key '", key, "', found: ",
                  names(stages)[finds])
           else which(finds)
         } else stop("Invalid stage key")
-      })
+      }, integer(1))
     }
   } # End active_stages assignment
 
   # Now that we have determined which stages to run, cycle through them all.
   # It is up to the user to determine that context changes make sense.
-  lapply(stages[active_stages], function(stage) stage(context))
+  # We also sort the stages to ensure linearity is preserved. Stagerunner
+  # enforces the linearity and directionality set in the stage definitions.
+  if (TRUE != all.equal(sorted_stages <- sort(active_stages), active_stages))
+    warning("Stages ", paste0(active_stages, collapse = ", "), " were ",
+            "requested to be run out of order. Coercing them to run in the ",
+            "order they were originally defined.")
+  
+  lapply(stages[sorted_stages], function(stage) stage(context))
   TRUE
 }
 
