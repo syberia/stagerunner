@@ -32,7 +32,7 @@ special_or_lists <- function(list1, list2) {
     if (!identical(names(list1), names(list2))) 
       warning("special_or_lists matches lists by order, not name, ",
               "but the names of the two lists do not match!")
-    mapply(FUN = special_or_lists, list1, list2, SIMPLIFY = FALSE)
+    Map(special_or_lists, list1, list2)
   }
 }
 
