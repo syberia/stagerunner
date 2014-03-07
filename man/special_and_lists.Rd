@@ -31,4 +31,7 @@ lists have the same comparable key orders. For example,
 FALSE, a = TRUE))} would mistakenly return \code{list(a =
 TRUE, b = TRUE)}.
 }
+\seealso{
+\code{\link{special_or_lists}}
+}
 

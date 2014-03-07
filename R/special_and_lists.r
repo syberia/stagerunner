@@ -19,6 +19,7 @@
 #'
 #' @param list1 a list.
 #' @param list2 a list.
+#' @seealso \code{\link{special_or_lists}}
 #' @return the and'ed list.
 special_and_lists <- function(list1, list2) {
   if (identical(list1, FALSE) || identical(list2, FALSE)) FALSE
