@@ -2,7 +2,7 @@
 \alias{stageRunner__run}
 \title{Run the stages in a stageRunner object.}
 \usage{
-stageRunner__run(stage_key = NULL, normalized = FALSE)
+stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE)
 }
 \arguments{
   \item{stage_key}{an indexing parameter. Many forms are
@@ -27,6 +27,16 @@ stageRunner__run(stage_key = NULL, normalized = FALSE)
   regular expressions are allowed for characters.  The
   default is \code{NULL}, which runs the whole sequences of
   stages.}
+
+  \item{to}{an indexing parameter. If \code{stage_key}
+  refers to a single stage, attempt to run from that stage
+  to this stage (or, if this one comes first, this stage to
+  that stage). For example, if we have \code{stages =
+  list(a = list(b = 1, c = 2), d = 3, e = list(f = 4, g =
+  5))} where the numbers are some functions, and we call
+  \code{run} with \code{stage_key = 'a/c'} and \code{to =
+  'e/f'}, then we would execute stages \code{"a/c", "d",
+  "e/f"}.}
 
   \item{normalized}{logical. A convenience recursion
   performance helper. If \code{TRUE}, stageRunner will
