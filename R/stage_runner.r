@@ -17,8 +17,14 @@
 stageRunner__initialize <- function(context, stages, remember = FALSE) {
   context <<- context
   stages <<- stages
-  stopifnot(all(vapply(stages,
-    function(s) is.function(s) || is.stagerunner(s), logical(1))))
+  legal_types <- function(x) all(vapply(x,
+    function(s) is.function(s) || is.stagerunner(s) ||
+      (is.list(s) && legal_types(s)), logical(1)))
+  stopifnot(legal_types(stages))
+
+  for (i in seq_along(stages))
+    if (is.list(stages[[i]]))
+      stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
 
   if (any(violators <- grepl('/', names(stages)))) {
     msg <- paste0("Stage names may not have a '/' character. The following do not ",

@@ -1,11 +1,40 @@
 context("stage runner")
 
+example1 <- function() {
+  eval.parent(substitute({
+    context <- new.env()
+    context$x <- 0
+    sr2 <- stageRunner$new(context, list(stage_one = function(cx) cx$x <- 2))
+    sr3 <- stageRunner$new(context,
+      list(stage_one = function(cx) cx$x <- 3, stage_oneb = function(cx) cx$x <- 5 ))
+    sr <- stageRunner$new(context,
+      list(sr2, sr3, stage_three = function(cx) cx$x <- 4))
+  }))
+}
+
 test_that("it runs a simple single stage correctly", {
   context <- new.env()
   context$x <- 1
   sr <- stageRunner$new(context, list(function(cx) cx$x <- 2))
   sr$run()
   expect_equal(2, context$x)
+})
+
+test_that("it runs a simple multi-step stages correctly", {
+  context <- new.env()
+  context$x <- 1; context$y <- 1; context$z <- 1; context$w <- 1
+  sr <- stageRunner$new(context,
+    list(function(cx) cx$x <- 2,
+         dos = stageRunner$new(context,
+           list(sub1 = function(cx) cx$y <- 3, sub2 = function(cx) cx$z <- 4)),
+         function(cx) cx$w <- 5
+    )
+  )
+  sr$run()
+  expect_equal(2, context$x)
+  expect_equal(3, context$y)
+  expect_equal(4, context$z)
+  expect_equal(5, context$w)
 })
 
 test_that("it finds a stage by full key name", {
@@ -15,6 +44,16 @@ test_that("it finds a stage by full key name", {
                                       stage_two = function(cx) cx$y <- 3))
   sr$run('stage_one')
   expect_equal(2, context$x); expect_equal(1, context$y)
+})
+
+test_that("it finds a non-first stage by full key name", {
+  context <- new.env()
+  context$x <- 1; context$y <- 1
+  sr <- stageRunner$new(context, list(stage_one = function(cx) cx$x <- 2,
+                                      stage_two = function(cx) cx$y <- 3))
+  sr$run('stage_two')
+  expect_equal(1, context$x); expect_equal(3, context$y)
+
 })
 
 test_that("it finds a stage by partial key name", {
@@ -53,6 +92,16 @@ test_that("it finds a stage by numeric indexing", {
   sr$run(1)
   expect_equal(2, context$x); expect_equal(1, context$y)
 })
+
+test_that("it finds a non-first stage by numeric indexing", {
+  context <- new.env()
+  context$x <- 1; context$y <- 1
+  sr <- stageRunner$new(context, list(stage_one = function(cx) cx$x <- 2,
+                                      stage_two = function(cx) cx$y <- 3))
+  sr$run(2)
+  expect_equal(1, context$x); expect_equal(3, context$y)
+})
+
 
 test_that("it finds a stage by negative indexing", {
   context <- new.env()
@@ -124,13 +173,7 @@ test_that("it accepts nested stagerunners", {
 })
 
 test_that("it runs nested stagerunners", {
-  context <- new.env()
-  context$x <- 0
-  sr2 <- stageRunner$new(context, list(stage_one = function(cx) cx$x <- 2))
-  sr3 <- stageRunner$new(context,
-    list(stage_one = function(cx) cx$x <- 3, stage_oneb = function(cx) cx$x <- 5 ))
-  sr <- stageRunner$new(context,
-    list(sr2, sr3, stage_three = function(cx) cx$x <- 4))
+  example1()
   sr$run()
   expect_equal(context$x, 4, "stagerunner must execute nested stages")
 
@@ -149,8 +192,59 @@ test_that("it allows referencing nested stage keys", {
   expect_equal(context$y, 0, "stagerunner must not execute unrun stages")
 })
 
+test_that("it can detect mixed numeric-character key collisions", {
+  example1()
+  expect_that(sr$run('1/one', to = '2/one'), throws_error("Multiple stages"))
+})
 
+test_that("it correctly references a numeric stage within a character stage", {
+  example1()
+  out <- tryCatch(sr$run('2/oneb'), error = function(err) 'error')
+  expect_false(out == 'error',
+    info = 'stagerunner should be able to reference a numeric stage within a character stage')
+})
 
+test_that("it throws an error when an invalid stage gets passed", {
+  expect_that(stageRunner$new(new.env(), list(1)),
+              throws_error('legal_types.*not TRUE'))
+})
 
+test_that("it correctly parses a nested list of functions into nested stagerunners", {
+  f1 <- function(){1}; f2 <- function(){2}; f3 <- function(){3}
+  sr <- stageRunner$new(new.env(), list(list(f1, c = f2), d = f3))
+  expect_is(sr$stages[[1]], 'stageRunner')
+  expect_identical(body(sr$stages[[1]]$stages[[1]]), body(f1))
+  expect_identical(body(sr$stages[[1]]$stages[[2]]), body(f2))
+  expect_identical(names(sr$stages[[1]]$stages)[2], 'c')
+  expect_identical(names(sr$stages)[2], 'd')
+})
+
+test_that("it correctly uses the to parameter", {
+  example1()
+  names(sr$stages[[2]]$stages) <- c('stage_onea', 'stage_oneb')
+  sr$run('1/one', to = '2/onea')
+  expect_equal(context$x, 3,
+    info = "this stagerunner should execute only stages 1/one and 2/one")
+})
+
+test_that("it correctly uses the to parameter in a more complicated example", {
+  context <- new.env()
+  with(context, { a <- 1; b <- 1; c <- 1; d <- 1; e <- 1; f <- 1; g <- 1 })
+  fn <- function(x) {
+    name <- deparse(substitute(x))
+    eval(bquote(function(cx) cx[[.(name)]] <- 2 ))
+  }
+
+  sr <- stageRunner$new(context, list(
+    one = list(a = fn(a), fn(z), b = fn(b)), fn(c),
+    two = list(fn(z), list(list(d = fn(d)))),
+    three = list(e = fn(e), f = fn(f)),
+    fn(g)))
+  sr$run('one/b', to = 'three/e')
+  expect_equal(
+    list(z = 2, a = 1, b = 2, c = 2, d = 2, e = 2, f = 1, g = 1), as.list(context),
+    info = paste0("this stagerunner should correctly execute all the stages ",
+                  "between b and e above, namely b,c,d,e"))
+})
 
 
