@@ -229,7 +229,6 @@ test_that("it correctly uses the to parameter", {
 
 test_that("it correctly uses the to parameter in a more complicated example", {
   context <- new.env()
-  with(context, { a <- 1; b <- 1; c <- 1; d <- 1; e <- 1; f <- 1; g <- 1 })
   fn <- function(x) {
     name <- deparse(substitute(x))
     eval(bquote(function(cx) cx[[.(name)]] <- 2 ))
@@ -240,11 +239,17 @@ test_that("it correctly uses the to parameter in a more complicated example", {
     two = list(fn(z), list(list(d = fn(d)))),
     three = list(e = fn(e), f = fn(f)),
     fn(g)))
-  sr$run('one/b', to = 'three/e')
-  expect_equal(
-    list(z = 2, a = 1, b = 2, c = 2, d = 2, e = 2, f = 1, g = 1), as.list(context),
-    info = paste0("this stagerunner should correctly execute all the stages ",
-                  "between b and e above, namely b,c,d,e"))
+  test_exprs <- list(substitute(sr$run('one/b', to = 'three/e')),
+                  substitute(sr$run('three/e', to = 'one/b')))
+  lapply(seq_along(test_exprs), function(ix) { 
+      with(context, { a <- 1; b <- 1; c <- 1; d <- 1; e <- 1; f <- 1; g <- 1 })
+      eval(test_exprs[[ix]])
+      expect_equal(
+        list(z = 2, a = 1, b = 2, c = 2, d = 2, e = 2, f = 1, g = 1), as.list(context),
+        info = paste0("this stagerunner should correctly execute all the stages ",
+                      "between b and e above, namely b,c,d,e, when running: ",
+                      deparse(test_exprs[[ix]])))
+    })
 })
 
 
