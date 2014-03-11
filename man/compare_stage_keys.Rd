@@ -1,0 +1,19 @@
+\name{compare_stage_keys}
+\alias{compare_stage_keys}
+\title{Compare two stage keys to see which one has a stage run first}
+\usage{
+compare_stage_keys(key1, key2)
+}
+\arguments{
+  \item{key1}{list}
+
+  \item{key2}{list}
+}
+\value{
+logical. Whether or not key1 runs a stage before key2.
+}
+\description{
+Compare two stage keys to see which one has a stage run
+first
+}
+

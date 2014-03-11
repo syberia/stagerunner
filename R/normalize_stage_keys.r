@@ -20,13 +20,12 @@
 #'    # TODO: Fill in
 #' }
 normalize_stage_keys <- function(keys, stages, parent_key = "") {
-  if (is.null(keys) || length(keys) == 0) {
-    if (is.stagerunner(stages)) return(rep(list(TRUE), length(stages)))
-    else return(TRUE)
+  if (is.null(keys) || length(keys) == 0 || identical(keys, "")) {
+    return(if (length(stages) == 1) TRUE else rep(list(TRUE), length(stages)))
   }
   if (is.stagerunner(stages)) stages <- stages$stages
 
-  all_logical <- function(x) all(vapply(x,
+  all_logical <- function(x) length(x) > 0 && all(vapply(x,
     function(y) if (is.atomic(y)) is.logical(y) else all_logical(y), logical(1)))
   if (all_logical(keys)) return(keys) # Already normalized
 
@@ -54,15 +53,18 @@ normalize_stage_keys <- function(keys, stages, parent_key = "") {
         if (length(key) == 0) stop("Stage key of length zero")
         key <- strsplit(key, '/')[[1]]
         finds <- grepl(key[[1]], names(stages))
-        if (length(finds) == 0 || sum(finds) == 0)
-          stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
-        else if (sum(finds) > 1)
+        if (length(finds) == 0 || sum(finds) == 0) {
+          # if we have a key like foo/3/bar, process the 3 as a numeric index
+          if (is.finite(suppressWarnings(tmp <- as.numeric(key[[1]]))) &&
+              tmp > 0 && tmp <= length(stages)) finds <- tmp
+          else stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
+        } else if (sum(finds) > 1) {
           stop("Multiple stages with key '", paste0(parent_key, key[[1]]),
                  "', found: ", paste0(parent_key, names(stages)[finds], collapse = ', '))
-        finds <- which(finds) # now an integer of length 1
+        } else finds <- which(finds) # now an integer of length 1
         normalized_keys[[finds]] <<- special_or_lists(
           normalized_keys[[finds]],
-          normalize_stage_keys(append(key[-1], rest_keys), 
+          normalize_stage_keys(append(paste0(key[-1], collapse = '/'), rest_keys), 
             stages[[finds]], paste0(parent_key, key[[1]], '/')))
       } else stop("Invalid stage key")
     })

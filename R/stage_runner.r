@@ -17,8 +17,14 @@
 stageRunner__initialize <- function(context, stages, remember = FALSE) {
   context <<- context
   stages <<- stages
-  stopifnot(all(vapply(stages,
-    function(s) is.function(s) || is.stagerunner(s), logical(1))))
+  legal_types <- function(x) all(vapply(x,
+    function(s) is.function(s) || is.stagerunner(s) ||
+      (is.list(s) && legal_types(s)), logical(1)))
+  stopifnot(legal_types(stages))
+
+  for (i in seq_along(stages))
+    if (is.list(stages[[i]]))
+      stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
 
   if (any(violators <- grepl('/', names(stages)))) {
     msg <- paste0("Stage names may not have a '/' character. The following do not ",
@@ -52,12 +58,36 @@ stageRunner__initialize <- function(context, stages, remember = FALSE) {
 #'   \code{run(list(list('one', 2)))}
 #'   Notice that regular expressions are allowed for characters.
 #'   The default is \code{NULL}, which runs the whole sequences of stages.
+#' @param to an indexing parameter. If \code{stage_key} refers to a single stage,
+#'   attempt to run from that stage to this stage (or, if this one comes first,
+#'   this stage to that stage). For example, if we have
+#'      \code{stages = list(a = list(b = 1, c = 2), d = 3, e = list(f = 4, g = 5))}
+#'   where the numbers are some functions, and we call \code{run} with
+#'   \code{stage_key = 'a/c'} and \code{to = 'e/f'}, then we would execute
+#'   stages \code{"a/c", "d", "e/f"}.
 #' @param normalized logical. A convenience recursion performance helper. If
 #'   \code{TRUE}, stageRunner will assume the \code{stage_key} argument is a
 #'   nested list of logicals.
-stageRunner__run <- function(stage_key = NULL, normalized = FALSE) {
+stageRunner__run <- function(stage_key = NULL, to = NULL, normalized = FALSE) {
   if (identical(normalized, FALSE))
     stage_key <- normalize_stage_keys(stage_key, stages)
+
+  if (!missing(to)) {
+    to_key <- normalize_stage_keys(to, stages)
+    if (!compare_stage_keys(stage_key, to_key)) {
+      # stage_key occurs after to_key
+      tmp <- stage_key
+      stage_key <- to_key
+      to_key <- tmp
+    }
+    # to go from the first key to the last, populate all the entries
+    # after the first TRUE w/ TRUE in stage_key, and all the entries
+    # before the first TRUE w/ TRUE in to_key, and then intersect.
+    stage_key <- special_and_lists(
+      boolean_fill(stage_key, forward = TRUE),
+      boolean_fill(to_key, forward = FALSE)
+    )
+  }
 
   # Now that we have determined which stages to run, cycle through them all.
   # It is up to the user to determine that context changes make sense.
@@ -72,11 +102,31 @@ stageRunner__run <- function(stage_key = NULL, normalized = FALSE) {
       if (!is.stagerunner(stages[[stage_index]]))
         stop("Invalid stage key: attempted to make a nested stage reference ",
              "to a non-existent stage")
-      stages[[stage_index]]$run(stage_key[[stage_index]])
+      stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE)
     }
   )
   TRUE
 }
+
+#' Retrieve a flattened list of canonical stage names for a stageRunner object
+#'
+#' For example, if we have stages
+#'   \code{stages = list(a = list(b = 1, c = 2), d = 3, e = list(f = 4, g = 5))}
+#' then this method would return
+#'   \code{list('a/b', 'a/c', 'd', 'e/f', 'e/g')}
+#'
+#' @return a list of canonical stage names.
+#' @examples
+#' f <- function() {}
+#' sr <- stageRunner$new(new.env(),
+#'   list(a = stageRunner$new(new.env(), list(b = f, c = f)), d = f,
+#'   e = stageRunner$new(new.env(), list(f = f, g = f))))
+#' sr$stage_names()
+stageRunner__stage_names <- function() {
+  nested_stages <- function(x) if (is.stagerunner(x)) nested_stages(x$stages) else x
+  nested_names(lapply(stages, nested_stages))
+}
+
 
 #' Stage runner is a reference class for parametrizing and executing
 #' a linear sequence of actions.
@@ -87,8 +137,9 @@ stageRunner__run <- function(stage_key = NULL, normalized = FALSE) {
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical'),
   methods = list(
-    initialize = stagerunner:::stageRunner__initialize,
-    run        = stagerunner:::stageRunner__run
+    initialize  = stagerunner:::stageRunner__initialize,
+    run         = stagerunner:::stageRunner__run,
+    stage_names = stagerunner:::stageRunner__stage_names
   )
 )
 
