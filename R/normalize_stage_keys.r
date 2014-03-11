@@ -20,12 +20,12 @@
 #'    # TODO: Fill in
 #' }
 normalize_stage_keys <- function(keys, stages, parent_key = "") {
-  if (is.null(keys) || length(keys) == 0) {
+  if (is.null(keys) || length(keys) == 0 || identical(keys, "")) {
     return(if (length(stages) == 1) TRUE else rep(list(TRUE), length(stages)))
   }
   if (is.stagerunner(stages)) stages <- stages$stages
 
-  all_logical <- function(x) all(vapply(x,
+  all_logical <- function(x) length(x) > 0 && all(vapply(x,
     function(y) if (is.atomic(y)) is.logical(y) else all_logical(y), logical(1)))
   if (all_logical(keys)) return(keys) # Already normalized
 
@@ -64,7 +64,7 @@ normalize_stage_keys <- function(keys, stages, parent_key = "") {
         } else finds <- which(finds) # now an integer of length 1
         normalized_keys[[finds]] <<- special_or_lists(
           normalized_keys[[finds]],
-          normalize_stage_keys(append(key[-1], rest_keys), 
+          normalize_stage_keys(append(paste0(key[-1], collapse = '/'), rest_keys), 
             stages[[finds]], paste0(parent_key, key[[1]], '/')))
       } else stop("Invalid stage key")
     })
