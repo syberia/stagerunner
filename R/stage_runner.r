@@ -14,13 +14,14 @@
 #'    easy to go back and investigate a stage. This could be optimized by
 #'    developing a package for "diffing" two environments. The default is
 #'    \code{FALSE}.
-stageRunner__initialize <- function(context, stages, remember = FALSE) {
+stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   context <<- context
-  stages <<- stages
-  legal_types <- function(x) all(vapply(x,
+  legal_types <- function(x) is.function(x) || all(vapply(x,
     function(s) is.function(s) || is.stagerunner(s) ||
       (is.list(s) && legal_types(s)), logical(1)))
-  stopifnot(legal_types(stages))
+  stopifnot(legal_types(.stages))
+  if (is.function(.stages)) .stages <- list(.stages)
+  stages <<- .stages
 
   for (i in seq_along(stages))
     if (is.list(stages[[i]]))

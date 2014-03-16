@@ -20,6 +20,14 @@ test_that("it runs a simple single stage correctly", {
   expect_equal(2, context$x)
 })
 
+test_that("it accepts functions (not lists) as stages", {
+  context <- new.env()
+  context$x <- 1
+  sr <- stageRunner$new(context, function(cx) cx$x <- 2)
+  sr$run()
+  expect_equal(2, context$x)
+})
+
 test_that("it runs a simple multi-step stages correctly", {
   context <- new.env()
   context$x <- 1; context$y <- 1; context$z <- 1; context$w <- 1
