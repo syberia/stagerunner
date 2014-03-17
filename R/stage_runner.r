@@ -41,10 +41,22 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   remember <<- remember
   if (remember) {
     stageRunner__.clear_cache(init = TRUE)
+    stageRunner__.set_parents(init = TRUE)
 
     if (length(.environment_cache) > 0) {
-      .environment_cache[[1]] <<- new.env(parent = parent.env(context))
-      copy_env(.environment_cache[[1]], context)
+      prev_stage <- NULL
+      stage <- stages[[1]]
+      while (is.stagerunner(stage)) {
+        prev_stage <- stage
+        stage <- stage$stages[[1]]
+      }
+      if (is.null(prev_stage)) {
+        .environment_cache[[1]] <<- new.env(parent = parent.env(context))
+        copy_env(.environment_cache[[1]], context)
+      } else {
+        prev_stage$.environment_cache[[1]] <- new.env(parent = parent.env(context))
+        copy_env(prev_stage$.environment_cache[[1]], context)
+      }
     }
   }
 }
@@ -153,6 +165,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
           if (is.null(.environment_cache[[stage_index]]))
             stop("Cannot run this stage yet because some previous stages have ",
                  "not been executed.")
+
           # Restart execution from cache, so set context to the cached environment.
           copy_env(context, .environment_cache[[stage_index]])
           .environment_cache[[stage_index]]
@@ -165,23 +178,11 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       
         # Get next cache ready
         # TODO: Document / comment the shit out of this!
-        if (stage_index + 1 <= length(stages)) {
-          prev_stage <- NULL
-          stage <- stages[[stage_index + 1]]
-          while (is.stagerunner(stage)) {
-            prev_stage <- stage
-            stage <- stage$stages[[1]]
-          }
-          if (is.null(prev_stage)) {
-            .environment_cache[[stage_index + 1]] <<- 
-              new.env(parent = parent.env(context))
-            copy_env(.environment_cache[[stage_index + 1]], context)
-          } else {
-            prev_stage$.environment_cache[[1]] <-
-              new.env(parent = parent.env(prev_stage$context))
-            copy_env(prev_stage$.environment_cache[[1]], context)
-          }
-        }
+        #if (stage_index + 1 <= length(stages)) {
+        #  set_first_cache(stages[[stage_index + 1]], context, stage_index + 1)
+        #} else {
+        #  set_first_cache(.parent, context)
+        #}
       }
     } else if (remember) {
       # If not a nested run, we should cache the environment (no need to cache
@@ -197,6 +198,14 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       # When running nested stages, we no longer need to return a before_env
       run_stage(remember_flag = FALSE)
     } else run_stage()
+
+    if (remember && !nested_run) {
+      env <- successor_env(stages[[stage_index]], .self)
+      if (!identical(env, FALSE)) {
+        # Prepare a cache for the future!
+        copy_env(env, context)
+      }
+    }
 
     if (display_message) show_message(names(stages), stage_index, begin = FALSE)
   })
@@ -236,6 +245,20 @@ stageRunner__.clear_cache <- function(init = FALSE) {
   TRUE
 }
 
+#' Set all parents for this stageRunner, and recursively
+stageRunner__.set_parents <- function(init = FALSE) {
+  (if (init) eval.parent else eval)(substitute({
+    lapply(stages, function(stage) {
+      if (is.stagerunner(stage)) {
+        stage$.parent <- .self
+        stage$.set_parents()
+      }
+    })
+  }))
+
+  TRUE
+}
+
 #' Stage runner is a reference class for parametrizing and executing
 #' a linear sequence of actions.
 #' 
@@ -244,12 +267,13 @@ stageRunner__.clear_cache <- function(init = FALSE) {
 #' @name stageRunner
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
-                .environment_cache = 'list'),
+                .environment_cache = 'list', .parent = 'ANY'),
   methods = list(
     initialize   = stagerunner:::stageRunner__initialize,
     run          = stagerunner:::stageRunner__run,
     stage_names  = stagerunner:::stageRunner__stage_names,
-    .clear_cache = stagerunner:::stageRunner__.clear_cache
+    .clear_cache = stagerunner:::stageRunner__.clear_cache,
+    .set_parents = stagerunner:::stageRunner__.set_parents
   )
 )
 
