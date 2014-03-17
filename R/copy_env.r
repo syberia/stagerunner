@@ -1,3 +1,6 @@
 copy_env <- function(to, from) {
-  to <- as.environment(as.list(from, all.names = TRUE))
+  stopifnot(is.environment(to) && is.environment(from))
+  rm(list = ls(to, all.names = TRUE), envir = to)
+  for (name in ls(from, all.names = TRUE)) assign(name, from[[name]], envir = to)
 }
+

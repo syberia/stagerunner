@@ -40,10 +40,12 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 
   remember <<- remember
   if (remember) {
-    .environment_cache <<- vector('list', length(stages))
-    if (length(.environment_cache) > 0)
-      .environment_cache[[1]] <<- 
-        as.environment(as.list(context, all.names = TRUE))
+    stageRunner__.clear_cache(init = TRUE)
+
+    if (length(.environment_cache) > 0) {
+      .environment_cache[[1]] <<- new.env(parent = parent.env(context))
+      copy_env(.environment_cache[[1]], context)
+    }
   }
 }
 
@@ -158,19 +160,42 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       
       # If atomic function, execute the stage (if it was nested,
       # it's already been executed in order to recursively fetch the before_env
-      if (!nested_run) run_stage() 
+      if (!nested_run) {
+        run_stage() 
+      
+        # Get next cache ready
+        if (stage_index + 1 <= length(stages)) {
+          prev_stage <- NULL
+          stage <- stages[[stage_index + 1]]
+          while (is.stagerunner(stage)) {
+            prev_stage <- stage
+            stage <- stage$stages[[1]]
+          }
+          if (is.null(prev_stage)) {
+            .environment_cache[[stage_index + 1]] <<- 
+              new.env(parent = parent.env(context))
+            copy_env(.environment_cache[[stage_index + 1]], context)
+          } else {
+            prev_stage$.environment_cache[[1]] <-
+              new.env(parent = parent.env(prev_stage$context))
+            copy_env(prev_stage$.environment_cache[[1]], context)
+          }
+        }
+      }
     } else if (remember) {
       # If not a nested run, we should cache the environment (no need to cache
       # for nested runs since it'll be cached downstairs -- i.e., only use
       # a cache in the leaves/terminal nodes of a stagerunner).
       if (!nested_run) {
-        .environment_cache[[stage_index]] <<-
-          as.environment(as.list(context, all.names = TRUE))
+        if (is.null(.environment_cache[[stage_index]]))
+          .environment_cache[[stage_index]] <<-
+            new.env(parent = parent.env(context))
+        copy_env(.environment_cache[[stage_index]], context)
       }
+
       # When running nested stages, we no longer need to return a before_env
       run_stage(remember_flag = FALSE)
     } else run_stage()
-    
 
     if (display_message) show_message(names(stages), stage_index, begin = FALSE)
   })
@@ -197,6 +222,18 @@ stageRunner__stage_names <- function() {
   nested_names(lapply(stages, nested_stages))
 }
 
+#' Clear all caches in this stageRunner, and recursively.
+stageRunner__.clear_cache <- function(init = FALSE) {
+  (if (init) eval.parent else eval)(substitute({
+    .environment_cache <<- lapply(seq_along(stages), function(.) NULL)
+    
+    lapply(stages, function(stage) {
+      if (is.stagerunner(stage)) stage$.clear_cache()   
+    })
+  }))
+
+  TRUE
+}
 
 #' Stage runner is a reference class for parametrizing and executing
 #' a linear sequence of actions.
@@ -208,9 +245,10 @@ stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
                 .environment_cache = 'list'),
   methods = list(
-    initialize  = stagerunner:::stageRunner__initialize,
-    run         = stagerunner:::stageRunner__run,
-    stage_names = stagerunner:::stageRunner__stage_names
+    initialize   = stagerunner:::stageRunner__initialize,
+    run          = stagerunner:::stageRunner__run,
+    stage_names  = stagerunner:::stageRunner__stage_names,
+    .clear_cache = stagerunner:::stageRunner__.clear_cache
   )
 )
 
