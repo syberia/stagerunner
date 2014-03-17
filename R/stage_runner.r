@@ -118,6 +118,11 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     if (display_message) show_message(names(stages), stage_index, begin = TRUE)
 
     nested_run <- TRUE
+    
+    # Determine how to run this stage, depending on whether it is an
+    # atomic function or nested stagerunner. We compute this first
+    # in case we run into referencing errors (e.g., the requested
+    # stage does not exist).
     run_stage <-
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
@@ -133,7 +138,12 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
         function(...) stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE, ...)
       } else return(FALSE)
 
+    # Now handle when remember = TRUE, i.e., we have to cache the
+    # progress along each stage.
     if (remember && remember_flag && is.null(before_env)) {
+      # If remember = remember_flag = TRUE and before_env has not been set
+      # this is the first stage of a $run() call, so use the cached
+      # environment.
       assign('before_env',
         #if (!remember_flag) TRUE
         if (nested_run) run_stage(remember_flag = TRUE)
@@ -141,19 +151,23 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
           if (is.null(.environment_cache[[stage_index]]))
             stop("Cannot run this stage yet because some previous stages have ",
                  "not been executed.")
+          # Restart execution from cache, so set context to the cached environment.
+          copy_env(context, .environment_cache[[stage_index]])
           .environment_cache[[stage_index]]
         }, parent.env(environment()))
       
-      if (!nested_run) run_stage()
-      #if (!remember_flag || !nested_run) run_stage()
+      # If atomic function, execute the stage (if it was nested,
+      # it's already been executed in order to recursively fetch the before_env
+      if (!nested_run) run_stage() 
     } else if (remember) {
+      # If not a nested run, we should cache the environment (no need to cache
+      # for nested runs since it'll be cached downstairs -- i.e., only use
+      # a cache in the leaves/terminal nodes of a stagerunner).
       if (!nested_run) {
-        # Prior to running, copy the current context to remember what it looked like before we ran.
-        # http://stackoverflow.com/questions/9965577/r-copy-move-one-environment-to-another
-        # TODO: Recursive..? What if there are nested environments? Or reference classes?
         .environment_cache[[stage_index]] <<-
           as.environment(as.list(context, all.names = TRUE))
       }
+      # When running nested stages, we no longer need to return a before_env
       run_stage(remember_flag = FALSE)
     } else run_stage()
     
