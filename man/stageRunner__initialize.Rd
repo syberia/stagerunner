@@ -2,7 +2,7 @@
 \alias{stageRunner__initialize}
 \title{Initialize a stageRunner object.}
 \usage{
-stageRunner__initialize(context, stages, remember = FALSE)
+stageRunner__initialize(context, .stages, remember = FALSE)
 }
 \arguments{
   \item{context}{an environment. The initial environment

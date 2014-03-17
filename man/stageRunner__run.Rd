@@ -2,7 +2,8 @@
 \alias{stageRunner__run}
 \title{Run the stages in a stageRunner object.}
 \usage{
-stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE)
+stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
+  verbose = FALSE, remember_flag = TRUE)
 }
 \arguments{
   \item{stage_key}{an indexing parameter. Many forms are
@@ -42,6 +43,9 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE)
   performance helper. If \code{TRUE}, stageRunner will
   assume the \code{stage_key} argument is a nested list of
   logicals.}
+
+  \item{verbose}{logical. Whether or not to display pretty
+  colored text informing about stage progress.}
 }
 \description{
 Run the stages in a stageRunner object.

@@ -160,7 +160,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       # environment.
       assign('before_env',
         #if (!remember_flag) TRUE
-        if (nested_run) run_stage(remember_flag = TRUE)
+        if (nested_run) run_stage(remember_flag = TRUE)$before
         else {
           if (is.null(.environment_cache[[stage_index]]))
             stop("Cannot run this stage yet because some previous stages have ",
@@ -210,7 +210,8 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     if (display_message) show_message(names(stages), stage_index, begin = FALSE)
   })
 
-  if (remember && remember_flag) before_env else invisible(TRUE)
+  if (remember && remember_flag) list(before = before_env, after = context)
+  else invisible(TRUE)
 }
 
 #' Retrieve a flattened list of canonical stage names for a stageRunner object
@@ -230,6 +231,12 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
 stageRunner__stage_names <- function() {
   nested_stages <- function(x) if (is.stagerunner(x)) nested_stages(x$stages) else x
   nested_names(lapply(stages, nested_stages))
+}
+
+#' Generic for printing stageRunner objects.
+stageRunner__show <- function() {
+  cat("A stageRunner with", length(stages), "stages:\n")
+  print(stages)
 }
 
 #' Clear all caches in this stageRunner, and recursively.
@@ -273,7 +280,8 @@ stageRunner <- setRefClass('stageRunner',
     run          = stagerunner:::stageRunner__run,
     stage_names  = stagerunner:::stageRunner__stage_names,
     .clear_cache = stagerunner:::stageRunner__.clear_cache,
-    .set_parents = stagerunner:::stageRunner__.set_parents
+    .set_parents = stagerunner:::stageRunner__.set_parents,
+    show         = stagerunner:::stageRunner__show
   )
 )
 
