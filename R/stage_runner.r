@@ -164,6 +164,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
         run_stage() 
       
         # Get next cache ready
+        # TODO: Document / comment the shit out of this!
         if (stage_index + 1 <= length(stages)) {
           prev_stage <- NULL
           stage <- stages[[stage_index + 1]]
