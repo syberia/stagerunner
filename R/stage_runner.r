@@ -69,7 +69,10 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 #' @param normalized logical. A convenience recursion performance helper. If
 #'   \code{TRUE}, stageRunner will assume the \code{stage_key} argument is a
 #'   nested list of logicals.
-stageRunner__run <- function(stage_key = NULL, to = NULL, normalized = FALSE) {
+#' @param verbose logical. Whether or not to display pretty colored text
+#'   informing about stage progress.
+stageRunner__run <- function(stage_key = NULL, to = NULL,
+                             normalized = FALSE, verbose = FALSE) {
   if (identical(normalized, FALSE))
     stage_key <- normalize_stage_keys(stage_key, stages)
 
@@ -95,7 +98,12 @@ stageRunner__run <- function(stage_key = NULL, to = NULL, normalized = FALSE) {
   # We also implicitly sort the stages to ensure linearity is preserved.
   # Stagerunner enforces the linearity and directionality set in the stage definitions.
   
-  lapply(seq_along(stage_key), function(stage_index) 
+  lapply(seq_along(stage_key), function(stage_index) {
+    if (verbose)
+      cat(paste0("Beginning ",
+                 decorate_stage_name(names(stages), stage_index, 'green'),
+                 " stage...\n"))
+
     if (identical(stage_key[[stage_index]], TRUE)) {
       stage <- stages[[stage_index]]
       if (is.stagerunner(stage)) stage$run() else stage(context)
@@ -105,8 +113,21 @@ stageRunner__run <- function(stage_key = NULL, to = NULL, normalized = FALSE) {
              "to a non-existent stage")
       stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE)
     }
-  )
+
+    if (verbose)
+      cat(paste0("Done with ",
+                 decorate_stage_name(names(stages), stage_index, 'blue'),
+                 " stage...\n"))
+  })
   TRUE
+}
+
+decorate_stage_name <- function(stage_names, stage_index, color = 'green') {
+  stage_name <- stage_names[stage_index]
+  if (is.null(stage_name) || stage_name == "")
+    stage_name <- list('first', 'second', 'third')[stage_index][[1]] %||%
+                  paste0(stage_index, 'th')
+  testthat:::colourise(stage_name, color)
 }
 
 #' Retrieve a flattened list of canonical stage names for a stageRunner object
