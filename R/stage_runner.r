@@ -16,6 +16,7 @@
 #'    \code{FALSE}.
 stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   context <<- context
+
   legal_types <- function(x) is.function(x) || all(vapply(x,
     function(s) is.function(s) || is.stagerunner(s) ||
       (is.list(s) && legal_types(s)), logical(1)))
@@ -23,10 +24,13 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   if (is.function(.stages)) .stages <- list(.stages)
   stages <<- .stages
 
+  # Construct recursive stagerunners out of a list of lists.
   for (i in seq_along(stages))
     if (is.list(stages[[i]]))
       stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
 
+  # Do not allow the '/' character in stage names, as it's reserved for
+  # referencing nested stages.
   if (any(violators <- grepl('/', names(stages)))) {
     msg <- paste0("Stage names may not have a '/' character. The following do not ",
       "satisfy this constraint: '",
@@ -35,6 +39,12 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   }
 
   remember <<- remember
+  if (remember) {
+    .environment_cache <<- vector('list', length(stages))
+    if (length(.environment_cache) > 0)
+      .environment_cache[[1]] <<- 
+        as.environment(as.list(context, all.names = TRUE))
+  }
 }
 
 #' Run the stages in a stageRunner object.
@@ -72,7 +82,8 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 #' @param verbose logical. Whether or not to display pretty colored text
 #'   informing about stage progress.
 stageRunner__run <- function(stage_key = NULL, to = NULL,
-                             normalized = FALSE, verbose = FALSE) {
+                             normalized = FALSE, verbose = FALSE,
+                             remember_flag = TRUE) {
   if (identical(normalized, FALSE))
     stage_key <- normalize_stage_keys(stage_key, stages)
 
@@ -98,36 +109,59 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
   # We also implicitly sort the stages to ensure linearity is preserved.
   # Stagerunner enforces the linearity and directionality set in the stage definitions.
   
+  # If we are remembering changes, recall what the environment looked like
+  # *before* we ran anything.
+  before_env <- NULL
+
   lapply(seq_along(stage_key), function(stage_index) {
-    if (verbose)
-      cat(paste0("Beginning ",
-                 decorate_stage_name(names(stages), stage_index, 'green'),
-                 " stage...\n"))
+    display_message <- verbose && contains_true(stage_key[[stage_index]])
+    if (display_message) show_message(names(stages), stage_index, begin = TRUE)
 
-    if (identical(stage_key[[stage_index]], TRUE)) {
-      stage <- stages[[stage_index]]
-      if (is.stagerunner(stage)) stage$run() else stage(context)
-    } else if (is.list(stage_key[[stage_index]])) {
-      if (!is.stagerunner(stages[[stage_index]]))
-        stop("Invalid stage key: attempted to make a nested stage reference ",
-             "to a non-existent stage")
-      stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE)
-    }
+    nested_run <- TRUE
+    run_stage <-
+      if (identical(stage_key[[stage_index]], TRUE)) {
+        stage <- stages[[stage_index]]
+        if (is.stagerunner(stage)) function(...) stage$run(...)
+        else {
+          nested_run <- FALSE
+          function(...) stage(context)
+        }
+      } else if (is.list(stage_key[[stage_index]])) {
+        if (!is.stagerunner(stages[[stage_index]]))
+          stop("Invalid stage key: attempted to make a nested stage reference ",
+               "to a non-existent stage")
+        function(...) stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE, ...)
+      } else return(FALSE)
 
-    if (verbose)
-      cat(paste0("Done with ",
-                 decorate_stage_name(names(stages), stage_index, 'blue'),
-                 " stage...\n"))
+    if (remember && remember_flag && is.null(before_env)) {
+      assign('before_env',
+        #if (!remember_flag) TRUE
+        if (nested_run) run_stage(remember_flag = TRUE)
+        else {
+          if (is.null(.environment_cache[[stage_index]]))
+            stop("Cannot run this stage yet because some previous stages have ",
+                 "not been executed.")
+          .environment_cache[[stage_index]]
+        }, parent.env(environment()))
+      
+      if (!nested_run) run_stage()
+      #if (!remember_flag || !nested_run) run_stage()
+    } else if (remember) {
+      if (!nested_run) {
+        # Prior to running, copy the current context to remember what it looked like before we ran.
+        # http://stackoverflow.com/questions/9965577/r-copy-move-one-environment-to-another
+        # TODO: Recursive..? What if there are nested environments? Or reference classes?
+        .environment_cache[[stage_index]] <<-
+          as.environment(as.list(context, all.names = TRUE))
+      }
+      run_stage(remember_flag = FALSE)
+    } else run_stage()
+    
+
+    if (display_message) show_message(names(stages), stage_index, begin = FALSE)
   })
-  TRUE
-}
 
-decorate_stage_name <- function(stage_names, stage_index, color = 'green') {
-  stage_name <- stage_names[stage_index]
-  if (is.null(stage_name) || stage_name == "")
-    stage_name <- list('first', 'second', 'third')[stage_index][[1]] %||%
-                  paste0(stage_index, 'th')
-  testthat:::colourise(stage_name, color)
+  if (remember && remember_flag) before_env else invisible(TRUE)
 }
 
 #' Retrieve a flattened list of canonical stage names for a stageRunner object
@@ -157,7 +191,8 @@ stageRunner__stage_names <- function() {
 #' @export
 #' @name stageRunner
 stageRunner <- setRefClass('stageRunner',
-  fields = list(context = 'environment', stages = 'list', remember = 'logical'),
+  fields = list(context = 'environment', stages = 'list', remember = 'logical',
+                .environment_cache = 'list'),
   methods = list(
     initialize  = stagerunner:::stageRunner__initialize,
     run         = stagerunner:::stageRunner__run,
