@@ -160,7 +160,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       # environment.
       assign('before_env',
         #if (!remember_flag) TRUE
-        if (nested_run) run_stage(remember_flag = TRUE)# $before
+        if (nested_run) run_stage(remember_flag = TRUE)$before
         else {
           if (is.null(.environment_cache[[stage_index]]))
             stop("Cannot run this stage yet because some previous stages have ",
@@ -210,7 +210,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     if (display_message) show_message(names(stages), stage_index, begin = FALSE)
   })
 
-  if (remember && remember_flag) before_env # list(before = before_env, after = context)
+  if (remember && remember_flag) list(before = before_env, after = context)
   else invisible(TRUE)
 }
 
