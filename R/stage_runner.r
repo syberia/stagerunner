@@ -153,14 +153,14 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       } else return(FALSE)
 
     # Now handle when remember = TRUE, i.e., we have to cache the
-    # progress along each stage.
+    # progress along eac stage.
     if (remember && remember_flag && is.null(before_env)) {
       # If remember = remember_flag = TRUE and before_env has not been set
       # this is the first stage of a $run() call, so use the cached
       # environment.
       assign('before_env',
         #if (!remember_flag) TRUE
-        if (nested_run) run_stage(remember_flag = TRUE)$before
+        if (nested_run) run_stage(remember_flag = TRUE)# $before
         else {
           if (is.null(.environment_cache[[stage_index]]))
             stop("Cannot run this stage yet because some previous stages have ",
@@ -200,7 +200,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     } else run_stage()
 
     if (remember && !nested_run) {
-      env <- successor_env(stages[[stage_index]], .self)
+      env <- successor_env(stages[[stage_index]], .self, stage_index)
       if (!identical(env, FALSE)) {
         # Prepare a cache for the future!
         copy_env(env, context)
@@ -210,7 +210,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     if (display_message) show_message(names(stages), stage_index, begin = FALSE)
   })
 
-  if (remember && remember_flag) list(before = before_env, after = context)
+  if (remember && remember_flag) before_env # list(before = before_env, after = context)
   else invisible(TRUE)
 }
 

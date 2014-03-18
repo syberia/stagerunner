@@ -1,9 +1,11 @@
-successor_env <- function(stagerunner, par = stagerunner$.parent) {
+successor_env <- function(stagerunner, par = stagerunner$.parent, index = NULL) {
   if (is.stagerunner(stagerunner) &&
       !is.stagerunner(stagerunner$.parent)) return(FALSE)
 
-  parent_index <- which(vapply(par$stages,
-    function(stage) identical(stage, stagerunner), logical(1)))[1]
+  parent_index <-
+    if (is.null(index)) which(vapply(par$stages,
+      function(stage) identical(stage, stagerunner), logical(1)))[1]
+    else index
   stopifnot(is.finite(parent_index))
 
   if (parent_index == length(par$stages))
