@@ -52,7 +52,7 @@ normalize_stage_keys <- function(keys, stages, parent_key = "") {
         # to reference arbitrarily nested stages.
         if (length(key) == 0) stop("Stage key of length zero")
         key <- strsplit(key, '/')[[1]]
-        finds <- grepl(key[[1]], names(stages))
+        finds <- grepl(key[[1]], names(stages), ignore.case = TRUE)
         if (length(finds) == 0 || sum(finds) == 0) {
           # if we have a key like foo/3/bar, process the 3 as a numeric index
           if (is.finite(suppressWarnings(tmp <- as.numeric(key[[1]]))) &&
