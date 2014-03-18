@@ -234,9 +234,21 @@ stageRunner__stage_names <- function() {
 }
 
 #' Generic for printing stageRunner objects.
-stageRunner__show <- function() {
-  cat("A stageRunner with", length(stages), "stages:\n")
-  print(stages)
+stageRunner__show <- function(indent = 0) {
+  sum_stages <- function(x) sum(vapply(x,
+    function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
+  if (missing(indent)) cat("A stageRunner with", sum_stages(.self$stages), "stages:\n")
+  stage_names <- names(stages) %||% rep("", length(stages))
+  lapply(seq_along(stage_names), function(index) {
+    prefix <- paste0('  ', vapply(seq_len(indent), function(.) '   ', character(1)), collapse = '')
+    prefix <- gsub('.$', '-', prefix)
+    stage_name <- 
+      if (stage_names[[index]] == "") paste0("< Unnamed (stage ", index, ") >")
+      else stage_names[[index]]
+    cat(prefix, stage_name, "\n")
+    if (is.stagerunner(stages[[stage_name]]))
+      stages[[stage_name]]$show(indent = indent + 1)
+  })
 }
 
 #' Clear all caches in this stageRunner, and recursively.
