@@ -28,6 +28,8 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   for (i in seq_along(stages))
     if (is.list(stages[[i]]))
       stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
+    else if (is.function(stages[[i]]))
+      stages[[i]] <<- stageRunnerNode(stages[[i]], .self)
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
@@ -42,6 +44,10 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   if (remember) {
     stageRunner__.clear_cache(init = TRUE)
     stageRunner__.set_parents(init = TRUE)
+    # Set the first cache environment
+    #first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
+    #first_env$cache_env <- new.env(parent = parent.env(context))
+    #copy_env(first_env$cache_env, context)
 
     if (length(.environment_cache) > 0) {
       prev_stage <- NULL
@@ -128,7 +134,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
         if (is.stagerunner(stage)) function(...) stage$run(...)
         else {
           nested_run <- FALSE
-          function(...) stage(context)
+          function(...) stage$fn(context)
         }
       } else if (is.list(stage_key[[stage_index]])) {
         if (!is.stagerunner(stages[[stage_index]]))
@@ -260,9 +266,6 @@ stageRunner__.set_parents <- function(init = FALSE) {
       if (is.stagerunner(stages[[i]])) {
         stages[[i]]$.parent <<- .self
         stages[[i]]$.set_parents()
-      } else {
-        attr(stages[[i]], 'parent') <<- .self
-        attr(stages[[i]], 'children') <<- list()
       }
     }
   }))
@@ -301,4 +304,26 @@ NULL
 #' @param obj any object. \code{TRUE} if the object is of class
 #'    \code{stageRunner}, \code{FALSE} otherwise.
 is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
+
+#' Stagerunner nodes are environment wrappers around individual stages
+#' (i.e. functions) in order to track meta-data (e.g., for caching).
+#' 
+#' @param fn function. This will be wrapped in an environment.
+#' @param parent_obj stageRunner. The enclosing stageRunner object.
+#' @param parent_env environment. The parent environment of the created
+#'   \code{stageRunnerNode} object. The default is the calling
+#'   environment (i.e., \code{parent.frame()}).
+#' @return an environment with some additional attributes for
+#'   navigating in a tree-like structure.
+stageRunnerNode <- function(fn, parent_obj, parent_env = parent.frame()) {
+  env <- new.env(parent = parent_env)
+  class(env) <- c('stageRunnerNode', class(env))
+  env$fn <- fn
+
+  # Make a stageRunnerNode commensurate with treeSkeleton
+  attr(env, 'parent') <- parent_obj
+  attr(env, 'children') <- list()
+
+  env
+}
 
