@@ -99,24 +99,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
                              remember_flag = TRUE) {
   if (identical(normalized, FALSE))
-    stage_key <- normalize_stage_keys(stage_key, stages)
-
-  if (!missing(to)) {
-    to_key <- normalize_stage_keys(to, stages)
-    if (!compare_stage_keys(stage_key, to_key)) {
-      # stage_key occurs after to_key
-      tmp <- stage_key
-      stage_key <- to_key
-      to_key <- tmp
-    }
-    # to go from the first key to the last, populate all the entries
-    # after the first TRUE w/ TRUE in stage_key, and all the entries
-    # before the first TRUE w/ TRUE in to_key, and then intersect.
-    stage_key <- special_and_lists(
-      boolean_fill(stage_key, forward = TRUE),
-      boolean_fill(to_key, forward = FALSE)
-    )
-  }
+    stage_key <- normalize_stage_keys(stage_key, stages, to = to)
 
   # Now that we have determined which stages to run, cycle through them all.
   # It is up to the user to determine that context changes make sense.

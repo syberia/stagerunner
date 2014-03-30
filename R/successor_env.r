@@ -1,3 +1,4 @@
+# A helper function for stageRunner caching
 successor_env <- function(stagerunner, par = stagerunner$.parent, index = NULL) {
   if (is.stagerunner(stagerunner) &&
       !is.stagerunner(stagerunner$.parent)) return(FALSE)
@@ -33,3 +34,4 @@ successor_env <- function(stagerunner, par = stagerunner$.parent, index = NULL) 
     }
   }
 }
+
