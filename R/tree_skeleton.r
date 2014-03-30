@@ -72,7 +72,6 @@ treeSkeleton__children <- function() {
 #' Find the index of the current object in the children of its parent.
 treeSkeleton__.parent_index <- function() {
   which(vapply(
-    # bquote and nearly everything else doesn't work
     object$parent()$children(),
     function(node) identical(node, object), logical(1)))[1]
 }
