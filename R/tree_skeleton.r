@@ -4,7 +4,11 @@
 #' as if it had a tree structure, merely by knowing how to call parent
 #' or child nodes.
 #'
-#' @param object refClass. Any reference class object.
+#' @param object ANY. If a reference class object, then \code{parent_caller}
+#'    and \code{children_caller} will refer to reference class methods.
+#'    If an attribute on the object with names of \code{children_caller} and
+#'    \code{parent_caller} exists, those will be used. Otherwise, the
+#'    generic methods will be used.
 #' @param parent_caller character. The name of the reference class method
 #'    that returns the parent object, if the object was a node in a tree
 #'    structure.
@@ -12,12 +16,65 @@
 #'    that returns the child objects, if the object was a node in a tree
 #'    structure.
 #' @return a treeSkeleton object.
-treeSkeleton__initialize <- function(object, parent_caller, child_caller) {
+treeSkeleton__initialize <- function(object, parent_caller = 'parent',
+                                     children_caller = 'children') {
   object <<- object
-  # Make sure parent_caller and child_caller are methods of object
-  stopifnot(all(c(parent_caller, child_caller) %in% object$getRefClass()$methods()))
+
+  # Make sure parent_caller and children_caller are methods of object
+  if (inherits(object, 'refClass'))
+    stopifnot(all(c(parent_caller, children_caller) %in% object$getRefClass()$methods()))
+
   parent_caller <<- parent_caller
   children_caller <<- children_caller
+}
+
+
+#' Attempt to find the successor of the current node.
+#'
+#' @param index integer. If specified, this is the index of the current node
+#'   in the children of its parent. (Sometimes, this cannot be computed
+#'   automatically, and should usually be provided.)
+#' @return successor for the wrapped object.
+treeSkeleton__successor <- function(index = NULL) {
+  parent_index <- if (is.null(index)) .parent_index() else index
+  stopifnot(is.finite(parent_index))
+  parent_index
+}
+
+#' Find the parent of the current object wrapped in a treeSkeleton.
+treeSkeleton__parent <- function() {
+  treeSkeleton$new(
+    if (inherits(object, 'refClass'))
+      # bquote and other methods don't work here -- it's hard to dynamically
+      # fetch reference class methods!
+      eval(parse(text = paste0('`$`(object, "', parent_caller, '")()')))
+    else if (parent_caller %in% names(attributes(object)))
+      attr(object, parent_caller)
+    else get(parent_caller)(object)
+  , parent_caller = parent_caller, children_caller = children_caller)
+}
+
+#' Find the children of the current object wrapped in treeSkeletons.
+treeSkeleton__children <- function() {
+  lapply(
+    if (inherits(object, 'refClass'))
+      # bquote and other methods don't work here -- it's hard to dynamically
+      # fetch reference class methods!
+      eval(parse(text = paste0('`$`(object, "', children_caller, '")()')))
+    else if (children_caller  %in% names(attributes(object)))
+      attr(object, children_caller)
+    else get(children_caller)(object)
+  , function(child) treeSkeleton$new(child, parent_caller = parent_caller,
+                                     children_caller = children_caller)
+  )
+}
+
+#' Find the index of the current object in the children of its parent.
+treeSkeleton__.parent_index <- function() {
+  which(vapply(
+    # bquote and nearly everything else doesn't work
+    eval(parse(text = paste0('`$`(`$`(object, "', parent_caller, '")(), "', children_caller, '")()'))),
+    function(node) identical(node, object), logical(1)))[1]
 }
 
 #' This class implements iterators for a tree-based structure
@@ -39,12 +96,15 @@ treeSkeleton__initialize <- function(object, parent_caller, child_caller) {
 #' @docType refClass
 #' @name treeSkeleton
 treeSkeleton <- setRefClass('treeSkeleton',
-  fields = list(object = 'refClass', parent_caller = 'character',
+  fields = list(object = 'ANY', parent_caller = 'character',
                 children_caller = 'character'),
   methods = list(
-    initialize   = stagerunner:::treeSkeleton__initialize#,
-    #successor    = stagerunner:::treeSkeleton__successor,
-    #predecessor  = stagerunner:::treeSkeleton__successor
+    initialize    = stagerunner:::treeSkeleton__initialize,
+    successor     = stagerunner:::treeSkeleton__successor,
+    parent        = stagerunner:::treeSkeleton__parent,
+    children      = stagerunner:::treeSkeleton__children,
+    #predecessor  = stagerunner:::treeSkeleton__predecessor,
+    .parent_index = stagerunner:::treeSkeleton__.parent_index 
   )
 )
 

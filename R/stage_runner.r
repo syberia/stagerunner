@@ -276,6 +276,8 @@ stageRunner <- setRefClass('stageRunner',
     stage_names  = stagerunner:::stageRunner__stage_names,
     .clear_cache = stagerunner:::stageRunner__.clear_cache,
     .set_parents = stagerunner:::stageRunner__.set_parents,
+    parent       = function() .parent,
+    children     = function() stages,
     show         = stagerunner:::stageRunner__show
   )
 )
