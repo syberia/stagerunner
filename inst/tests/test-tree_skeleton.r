@@ -32,3 +32,4 @@ test_that('it finds the successor of a simple stageRunner object correctly when 
 })
 
 # TODO: Write tests for S3 and S4 treeSkeleton calls
+

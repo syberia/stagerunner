@@ -42,28 +42,13 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 
   remember <<- remember
   if (remember) {
-    stageRunner__.clear_cache(init = TRUE)
+    # Set up parents for treeSkeleton.
     stageRunner__.set_parents(init = TRUE)
-    # Set the first cache environment
-    #first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
-    #first_env$cache_env <- new.env(parent = parent.env(context))
-    #copy_env(first_env$cache_env, context)
 
-    if (length(.environment_cache) > 0) {
-      prev_stage <- NULL
-      stage <- stages[[1]]
-      while (is.stagerunner(stage)) {
-        prev_stage <- stage
-        stage <- stage$stages[[1]]
-      }
-      if (is.null(prev_stage)) {
-        .environment_cache[[1]] <<- new.env(parent = parent.env(context))
-        copy_env(.environment_cache[[1]], context)
-      } else {
-        prev_stage$.environment_cache[[1]] <- new.env(parent = parent.env(context))
-        copy_env(prev_stage$.environment_cache[[1]], context)
-      }
-    }
+    # Set the first cache environment
+    first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
+    first_env$cache_env <- new.env(parent = parent.env(context))
+    copy_env(first_env$cache_env, context)
   }
 }
 
@@ -265,6 +250,9 @@ stageRunner__.set_parents <- function(init = FALSE) {
     for (i in seq_along(stages)) {
       if (is.stagerunner(stages[[i]])) {
         stages[[i]]$.parent <<- .self
+        # Convenience helper attribute to ensure that treeSkeleton
+        # can find this stage.
+        attr(stages[[i]], 'child_index') <<- i
         stages[[i]]$.set_parents()
       }
     }

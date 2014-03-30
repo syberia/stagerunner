@@ -85,9 +85,11 @@ treeSkeleton__children <- function() {
 
 #' Find the index of the current object in the children of its parent.
 treeSkeleton__.parent_index <- function() {
-  which(vapply(
-    .self$parent()$children(),
-    function(node) identical(node$object, object), logical(1)))[1]
+  if ('child_index' %in% names(attributes(.self))) attr(.self, 'child_index')
+  else # look through the parent's children and compare to .self
+    which(vapply(
+      .self$parent()$children(),
+      function(node) identical(node$object, object), logical(1)))[1]
 }
 
 #' This class implements iterators for a tree-based structure
