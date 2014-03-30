@@ -73,7 +73,7 @@ treeSkeleton__children <- function() {
 treeSkeleton__.parent_index <- function() {
   which(vapply(
     # bquote and nearly everything else doesn't work
-    eval(parse(text = paste0('`$`(`$`(object, "', parent_caller, '")(), "', children_caller, '")()'))),
+    object$parent()$children(),
     function(node) identical(node, object), logical(1)))[1]
 }
 
