@@ -4,6 +4,9 @@
 \usage{
 stageRunner__.clear_cache(init = FALSE)
 }
+\arguments{
+  \item{init}{logical. Internal argument.}
+}
 \description{
 Clear all caches in this stageRunner, and recursively.
 }

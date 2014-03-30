@@ -44,6 +44,9 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
   assume the \code{stage_key} argument is a nested list of
   logicals.}
 
+  \item{remember_flag}{logical. Whether or not to cache
+  runs of individual stages.}
+
   \item{verbose}{logical. Whether or not to display pretty
   colored text informing about stage progress.}
 }

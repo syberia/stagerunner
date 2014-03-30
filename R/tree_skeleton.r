@@ -38,7 +38,21 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
 treeSkeleton__successor <- function(index = NULL) {
   parent_index <- if (is.null(index)) .parent_index() else index
   stopifnot(is.finite(parent_index))
-  parent_index
+
+  # If we are the last leaf in the list of our parent's children,
+  # our successor is our parent's successor
+  if (parent_index == length(cs <- (p <- .self$parent())$children()))
+    p$successor()
+  else
+    cs[[parent_index + 1]]$first_leaf()
+}
+
+#' Find the first leaf in a tree.
+#'
+#' The first leaf is the first terminal child node.
+treeSkeleton__first_leaf <- function() {
+  if (length(childs <- .self$children()) == 0) .self
+  else childs[[1]]$first_leaf()
 }
 
 #' Find the parent of the current object wrapped in a treeSkeleton.
@@ -72,8 +86,8 @@ treeSkeleton__children <- function() {
 #' Find the index of the current object in the children of its parent.
 treeSkeleton__.parent_index <- function() {
   which(vapply(
-    object$parent()$children(),
-    function(node) identical(node, object), logical(1)))[1]
+    .self$parent()$children(),
+    function(node) identical(node$object, object), logical(1)))[1]
 }
 
 #' This class implements iterators for a tree-based structure
@@ -92,7 +106,7 @@ treeSkeleton__.parent_index <- function() {
 #'
 #' The iterators on a \code{treeSkeleton} use the standard definition of
 #' successor, predecessor, ancestor, etc.
-#' @docType refClass
+#' @docType class
 #' @name treeSkeleton
 treeSkeleton <- setRefClass('treeSkeleton',
   fields = list(object = 'ANY', parent_caller = 'character',
@@ -102,6 +116,7 @@ treeSkeleton <- setRefClass('treeSkeleton',
     successor     = stagerunner:::treeSkeleton__successor,
     parent        = stagerunner:::treeSkeleton__parent,
     children      = stagerunner:::treeSkeleton__children,
+    first_leaf    = stagerunner:::treeSkeleton__first_leaf,
     #predecessor  = stagerunner:::treeSkeleton__predecessor,
     .parent_index = stagerunner:::treeSkeleton__.parent_index 
   )

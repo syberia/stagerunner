@@ -9,7 +9,7 @@ stageRunner__initialize(context, .stages, remember = FALSE)
   that is getting modified during the execution of the
   stages.}
 
-  \item{stages}{a list. The functions to execute on the
+  \item{.stages}{a list. The functions to execute on the
   \code{context}.}
 
   \item{remember}{a logical. Whether to keep a copy of the

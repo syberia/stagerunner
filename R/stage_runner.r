@@ -8,7 +8,7 @@
 #'
 #' @param context an environment. The initial environment that is getting
 #'    modified during the execution of the stages. 
-#' @param stages a list. The functions to execute on the \code{context}.
+#' @param .stages a list. The functions to execute on the \code{context}.
 #' @param remember a logical. Whether to keep a copy of the context and its
 #'    contents throughout each stage for debugging purposes--this makes it
 #'    easy to go back and investigate a stage. This could be optimized by
@@ -93,6 +93,8 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 #' @param normalized logical. A convenience recursion performance helper. If
 #'   \code{TRUE}, stageRunner will assume the \code{stage_key} argument is a
 #'   nested list of logicals.
+#' @param remember_flag logical. Whether or not to cache runs of individual
+#'   stages.
 #' @param verbose logical. Whether or not to display pretty colored text
 #'   informing about stage progress.
 stageRunner__run <- function(stage_key = NULL, to = NULL,
@@ -217,6 +219,8 @@ stageRunner__stage_names <- function() {
 }
 
 #' Generic for printing stageRunner objects.
+#' @param indent integer. Internal parameter for keeping track of nested
+#'   indentation level.
 stageRunner__show <- function(indent = 0) {
   sum_stages <- function(x) sum(vapply(x,
     function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
@@ -235,6 +239,7 @@ stageRunner__show <- function(indent = 0) {
 }
 
 #' Clear all caches in this stageRunner, and recursively.
+#' @param init logical. Internal argument.
 stageRunner__.clear_cache <- function(init = FALSE) {
   (if (init) eval.parent else eval)(substitute({
     .environment_cache <<- lapply(seq_along(stages), function(.) NULL)
@@ -248,14 +253,18 @@ stageRunner__.clear_cache <- function(init = FALSE) {
 }
 
 #' Set all parents for this stageRunner, and recursively
+#' @param init logical. Internal argument.
 stageRunner__.set_parents <- function(init = FALSE) {
   (if (init) eval.parent else eval)(substitute({
-    lapply(stages, function(stage) {
-      if (is.stagerunner(stage)) {
-        stage$.parent <- .self
-        stage$.set_parents()
+    for (i in seq_along(stages)) {
+      if (is.stagerunner(stages[[i]])) {
+        stages[[i]]$.parent <<- .self
+        stages[[i]]$.set_parents()
+      } else {
+        attr(stages[[i]], 'parent') <<- .self
+        attr(stages[[i]], 'children') <<- list()
       }
-    })
+    }
   }))
 
   TRUE
