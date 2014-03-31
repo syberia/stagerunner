@@ -44,8 +44,15 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
   assume the \code{stage_key} argument is a nested list of
   logicals.}
 
-  \item{remember_flag}{logical. Whether or not to cache
-  runs of individual stages.}
+  \item{remember_flag}{logical. An internal argument used
+  by \code{run} recursively if the \code{stageRunner}
+  object has the \code{remember} field set to \code{TRUE}.
+  If \code{remember_flag} is FALSE, \code{run} will not
+  attempt to restore the context from cache (e.g., if we
+  are executing five stages simultaneously with
+  \code{remember = TRUE}, the first stage's context should
+  be restored from cache but none of the remaining stages
+  should).}
 
   \item{verbose}{logical. Whether or not to display pretty
   colored text informing about stage progress.}

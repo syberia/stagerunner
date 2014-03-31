@@ -13,7 +13,10 @@
 #'    contents throughout each stage for debugging purposes--this makes it
 #'    easy to go back and investigate a stage. This could be optimized by
 #'    developing a package for "diffing" two environments. The default is
-#'    \code{FALSE}.
+#'    \code{FALSE}. When set to \code{TRUE}, the return value of the
+#'    \code{run} method will be a list of two environments: one of what
+#'    the context looked like before the \code{run} call, and another
+#'    of the aftermath.
 stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   context <<- context
 
@@ -85,8 +88,13 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 #' @param normalized logical. A convenience recursion performance helper. If
 #'   \code{TRUE}, stageRunner will assume the \code{stage_key} argument is a
 #'   nested list of logicals.
-#' @param remember_flag logical. Whether or not to cache runs of individual
-#'   stages.
+#' @param remember_flag logical. An internal argument used by \code{run}
+#'   recursively if the \code{stageRunner} object has the \code{remember}
+#'   field set to \code{TRUE}. If \code{remember_flag} is FALSE, \code{run}
+#'   will not attempt to restore the context from cache (e.g., if we are
+#'   executing five stages simultaneously with \code{remember = TRUE},
+#'   the first stage's context should be restored from cache but none
+#'   of the remaining stages should).
 #' @param verbose logical. Whether or not to display pretty colored text
 #'   informing about stage progress.
 stageRunner__run <- function(stage_key = NULL, to = NULL,
