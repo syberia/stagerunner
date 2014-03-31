@@ -212,7 +212,8 @@ stageRunner__show <- function(indent = 0) {
     prefix <- paste0('  ', vapply(seq_len(indent), function(.) '   ', character(1)), collapse = '')
     prefix <- gsub('.$', '-', prefix)
     stage_name <- 
-      if (stage_names[[index]] == "") paste0("< Unnamed (stage ", index, ") >")
+      if (is.na(stage_names[[index]]) || stage_names[[index]] == "")
+        paste0("< Unnamed (stage ", index, ") >")
       else stage_names[[index]]
     cat(prefix, stage_name, "\n")
     if (is.stagerunner(stages[[stage_name]]))
