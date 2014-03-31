@@ -47,8 +47,8 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 
     # Set the first cache environment
     first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
-    first_env$cache_env <- new.env(parent = parent.env(context))
-    copy_env(first_env$cache_env, context)
+    first_env$cached_env <- new.env(parent = parent.env(context))
+    copy_env(first_env$cached_env, context)
   }
 }
 
@@ -117,7 +117,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
         if (is.stagerunner(stage)) function(...) stage$run(...)
-        else { # stageRunnerNode
+        else { # stages[[stage_index]] is a stageRunnerNode so has a $fn
           nested_run <- FALSE
           function(...) stage$fn(context)
         }
@@ -129,46 +129,36 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       } else return(FALSE)
 
     # Now handle when remember = TRUE, i.e., we have to cache the
-    # progress along eac stage.
+    # progress along each stage.
     if (remember && remember_flag && is.null(before_env)) {
       # If remember = remember_flag = TRUE and before_env has not been set
       # this is the first stage of a $run() call, so use the cached
       # environment.
       assign('before_env',
-        #if (!remember_flag) TRUE
         if (nested_run) run_stage(remember_flag = TRUE)$before
-        else {
-          if (is.null(.environment_cache[[stage_index]]))
+        else { # a leaf / terminal node
+          if (is.null(env <- stages[[stage_index]]$cached_env))
             stop("Cannot run this stage yet because some previous stages have ",
                  "not been executed.")
 
           # Restart execution from cache, so set context to the cached environment.
-          copy_env(context, .environment_cache[[stage_index]])
-          .environment_cache[[stage_index]]
-        }, parent.env(environment()))
+          copy_env(context, env)
+          env
+        }, parent.env(environment())) # use parent.env(environment()) because
+                                      # this is happening in an lapply
       
       # If atomic function, execute the stage (if it was nested,
       # it's already been executed in order to recursively fetch the before_env
-      if (!nested_run) {
-        run_stage() 
-      
-        # Get next cache ready
-        # TODO: Document / comment the shit out of this!
-        #if (stage_index + 1 <= length(stages)) {
-        #  set_first_cache(stages[[stage_index + 1]], context, stage_index + 1)
-        #} else {
-        #  set_first_cache(.parent, context)
-        #}
-      }
+      if (!nested_run) run_stage() 
+
     } else if (remember) {
       # If not a nested run, we should cache the environment (no need to cache
       # for nested runs since it'll be cached downstairs -- i.e., only use
       # a cache in the leaves/terminal nodes of a stagerunner).
       if (!nested_run) {
-        if (is.null(.environment_cache[[stage_index]]))
-          .environment_cache[[stage_index]] <<-
-            new.env(parent = parent.env(context))
-        copy_env(.environment_cache[[stage_index]], context)
+        copy_env(stages[[stage_index]]$cached_env <<-
+          new.env(parent = parent.env(context)), context)
+        # TODO: What about GC? These could get pretty big...
       }
 
       # When running nested stages, we no longer need to return a before_env
@@ -176,11 +166,9 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     } else run_stage()
 
     if (remember && !nested_run) {
-      env <- successor_env(stages[[stage_index]], .self, stage_index)
-      if (!identical(env, FALSE)) {
-        # Prepare a cache for the future!
-        copy_env(env, context)
-      }
+      node <- treeSkeleton$new(stages[[stage_index]])$successor()
+      if (!is.null(node)) # Prepare a cache for the future!
+        copy_env(node$object$cached_env <- new.env(parent = parent.env(context)), context)
     }
 
     if (display_message) show_message(names(stages), stage_index, begin = FALSE)
@@ -229,17 +217,6 @@ stageRunner__show <- function(indent = 0) {
   })
 }
 
-#' Clear all caches in this stageRunner, and recursively.
-stageRunner__.clear_cache <- function() {
-  .environment_cache <<- lapply(seq_along(stages), function(.) NULL)
-  
-  lapply(stages, function(stage) {
-    if (is.stagerunner(stage)) stage$.clear_cache()   
-  })
-
-  TRUE
-}
-
 #' Set all parents for this stageRunner, and recursively
 stageRunner__.set_parents <- function() {
   for (i in seq_along(stages)) {
@@ -270,16 +247,15 @@ stageRunner__.set_parents <- function() {
 #' @name stageRunner
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
-                .environment_cache = 'list', .parent = 'ANY'),
+                .parent = 'ANY'),
   methods = list(
     initialize   = stagerunner:::stageRunner__initialize,
     run          = stagerunner:::stageRunner__run,
     stage_names  = stagerunner:::stageRunner__stage_names,
-    .clear_cache = stagerunner:::stageRunner__.clear_cache,
-    .set_parents = stagerunner:::stageRunner__.set_parents,
     parent       = function() .parent,
     children     = function() stages,
-    show         = stagerunner:::stageRunner__show
+    show         = stagerunner:::stageRunner__show,
+    .set_parents = stagerunner:::stageRunner__.set_parents
   )
 )
 
