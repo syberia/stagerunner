@@ -119,7 +119,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     nested_run <- TRUE
     
     # Determine how to run this stage, depending on whether it is an
-    # atomic function or nested stagerunner. We compute this first
+    # terminal node or nested stagerunner. We compute this first
     # in case we run into referencing errors (e.g., the requested
     # stage does not exist).
     run_stage <-
@@ -156,25 +156,19 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
         }, parent.env(environment())) # use parent.env(environment()) because
                                       # this is happening in an lapply
       
-      # If atomic function, execute the stage (if it was nested,
-      # it's already been executed in order to recursively fetch the before_env
+      # If terminal node, execute the stage (if it was nested,  it's already been
+      # executed in order to recursively fetch the before_env).
       if (!nested_run) run_stage() 
-
-    } else if (remember) {
-      # If not a nested run, we should cache the environment (no need to cache
-      # for nested runs since it'll be cached downstairs -- i.e., only use
-      # a cache in the leaves/terminal nodes of a stagerunner).
-      if (!nested_run) {
-        copy_env(stages[[stage_index]]$cached_env <<-
-          new.env(parent = parent.env(context)), context)
-        # TODO: What about GC? These could get pretty big...
-      }
-
-      # When running nested stages, we no longer need to return a before_env
-      run_stage(remember_flag = FALSE)
-    } else run_stage()
+    }
+    else if (remember) run_stage(remember_flag = FALSE)
+    else run_stage()
 
     if (remember && !nested_run) {
+      # When we're done running a stage (i.e., processing a terminal node),
+      # set the cache on the successor node to be the current context
+      # (since that node will execute starting with what's in the context now --
+      # this also ensures that running that node with a separate call to
+      # $run will not bump into a "you haven't executed this stage yet" error).
       node <- treeSkeleton$new(stages[[stage_index]])$successor()
       if (!is.null(node)) # Prepare a cache for the future!
         copy_env(node$object$cached_env <- new.env(parent = parent.env(context)), context)
