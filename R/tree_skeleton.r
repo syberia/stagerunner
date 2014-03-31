@@ -129,6 +129,7 @@ treeSkeleton <- setRefClass('treeSkeleton',
     parent        = stagerunner:::treeSkeleton__parent,
     children      = stagerunner:::treeSkeleton__children,
     first_leaf    = stagerunner:::treeSkeleton__first_leaf,
+    # TODO: I don't need any more iterators, but maybe implement them later
     #predecessor  = stagerunner:::treeSkeleton__predecessor,
     .parent_index = stagerunner:::treeSkeleton__.parent_index 
   )
