@@ -83,9 +83,8 @@ treeSkeleton__children <- function() {
     else if (children_caller  %in% names(attributes(object)))
       attr(object, children_caller)
     else get(children_caller)(object)
-  , function(child) treeSkeleton$new(child, parent_caller = parent_caller,
-                                     children_caller = children_caller)
-  )
+  , treeSkeleton$new, parent_caller = parent_caller,
+    children_caller = children_caller)
 }
 
 #' Find the index of the current object in the children of its parent.
