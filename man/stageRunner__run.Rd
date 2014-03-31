@@ -2,7 +2,8 @@
 \alias{stageRunner__run}
 \title{Run the stages in a stageRunner object.}
 \usage{
-stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE)
+stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
+  verbose = FALSE, remember_flag = TRUE)
 }
 \arguments{
   \item{stage_key}{an indexing parameter. Many forms are
@@ -42,6 +43,19 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE)
   performance helper. If \code{TRUE}, stageRunner will
   assume the \code{stage_key} argument is a nested list of
   logicals.}
+
+  \item{remember_flag}{logical. An internal argument used
+  by \code{run} recursively if the \code{stageRunner}
+  object has the \code{remember} field set to \code{TRUE}.
+  If \code{remember_flag} is FALSE, \code{run} will not
+  attempt to restore the context from cache (e.g., if we
+  are executing five stages simultaneously with
+  \code{remember = TRUE}, the first stage's context should
+  be restored from cache but none of the remaining stages
+  should).}
+
+  \item{verbose}{logical. Whether or not to display pretty
+  colored text informing about stage progress.}
 }
 \description{
 Run the stages in a stageRunner object.

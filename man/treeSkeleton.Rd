@@ -1,0 +1,24 @@
+\docType{class}
+\name{treeSkeleton}
+\alias{treeSkeleton}
+\title{This class implements iterators for a tree-based structure
+without an actual underlying tree.}
+\description{
+In other dynamic languages, this kind of behavior would be
+called duck typing. Imagine we have an object \code{x} that
+is of some reference class. This object has a tree
+structure, and each node in the tree has a parent and
+children. However, the methods to fetch a node's parent or
+its children may have arbitrary names. These names are
+stored in \code{treeSkeleton}'s \code{parent_caller} and
+\code{children_caller} fields. Thus, if \code{x$methods()}
+refers to \code{x}'s children and \code{x$parent_method()}
+refers to \code{x}'s parent, we could define a
+\code{treeSkeleton} for \code{x} by writing
+\code{treeSkeleton$new(x, 'parent_method', 'methods')}.
+}
+\details{
+The iterators on a \code{treeSkeleton} use the standard
+definition of successor, predecessor, ancestor, etc.
+}
+

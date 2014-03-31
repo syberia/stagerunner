@@ -15,7 +15,7 @@ boolean_fill(el, forward = TRUE)
 the filled list
 }
 \description{
-Fill a nested logical list with TRUEs before or after the
-first TRUE
+This is a helper function to implement the \code{to}
+parameter in the \code{run} method on a stageRunner object.
 }
 
