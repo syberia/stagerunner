@@ -31,5 +31,16 @@ test_that('it finds the successor of a simple stageRunner object correctly when 
   expect_identical(ts$successor()$object, sr$stages[[2]])
 })
 
+test_that('it returns NULL if a node has no successor', {
+  sr <- stageRunner$new(new.env(),
+    list(list(tmp <- function(x) x + 1, function(x) x + 2), force), remember = T)
+  ts <- treeSkeleton$new(sr$stages[[2]])
+  expect_identical(ts$successor(), NULL)
+  sr <- stageRunner$new(new.env(),
+    list(force, list(force, force)), remember = T)
+  ts <- treeSkeleton$new(sr$stages[[2]]$stages[[2]])
+  expect_identical(ts$successor(), NULL)
+})
+
 # TODO: Write tests for S3 and S4 treeSkeleton calls
 

@@ -29,7 +29,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
     if (is.list(stages[[i]]))
       stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
     else if (is.function(stages[[i]]))
-      stages[[i]] <<- stageRunnerNode(stages[[i]], .self)
+      stages[[i]] <<- stageRunnerNode(stages[[i]])
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
@@ -43,7 +43,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   remember <<- remember
   if (remember) {
     # Set up parents for treeSkeleton.
-    stageRunner__.set_parents(init = TRUE)
+    .self$.set_parents()
 
     # Set the first cache environment
     first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
@@ -117,7 +117,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
         if (is.stagerunner(stage)) function(...) stage$run(...)
-        else {
+        else { # stageRunnerNode
           nested_run <- FALSE
           function(...) stage$fn(context)
         }
@@ -230,35 +230,36 @@ stageRunner__show <- function(indent = 0) {
 }
 
 #' Clear all caches in this stageRunner, and recursively.
-#' @param init logical. Internal argument.
-stageRunner__.clear_cache <- function(init = FALSE) {
-  (if (init) eval.parent else eval)(substitute({
-    .environment_cache <<- lapply(seq_along(stages), function(.) NULL)
-    
-    lapply(stages, function(stage) {
-      if (is.stagerunner(stage)) stage$.clear_cache()   
-    })
-  }))
+stageRunner__.clear_cache <- function() {
+  .environment_cache <<- lapply(seq_along(stages), function(.) NULL)
+  
+  lapply(stages, function(stage) {
+    if (is.stagerunner(stage)) stage$.clear_cache()   
+  })
 
   TRUE
 }
 
 #' Set all parents for this stageRunner, and recursively
-#' @param init logical. Internal argument.
-stageRunner__.set_parents <- function(init = FALSE) {
-  (if (init) eval.parent else eval)(substitute({
-    for (i in seq_along(stages)) {
-      if (is.stagerunner(stages[[i]])) {
-        stages[[i]]$.parent <<- .self
-        # Convenience helper attribute to ensure that treeSkeleton
-        # can find this stage.
-        attr(stages[[i]], 'child_index') <<- i
-        stages[[i]]$.set_parents()
-      }
-    }
-  }))
+stageRunner__.set_parents <- function() {
+  for (i in seq_along(stages)) {
+    # Set convenience helper attribute "child_index" to ensure that treeSkeleton
+    # can find this stage.
+    if (is.stagerunner(stages[[i]])) {
+      # http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
+      unlockBinding('.self', attr(stages[[i]], '.xData'))
+      attr(attr(stages[[i]], '.xData')$.self, 'child_index') <<- i
+      lockBinding('.self', attr(stages[[i]], '.xData'))
+    } else attr(stages[[i]], 'child_index') <<- i
 
-  TRUE
+    if (!is.stagerunner(stages[[i]])) {
+      attr(stages[[i]], 'parent') <<- .self
+    } else {
+      stages[[i]]$.set_parents()
+      stages[[i]]$.parent <<- .self
+    }
+  }
+  .parent <<- NULL
 }
 
 #' Stage runner is a reference class for parametrizing and executing
@@ -309,7 +310,8 @@ stageRunnerNode <- function(fn, parent_obj, parent_env = parent.frame()) {
   env$fn <- fn
 
   # Make a stageRunnerNode commensurate with treeSkeleton
-  attr(env, 'parent') <- parent_obj
+  # parent will be set later
+  if (!missing(parent_obj)) attr(env, 'parent') <- parent_obj
   attr(env, 'children') <- list()
 
   env

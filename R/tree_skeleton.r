@@ -36,12 +36,14 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
 #'   automatically, and should usually be provided.)
 #' @return successor for the wrapped object.
 treeSkeleton__successor <- function(index = NULL) {
+  if (is.null(p <- parent())) return(NULL) # no successor of root node
+
   parent_index <- if (is.null(index)) .parent_index() else index
   stopifnot(is.finite(parent_index))
 
   # If we are the last leaf in the list of our parent's children,
   # our successor is our parent's successor
-  if (parent_index == length(cs <- (p <- .self$parent())$children()))
+  if (parent_index == length(cs <- p$children()))
     p$successor()
   else
     cs[[parent_index + 1]]$first_leaf()
@@ -57,7 +59,7 @@ treeSkeleton__first_leaf <- function() {
 
 #' Find the parent of the current object wrapped in a treeSkeleton.
 treeSkeleton__parent <- function() {
-  treeSkeleton$new(
+  obj <- 
     if (inherits(object, 'refClass'))
       # bquote and other methods don't work here -- it's hard to dynamically
       # fetch reference class methods!
@@ -65,7 +67,10 @@ treeSkeleton__parent <- function() {
     else if (parent_caller %in% names(attributes(object)))
       attr(object, parent_caller)
     else get(parent_caller)(object)
-  , parent_caller = parent_caller, children_caller = children_caller)
+
+  if (is.null(obj)) NULL
+  else treeSkeleton$new(obj, parent_caller = parent_caller,
+                        children_caller = children_caller)
 }
 
 #' Find the children of the current object wrapped in treeSkeletons.
@@ -85,7 +90,10 @@ treeSkeleton__children <- function() {
 
 #' Find the index of the current object in the children of its parent.
 treeSkeleton__.parent_index <- function() {
-  if ('child_index' %in% names(attributes(.self))) attr(.self, 'child_index')
+  if (!is.null(ci <- attr(object, 'child_index'))) ci
+  # Hack for accessing attribute modifications on a reference class object
+  # See: http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
+  else if (!is.null(ci <- attr(attr(object, '.xData')$.self, 'child_index'))) ci
   else # look through the parent's children and compare to .self
     which(vapply(
       .self$parent()$children(),

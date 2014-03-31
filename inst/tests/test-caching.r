@@ -1,5 +1,6 @@
 context('caching on a stageRunner object')
 
+(function(){
 # A helper function for checking whether copy_env is working properly.
 # See also: http://stackoverflow.com/questions/22675046/transforming-a-nested-environment-into-a-nested-list/22675108#22675108
 nested_env_list <- function(env) {
@@ -60,3 +61,10 @@ test_that('we cannot run stages out of order due to caching issues', {
   sr$run('2/2') # it should be runnable now
 })
 
+test_that('parents and children get set in a stageRunner tree with caching', {
+  sr <- stageRunner$new(new.env(), list(force, list(force, force)), remember = TRUE)
+  expect_equal(sr$children(), 2)
+  expect_equal(sr$children()[[2]]$children(), 2)
+})
+
+})
