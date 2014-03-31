@@ -36,7 +36,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
-  if (any(violators <- grepl('/', names(stages)))) {
+  if (any(violators <- grepl('/', names(stages), fixed = TRUE))) {
     msg <- paste0("Stage names may not have a '/' character. The following do not ",
       "satisfy this constraint: '",
       paste0(names(stages)[violators], collapse = "', '"), "'")
