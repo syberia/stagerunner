@@ -95,6 +95,8 @@ treeSkeleton__.parent_index <- function() {
   else if (inherits(object, 'refClass') &&
            !is.null(ci <- attr(attr(object, '.xData')$.self, 'child_index'))) ci
   else # look through the parent's children and compare to .self
+    # Danger Will Robinson! This will lead to strange bugs if our tree
+    # has several nodes with duplicate objects
     which(vapply(
       .self$parent()$children(),
       function(node) identical(node$object, object), logical(1)))[1]
