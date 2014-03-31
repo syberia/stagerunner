@@ -2,7 +2,7 @@
 \alias{normalize_stage_keys}
 \title{Normalize a reference to stage keys}
 \usage{
-normalize_stage_keys(keys, stages, parent_key = "")
+normalize_stage_keys(keys, stages, parent_key = "", to = NULL)
 }
 \arguments{
   \item{keys}{a list. The keys to normalize.}
@@ -16,6 +16,17 @@ normalize_stage_keys(keys, stages, parent_key = "")
   \code{normalize_stage_keys} errors when \code{bar} isn't
   found, we would still like the error to display the full
   name (\code{foo/bar}).}
+
+  \item{to}{an indexing parameter. If \code{keys} refers to
+  a single stage, attempt to find all stages from that
+  stage to this stage (or, if this one comes first, this
+  stage to that stage). For example, if we have
+  \code{stages = list(a = list(b = 1, c = 2), d = 3, e =
+  list(f = 4, g = 5))} where the numbers are some
+  functions, and we call \code{normalize_stage_keys} with
+  \code{keys = 'a/c'} and \code{to = 'e/f'}, then we would
+  obtain a nested list of logicals referencing \code{"a/c",
+  "d", "e/f"}.}
 }
 \value{
 a list. The format is nested logicals. For example, if
@@ -33,5 +44,8 @@ to \code{list('data', list('one')), 2)}.
 \dontrun{
    # TODO: Fill in
 }
+}
+\seealso{
+stageRunner__run
 }
 

@@ -1,3 +1,4 @@
 export(is.stagerunner)
 export(stageRunner)
 exportClasses(stageRunner)
+importFrom(testthat,colourise)

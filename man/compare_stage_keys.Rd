@@ -13,7 +13,7 @@ compare_stage_keys(key1, key2)
 logical. Whether or not key1 runs a stage before key2.
 }
 \description{
-Compare two stage keys to see which one has a stage run
-first
+This is a helper function to implement the \code{to}
+parameter in the \code{run} method on a stageRunner object.
 }
 

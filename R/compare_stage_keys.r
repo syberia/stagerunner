@@ -1,4 +1,7 @@
 #' Compare two stage keys to see which one has a stage run first
+#' 
+#' This is a helper function to implement the \code{to} parameter
+#' in the \code{run} method on a stageRunner object.
 #'
 #' @param key1 list
 #' @param key2 list
