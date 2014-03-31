@@ -1,4 +1,4 @@
-context('tree skeleton')
+context('treeSkeleton')
 
 test_that('it errors when not given methods of a reference class object for the callers', {
   sr <- stageRunner$new(new.env(),list())

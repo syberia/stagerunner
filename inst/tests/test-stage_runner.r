@@ -1,4 +1,4 @@
-context("stage runner")
+context("stageRunner")
 
 example1 <- function() {
   eval.parent(substitute({
