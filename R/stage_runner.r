@@ -50,9 +50,11 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
     .self$.set_parents()
 
     # Set the first cache environment
-    first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
-    first_env$cached_env <- new.env(parent = parent.env(context))
-    copy_env(first_env$cached_env, context)
+    if (length(stages) > 0) {
+      first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
+      first_env$cached_env <- new.env(parent = parent.env(context))
+      copy_env(first_env$cached_env, context)
+    }
   }
 }
 

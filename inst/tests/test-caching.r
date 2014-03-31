@@ -7,6 +7,16 @@ nested_env_list <- function(env) {
   lapply(out, function(x) if (is.environment(x)) nested_env_list(x) else x)
 }
 
+test_that('it can initialize a trivial stageRunner', {
+  sr <- stageRunner$new(new.env(), list(), remember = TRUE)
+  expect_false(is.null(tryCatch(sr$run(), error = function(.) NULL)))
+})
+
+test_that('it should be able to run a simple double staged stageRunner', {
+  sr <- stageRunner$new(new.env(), list(function(x) x$x <- 1, function(y) y$y <- 2), remember = TRUE)
+  expect_false(is.null(tryCatch(sr$run(), error = function(.) NULL)))
+})
+
 test_that('the first cached environment is simply the initial context', {
   tmp <- new.env(); tmp$x <- 1; tmp$y <- function(z) z + 1; tmp$w <- list(1, iris)
   sr <- stageRunner$new(tmp, list(force), remember = TRUE)
