@@ -66,3 +66,13 @@ test_that('parents and children get set in a stageRunner tree with caching', {
   expect_equal(length(sr$children()[[2]]$children()), 2)
 })
 
+test_that('the environment gets restored from cache upon second execution', {
+  env <- new.env(); env$x <- 0
+  sr <- stageRunner$new(env, list(function(e) e$x <- 1, list(function(e) e$x <- 2, function(e) e$x <- 3)), remember = TRUE)
+  sr$run()
+  expect_equal(env$x, 3)
+  envs <- sr$run('2/1')
+  expect_equal(envs$before$x, 1)
+  expect_equal(envs$after$x, 2)
+})
+
