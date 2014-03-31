@@ -92,7 +92,8 @@ treeSkeleton__.parent_index <- function() {
   if (!is.null(ci <- attr(object, 'child_index'))) ci
   # Hack for accessing attribute modifications on a reference class object
   # See: http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
-  else if (!is.null(ci <- attr(attr(object, '.xData')$.self, 'child_index'))) ci
+  else if (inherits(object, 'refClass') &&
+           !is.null(ci <- attr(attr(object, '.xData')$.self, 'child_index'))) ci
   else # look through the parent's children and compare to .self
     which(vapply(
       .self$parent()$children(),
