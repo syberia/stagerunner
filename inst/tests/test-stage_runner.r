@@ -227,6 +227,11 @@ test_that("it correctly parses a nested list of functions into nested stagerunne
   expect_identical(names(sr$stages)[2], 'd')
 })
 
+test_that("it should be able to run a nested stage", {
+  sr <- stageRunner$new(new.env(), list(list(function(env) env$x <- 1, force), list(function(env) env$y <- 1, force)))
+  expect_false(is.null(tryCatch(sr$run('2/1'), error = function(.) NULL)))
+})
+
 test_that("it correctly uses the to parameter", {
   example1()
   names(sr$stages[[2]]$stages) <- c('stage_onea', 'stage_oneb')

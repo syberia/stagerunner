@@ -43,6 +43,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   remember <<- remember
   if (remember) {
     # Set up parents for treeSkeleton.
+    .self$.clear_cache()
     .self$.set_parents()
 
     # Set the first cache environment
@@ -217,6 +218,15 @@ stageRunner__show <- function(indent = 0) {
   })
 }
 
+#' Clear all caches in this stageRunner, and recursively.
+stageRunner__.clear_cache <- function() {
+  for (i in seq_along(stages)) {
+    if (is.stagerunner(stages[[i]])) stages[[i]]$.clear_cache()
+    else stages[[i]]$cached_env <<- NULL
+  }
+  TRUE
+}
+
 #' Set all parents for this stageRunner, and recursively
 stageRunner__.set_parents <- function() {
   for (i in seq_along(stages)) {
@@ -249,13 +259,14 @@ stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
                 .parent = 'ANY'),
   methods = list(
-    initialize   = stagerunner:::stageRunner__initialize,
-    run          = stagerunner:::stageRunner__run,
-    stage_names  = stagerunner:::stageRunner__stage_names,
+    initialize   = stageRunner__initialize,
+    run          = stageRunner__run,
+    stage_names  = stageRunner__stage_names,
     parent       = function() .parent,
     children     = function() stages,
-    show         = stagerunner:::stageRunner__show,
-    .set_parents = stagerunner:::stageRunner__.set_parents
+    show         = stageRunner__show,
+    .set_parents = stageRunner__.set_parents,
+    .clear_cache = stageRunner__.clear_cache 
   )
 )
 

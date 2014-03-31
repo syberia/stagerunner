@@ -38,19 +38,18 @@ test_that('running the first stage does not update the cache for the fourth stag
   expect_identical(sr$stages[[4]]$cached_env, NULL)
 })
 
-function(){
 test_that('running the first nested stage updates the cache for the second non-nested stage', {
   sr <- stageRunner$new(new.env(), list(list(function(env) env$x <- 1, force), force), remember = TRUE)
-  expect_identical(sr$.environment_cache[[2]], NULL)
+  expect_identical(sr$stages[[2]]$cached_env, NULL)
   sr$run(1)
-  expect_identical(nested_env_list(sr$.environment_cache[[2]]), list(x = 1))
+  expect_identical(nested_env_list(sr$stages[[2]]$cached_env), list(x = 1))
 })
 
 test_that('running the first nested stage updates the cache for the second nested stage', {
   sr <- stageRunner$new(new.env(), list(list(function(env) env$x <- 1, force), list(function(env) env$y <- 1, force)), remember = TRUE)
-  expect_identical(sr$stages[[2]]$.environment_cache[[1]], NULL)
+  expect_identical(sr$stages[[2]]$stages[[1]]$cached_env, NULL)
   sr$run(1)
-  expect_identical(nested_env_list(sr$stages[[1]]$.environment_cache[[2]]), list(x = 1))
+  expect_identical(nested_env_list(sr$stages[[1]]$stages[[2]]$cached_env), list(x = 1))
 })
 
 test_that('we cannot run stages out of order due to caching issues', {
@@ -63,8 +62,7 @@ test_that('we cannot run stages out of order due to caching issues', {
 
 test_that('parents and children get set in a stageRunner tree with caching', {
   sr <- stageRunner$new(new.env(), list(force, list(force, force)), remember = TRUE)
-  expect_equal(sr$children(), 2)
-  expect_equal(sr$children()[[2]]$children(), 2)
+  expect_equal(length(sr$children()), 2)
+  expect_equal(length(sr$children()[[2]]$children()), 2)
 })
 
-}

@@ -45,7 +45,8 @@ normalize_stage_keys <- function(keys, stages, parent_key = "", to = NULL) {
   }
 
   if (is.null(keys) || length(keys) == 0 || identical(keys, "")) {
-    return(if (length(stages) == 1) TRUE else rep(list(TRUE), length(stages)))
+    return(if (!is.list(stages) || length(stages) == 1) TRUE
+           else rep(list(TRUE), length(stages)))
   }
   if (is.stagerunner(stages)) stages <- stages$stages
 
@@ -53,11 +54,11 @@ normalize_stage_keys <- function(keys, stages, parent_key = "", to = NULL) {
     function(y) if (is.atomic(y)) is.logical(y) else all_logical(y), logical(1)))
   if (all_logical(keys)) return(keys) # Already normalized
 
-  normalized_keys <- rep(list(FALSE), length(stages))
+  normalized_keys <- rep(list(FALSE), if (is.list(stages)) length(stages) else 1)
   if (is.numeric(keys) && any(keys < 0)) { # Allow negative indexing
     normalized_keys[keys] <- rep(list(TRUE), length(normalized_keys[keys]))
   } else {
-    seqs <- seq_along(stages)
+    seqs <- seq_along(if (is.list(stages)) stages else 1)
     lapply(seq_along(keys), function(key_index) {
       key <- keys[[key_index]]
       if (length(key) == 0) stop("Invalid stage key (cannot be of length 0)")
