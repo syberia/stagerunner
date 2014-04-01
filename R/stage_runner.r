@@ -207,7 +207,7 @@ stageRunner__coalesce <- function(other_runner) {
           !is.stagerunner(other_runner$stages[[stage_index]]) &&
           !is.null(other_runner$stages[[stage_index]]$cached_env) &&
           identical(deparse(stages[[names(stages)[stage_index]]]$fn),
-                    deparse(other_runner$stages[[stage_index]]$fn)) &&
+                    deparse(other_runner$stages[[stage_index]]$fn)) # &&
           # This is way too tricky and far beyond my abilities..
           #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
           #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
