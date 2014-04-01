@@ -203,7 +203,9 @@ stageRunner__coalesce <- function(other_runner) {
             other_runner$stages[[stage_index]])
       # If both are not stageRunners, copy the cached_env
       } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
-          !is.stagerunner(other_runner$stages[[stage_index]])) {
+          !is.stagerunner(other_runner$stages[[stage_index]]) &&
+          identical(deparse(stages[[names(stages)[stage_index]]]$fn),
+                    deparse(other_runner$stages[[stage_index]]$fn))) {
         stages[[names(stages)[stage_index]]]$cached_env <<-
           new.env(parent = parent.env(context))
         copy_env(stages[[names(stages)[stage_index]]]$cached_env,
