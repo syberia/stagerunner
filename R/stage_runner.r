@@ -199,8 +199,8 @@ stageRunner__coalesce <- function(other_runner) {
       # If both are stageRunners, try to coalesce our sub-stages.
       if (is.stagerunner(stages[[names(stages)[stage_index]]]) &&
           is.stagerunner(other_runner$stages[[stage_index]])) {
-        stages[[names(stages)[stage_index]]]$coalesce(
-          other_runner$stages[[stage_index]])
+          stages[[names(stages)[stage_index]]]$coalesce(
+            other_runner$stages[[stage_index]])
       # If both are not stageRunners, copy the cached_env
       } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
           !is.stagerunner(other_runner$stages[[stage_index]])) {
@@ -211,7 +211,7 @@ stageRunner__coalesce <- function(other_runner) {
       }
     }
   })
-  TRUE
+  .self
 }
 
 
