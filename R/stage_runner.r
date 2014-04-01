@@ -201,11 +201,17 @@ stageRunner__coalesce <- function(other_runner) {
           is.stagerunner(other_runner$stages[[stage_index]])) {
           stages[[names(stages)[stage_index]]]$coalesce(
             other_runner$stages[[stage_index]])
-      # If both are not stageRunners, copy the cached_env
+      # If both are not stageRunners, copy the cached_env if and only if
+      # the stored function and its environment are identical
       } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
           !is.stagerunner(other_runner$stages[[stage_index]]) &&
+          !is.null(other_runner$stages[[stage_index]]$cached_env) &&
           identical(deparse(stages[[names(stages)[stage_index]]]$fn),
-                    deparse(other_runner$stages[[stage_index]]$fn))) {
+                    deparse(other_runner$stages[[stage_index]]$fn)) &&
+          # This is way too tricky and far beyond my abilities..
+          #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
+          #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
+          ) {
         stages[[names(stages)[stage_index]]]$cached_env <<-
           new.env(parent = parent.env(context))
         copy_env(stages[[names(stages)[stage_index]]]$cached_env,
