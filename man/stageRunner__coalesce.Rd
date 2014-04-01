@@ -1,0 +1,18 @@
+\name{stageRunner__coalesce}
+\alias{stageRunner__coalesce}
+\title{Coalescing a stageRunner object is taking another stageRunner object
+with similar stage names and replacing the latter's cached environments
+with the former's.}
+\usage{
+stageRunner__coalesce(other_runner)
+}
+\arguments{
+  \item{other_runner}{stageRunner. Another stageRunner from
+  which to coalesce.}
+}
+\description{
+Coalescing a stageRunner object is taking another
+stageRunner object with similar stage names and replacing
+the latter's cached environments with the former's.
+}
+
