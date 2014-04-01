@@ -189,6 +189,29 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
 #'
 #' @param other_runner stageRunner. Another stageRunner from which to coalesce.
 stageRunner__coalesce <- function(other_runner) {
+  # TODO: Should we care about insertion of new stages causing cache wipes?
+  # For now it seems like this would just be an annoyance.
+  stopifnot(remember)
+  stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
+  lapply(seq_along(other_runner$stages), function(stage_index) {
+    # TODO: Match by name *OR* index
+    if (stagenames[[stage_index]] %in% names(stages)) {
+      # If both are stageRunners, try to coalesce our sub-stages.
+      if (is.stagerunner(stages[[names(stages)[stage_index]]]) &&
+          is.stagerunner(other_runner$stages[[stage_index]])) {
+        stages[[names(stages)[stage_index]]]$coalesce(
+          other_runner$stages[[stage_index]])
+      # If both are not stageRunners, copy the cached_env
+      } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
+          !is.stagerunner(other_runner$stages[[stage_index]])) {
+        stages[[names(stages)[stage_index]]]$cached_env <<-
+          new.env(parent = parent.env(context))
+        copy_env(stages[[names(stages)[stage_index]]]$cached_env,
+                 other_runner$stages[[stage_index]]$cached_env)
+      }
+    }
+  })
+  TRUE
 }
 
 
