@@ -1,7 +1,7 @@
 context('treeSkeleton')
 
 test_that('it errors when not given methods of a reference class object for the callers', {
-  sr <- stageRunner$new(new.env(),list())
+  sr <- stageRunner$new(new.env(), list())
   expect_error(treeSkeleton$new(sr, '', ''), 'methods\\(\\)) is not TRUE')
 })
 
