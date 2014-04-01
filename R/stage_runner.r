@@ -183,6 +183,15 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
   else invisible(TRUE)
 }
 
+#' Coalescing a stageRunner object is taking another stageRunner object
+#' with similar stage names and replacing the latter's cached environments
+#' with the former's.
+#'
+#' @param other_runner stageRunner. Another stageRunner from which to coalesce.
+stageRunner__coalesce <- function(other_runner) {
+}
+
+
 #' Retrieve a flattened list of canonical stage names for a stageRunner object
 #'
 #' For example, if we have stages
@@ -266,6 +275,7 @@ stageRunner <- setRefClass('stageRunner',
   methods = list(
     initialize   = stageRunner__initialize,
     run          = stageRunner__run,
+    coalesce     = stageRunner__coalesce,
     stage_names  = stageRunner__stage_names,
     parent       = function() .parent,
     children     = function() stages,
