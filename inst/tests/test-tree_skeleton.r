@@ -6,7 +6,7 @@ test_that('it errors when not given methods of a reference class object for the 
 })
 
 test_that('it does not error when given methods of a reference class object for the callers', {
-  sr <- stageRunner$new(new.env(),list())
+  sr <- stageRunner$new(new.env(), list())
   out <- tryCatch(treeSkeleton$new(sr, 'run', 'run'), error = function(.) NULL)
   expect_false(identical(out, NULL))
 })
