@@ -1,4 +1,7 @@
 #' Fill a nested logical list with TRUEs before or after the first TRUE
+#' 
+#' This is a helper function to implement the \code{to} parameter
+#' in the \code{run} method on a stageRunner object.
 #'
 #' @param el list. A nested list of logicals with exactly one entry TRUE.
 #' @param forward logical. FALSE for backwards, and TRUE for forwards.
