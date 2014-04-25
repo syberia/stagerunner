@@ -5,3 +5,8 @@ contains_true <- function(x) {
   else any(x)
 }
 
+# Whether obj is of any of the given types.
+is_any <- function(obj, klasses) {
+  any(vapply(klasses, inherits, logical(1), x = obj))
+}
+

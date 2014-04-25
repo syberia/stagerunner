@@ -1,3 +1,14 @@
+# Dynamically create an accessor method for reference classes.
+accessor_method <- function(attr) {
+  fn <- eval(bquote(
+    function(`*VALUE*` = NULL)
+      if (missing(`*VALUE*`)) .(substitute(attr))
+      else .(substitute(attr)) <<- `*VALUE*`
+  ))
+  environment(fn) <- parent.frame()
+  fn
+}
+
 #' Initialize a stageRunner object.
 #'
 #' stageRunner objects are used for executing a linear sequence of
@@ -32,7 +43,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
     if (is.list(stages[[i]]))
       stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
     else if (is.function(stages[[i]]))
-      stages[[i]] <<- stageRunnerNode(stages[[i]])
+      stages[[i]] <<- stageRunnerNode$new(stages[[i]], context)
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
@@ -128,9 +139,9 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
         if (is.stagerunner(stage)) function(...) stage$run(...)
-        else { # stages[[stage_index]] is a stageRunnerNode so has a $fn
+        else if (is.stageRunnerNode(stage)) {
           nested_run <- FALSE
-          function(...) stage$fn(context)
+          function(...) stage$run(context)
         }
       } else if (is.list(stage_key[[stage_index]])) {
         if (!is.stagerunner(stages[[stage_index]]))
@@ -222,6 +233,15 @@ stageRunner__coalesce <- function(other_runner) {
   .self
 }
 
+#' Overlaying a stageRunner object is taking another stageRunner object
+#' with similar stage names and adding the latter's stages as terminal stages
+#' to the former (for example, to support tests).
+#'
+#' @param other_runner stageRunner. Another stageRunner from which to overlay.
+stageRunner__overlay <- function(other_runner) {
+  # lapply(seq_along(other_runner$stages, function(stage_index)))
+}
+
 
 #' Retrieve a flattened list of canonical stage names for a stageRunner object
 #'
@@ -277,18 +297,20 @@ stageRunner__.set_parents <- function() {
   for (i in seq_along(stages)) {
     # Set convenience helper attribute "child_index" to ensure that treeSkeleton
     # can find this stage.
-    if (is.stagerunner(stages[[i]])) {
+    if (inherits(stages[[i]], 'refClass')) {
       # http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
       unlockBinding('.self', attr(stages[[i]], '.xData'))
       attr(attr(stages[[i]], '.xData')$.self, 'child_index') <<- i
       lockBinding('.self', attr(stages[[i]], '.xData'))
     } else attr(stages[[i]], 'child_index') <<- i
 
-    if (!is.stagerunner(stages[[i]])) {
+    if (!inherits(stages[[i]], 'refClass')) {
       attr(stages[[i]], 'parent') <<- .self
     } else {
-      stages[[i]]$.set_parents()
-      stages[[i]]$.parent <<- .self
+      # if stages[[i]] has a .set_parents method (e.g. it is a stagerunner), run that
+      if ('.set_parents' %in% ls(stages[[i]]$.refClassDef@refMethods, all.names = TRUE))
+        stages[[i]]$.set_parents()
+      stages[[i]]$parent(.self)
     }
   }
   .parent <<- NULL
@@ -308,7 +330,7 @@ stageRunner <- setRefClass('stageRunner',
     run          = stageRunner__run,
     coalesce     = stageRunner__coalesce,
     stage_names  = stageRunner__stage_names,
-    parent       = function() .parent,
+    parent       = accessor_method(.parent),
     children     = function() stages,
     show         = stageRunner__show,
     .set_parents = stageRunner__.set_parents,
@@ -338,16 +360,37 @@ is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
 #'   environment (i.e., \code{parent.frame()}).
 #' @return an environment with some additional attributes for
 #'   navigating in a tree-like structure.
-stageRunnerNode <- function(fn, parent_obj, parent_env = parent.frame()) {
-  env <- new.env(parent = parent_env)
-  class(env) <- c('stageRunnerNode', class(env))
-  env$fn <- fn
+#stageRunnerNode <- function(fn, parent_obj, parent_env = parent.frame()) {
+#  env <- new.env(parent = parent_env)
+#  class(env) <- c('stageRunnerNode', class(env))
+#  env$fn <- fn
+#
+#  # Make a stageRunnerNode commensurate with treeSkeleton
+#  # parent will be set later
+#  if (!missing(parent_obj)) attr(env, 'parent') <- parent_obj
+#  attr(env, 'children') <- list()
+#
+#  env
+#}
 
-  # Make a stageRunnerNode commensurate with treeSkeleton
-  # parent will be set later
-  if (!missing(parent_obj)) attr(env, 'parent') <- parent_obj
-  attr(env, 'children') <- list()
+stageRunnerNode <- setRefClass('stageRunnerNode',
+  fields = list(callable = 'ANY',
+                cached_env = 'ANY',
+                .context = 'ANY',
+                .parent = 'ANY'),
+  methods = list(
+    initialize = function(.callable, .context = NULL) {
+      stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
+      callable <<- .callable; .context <<- .context
+    },
+    run = function(...) {
+      if (is.stagerunner(callable)) callable$run(...)
+      else callable(.context)
+    }, 
+    parent   = accessor_method(.parent),
+    children = function() list()
+  )
+)
 
-  env
-}
+is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
 
