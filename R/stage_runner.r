@@ -112,7 +112,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 #'   informing about stage progress.
 stageRunner__run <- function(stage_key = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
-                             remember_flag = TRUE) {
+                             remember_flag = TRUE, ...) {
   if (identical(normalized, FALSE))
     stage_key <- normalize_stage_keys(stage_key, stages, to = to)
 
@@ -155,7 +155,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       # this is the first stage of a $run() call, so use the cached
       # environment.
       before_env <-
-        if (nested_run) run_stage(remember_flag = TRUE)$before
+        if (nested_run) run_stage(..., remember_flag = TRUE)$before
         else { # a leaf / terminal node
           if (is.null(env <- stages[[stage_index]]$cached_env))
             stop("Cannot run this stage yet because some previous stages have ",
@@ -168,10 +168,10 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       
       # If terminal node, execute the stage (if it was nested,  it's already been
       # executed in order to recursively fetch the before_env).
-      if (!nested_run) run_stage() 
+      if (!nested_run) run_stage(...) 
     }
-    else if (remember) run_stage(remember_flag = FALSE)
-    else run_stage()
+    else if (remember) run_stage(..., remember_flag = FALSE)
+    else run_stage(...)
 
     if (remember && !nested_run) {
       # When we're done running a stage (i.e., processing a terminal node),
@@ -235,7 +235,7 @@ stageRunner__coalesce <- function(other_runner) {
 #' to the former (for example, to support tests).
 #'
 #' @param other_runner stageRunner. Another stageRunner from which to overlay.
-stageRunner__overlay <- function(other_runner) {
+stageRunner__overlay <- function(other_runner, label = NULL) {
   stopifnot(is.stagerunner(other_runner))
   for (stage_index in seq_along(other_runner$stages)) {
     name <- names(other_runner$stages)[[stage_index]]
@@ -243,7 +243,7 @@ stageRunner__overlay <- function(other_runner) {
       if (identical(name, '') || identical(name, NULL)) stage_index
       else if (name %in% names(stages)) name
       else stop('Cannot overlay because keys do not match')
-    stages[[index]]$overlay(other_runner$stages[[stage_index]])
+    stages[[index]]$overlay(other_runner$stages[[stage_index]], label)
   }
   TRUE
 }
@@ -405,11 +405,27 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
       callable <<- .callable; .context <<- .context
     },
-    run = function(...) {
-      if (!is(cached_env, 'uninitializedField'))
-        .context$`*cached_env*` <<- cached_env
-      if (is.stagerunner(callable)) callable$run(...)
-      else callable(.context)
+    run = function(..., .cached_env = NULL) {
+      # TODO: Clean this up by using environment injection utility fn
+      if (identical(.cached_env, NULL)) {
+        if (is.stagerunner(callable)) callable$run(..., .cached_env = cached_env)
+        else {
+          tmp <- new.env(parent = environment(callable))
+          environment(callable) <<- tmp
+          environment(callable)$cached_env <<- tmp
+          callable(.context, ...)
+          environment(callable) <<- parent.env(environment(callable))
+        }
+      } else {
+        if (is.stagerunner(callable)) callable$run(..., .cached_env = .cached_env)
+        else {
+          tmp <- new.env(parent = environment(callable))
+          environment(callable) <<- tmp
+          environment(callable)$cached_env <<- tmp
+          callable(.context, ...)
+          environment(callable) <<- parent.env(environment(callable))
+        }
+      }
     }, 
     overlay = function(other_node, label = NULL) {
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
