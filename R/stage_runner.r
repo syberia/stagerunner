@@ -28,7 +28,7 @@ accessor_method <- function(attr) {
 #'    \code{run} method will be a list of two environments: one of what
 #'    the context looked like before the \code{run} call, and another
 #'    of the aftermath.
-stageRunner__initialize <- function(context, .stages, remember = FALSE) {
+stageRunner__initialize <- function(context, .stages, remember = FALSE, .recursive = TRUE) {
   context <<- context
 
   legal_types <- function(x) is.function(x) || all(vapply(x,
@@ -42,7 +42,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   for (i in seq_along(stages))
     if (is.list(stages[[i]]))
       stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
-    else if (is.function(stages[[i]]))
+    else if (is.function(stages[[i]]) && .recursive)
       stages[[i]] <<- stageRunnerNode$new(stages[[i]], context)
 
   # Do not allow the '/' character in stage names, as it's reserved for
@@ -58,7 +58,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   if (remember) {
     # Set up parents for treeSkeleton.
     .self$.clear_cache()
-    .self$.set_parents()
+    #.self$.set_parents()
 
     # Set the first cache environment
     if (length(stages) > 0) {
@@ -143,6 +143,10 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
           nested_run <- FALSE
           function(...) stage$run(context)
         }
+        else if (is.function(stage)) {
+          nested_run <- FALSE
+          function(...) stage(context)
+        }
       } else if (is.list(stage_key[[stage_index]])) {
         if (!is.stagerunner(stages[[stage_index]]))
           stop("Invalid stage key: attempted to make a nested stage reference ",
@@ -216,9 +220,9 @@ stageRunner__coalesce <- function(other_runner) {
       # the stored function and its environment are identical
       } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
           !is.stagerunner(other_runner$stages[[stage_index]]) &&
-          !is.null(other_runner$stages[[stage_index]]$cached_env) &&
-          identical(deparse(stages[[names(stages)[stage_index]]]$fn),
-                    deparse(other_runner$stages[[stage_index]]$fn)) # &&
+          !is.null(other_runner$stages[[stage_index]]$cached_env) #&&
+          #identical(deparse(stages[[names(stages)[stage_index]]]$fn),
+          #          deparse(other_runner$stages[[stage_index]]$fn)) # &&
           # This is way too tricky and far beyond my abilities..
           #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
           #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
@@ -239,7 +243,14 @@ stageRunner__coalesce <- function(other_runner) {
 #'
 #' @param other_runner stageRunner. Another stageRunner from which to overlay.
 stageRunner__overlay <- function(other_runner) {
-  # lapply(seq_along(other_runner$stages, function(stage_index)))
+  for (stage_index in seq_along(other_runner)) {
+    name <- names(other_runner)[[stage_index]]
+    index <-
+      if (identical(name, '') || identical(name, NULL)) stage_index
+      else if (name %in% names(stages)) name
+      else stop('Cannot overlay because keys do not match')
+    stages[[index]]$overlay(other_runner$stages[[stage_index]])
+  }
 }
 
 
@@ -266,12 +277,15 @@ stageRunner__stage_names <- function() {
 #' @param indent integer. Internal parameter for keeping track of nested
 #'   indentation level.
 stageRunner__show <- function(indent = 0) {
-  sum_stages <- function(x) sum(vapply(x,
-    function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
-  if (missing(indent)) cat("A stageRunner with", sum_stages(.self$stages), "stages:\n")
+  if (missing(indent)) {
+    sum_stages <- function(x) sum(vapply(x,
+      function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
+    cat("A stageRunner with", sum_stages(.self$stages), "stages:\n")
+  }
+
   stage_names <- names(stages) %||% rep("", length(stages))
   lapply(seq_along(stage_names), function(index) {
-    prefix <- paste0('  ', vapply(seq_len(indent), function(.) '   ', character(1)), collapse = '')
+    prefix <- paste0(rep('  ', indent + 1), collapse = '')
     prefix <- gsub('.$', '-', prefix)
     stage_name <- 
       if (is.na(stage_names[[index]]) || stage_names[[index]] == "")
@@ -381,12 +395,20 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
   methods = list(
     initialize = function(.callable, .context = NULL) {
       stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
+      if (is.function(.callable)) 
+        .callable <- stageRunner$new(.context, .callable, .recursive = FALSE)
       callable <<- .callable; .context <<- .context
     },
     run = function(...) {
       if (is.stagerunner(callable)) callable$run(...)
       else callable(.context)
     }, 
+    overlay = function(other_node) {
+      if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
+      stopifnot(is.stagerunner(other_node))
+      # TODO: Fancier merging here
+      callable$stages <<- append(callable$stages, other_node$stages)
+    },
     parent   = accessor_method(.parent),
     children = function() list()
   )

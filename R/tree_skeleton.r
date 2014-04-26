@@ -26,8 +26,23 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
 
   parent_caller <<- parent_caller
   children_caller <<- children_caller
+  .initialize_skeleton()
+  NULL
 }
 
+#' Calculate and cache the children of our tree.
+treeSkeleton__.initialize_skeleton <- function() {
+  .children <<- lapply(
+    if (inherits(object, 'refClass'))
+      # bquote and other methods don't work here -- it's hard to dynamically
+      # fetch reference class methods!
+      eval(parse(text = paste0('`$`(object, "', children_caller, '")()')))
+    else if (children_caller %in% names(attributes(object)))
+      attr(object, children_caller)
+    else get(children_caller)(object)
+  , treeSkeleton$new, parent_caller = parent_caller,
+    children_caller = children_caller)
+}
 
 #' Attempt to find the successor of the current node.
 #'
@@ -59,6 +74,8 @@ treeSkeleton__first_leaf <- function() {
 
 #' Find the parent of the current object wrapped in a treeSkeleton.
 treeSkeleton__parent <- function() {
+  # For some reason, we cannot do this in the constructor.
+  if (!inherits(.parent, 'uninitializedField')) return(.parent)
   obj <- 
     if (inherits(object, 'refClass'))
       # bquote and other methods don't work here -- it's hard to dynamically
@@ -68,23 +85,16 @@ treeSkeleton__parent <- function() {
       attr(object, parent_caller)
     else get(parent_caller)(object)
 
-  if (is.null(obj)) NULL
-  else treeSkeleton$new(obj, parent_caller = parent_caller,
-                        children_caller = children_caller)
+  .parent <<- 
+    if (is.null(obj)) NULL
+    else treeSkeleton$new(obj, parent_caller = parent_caller,
+                          children_caller = children_caller)
+  .parent
 }
 
 #' Find the children of the current object wrapped in treeSkeletons.
 treeSkeleton__children <- function() {
-  lapply(
-    if (inherits(object, 'refClass'))
-      # bquote and other methods don't work here -- it's hard to dynamically
-      # fetch reference class methods!
-      eval(parse(text = paste0('`$`(object, "', children_caller, '")()')))
-    else if (children_caller  %in% names(attributes(object)))
-      attr(object, children_caller)
-    else get(children_caller)(object)
-  , treeSkeleton$new, parent_caller = parent_caller,
-    children_caller = children_caller)
+   .children
 }
 
 #' Find the index of the current object in the children of its parent.
@@ -100,6 +110,41 @@ treeSkeleton__.parent_index <- function() {
     which(vapply(
       .self$parent()$children(),
       function(node) identical(node$object, object), logical(1)))[1]
+}
+
+#' Find the key with the given index using the names of the lists
+#' that parametrize each node's children.
+#'
+#' For example, if our tree structure is given by
+#'   \code{list(a = list(b = 1, c = 2))}
+#' then calling \code{find('a/b')} on the root node will return \code{1}.
+#'
+#' @param key character. The key to find in the given tree structure,
+#'    whether nodes are named by their name in the \code{children()}
+#'    list. Numeric indices can be used to refer to unnamed nodes.
+#'    For example, if key is \code{a/2/b}, this method would try to find
+#'    the current node's child \code{a}'s second child's \code{b} child.
+#'    (Just look at the examples).
+#' @return the subtree or terminal node with the given key.
+#' @examples 
+#' sr <- stageRunner$new(new.env(), list(a = list(force, list(b = function(x) x + 1))))
+#' treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
+treeSkeleton__find <- function(key) {
+  stopifnot(is.character(key))
+  if (length(key) == 0 || identical(key, '')) return(object)
+  # Extract "foo" from "foo/bar/baz"
+  subkey <- regmatches(key, regexec('^[^/]+', key))[[1]]
+  key_remainder <- substr(key, nchar(subkey) + 2, nchar(key))
+  if (grepl('^[0-9]+', subkey)) {
+    subkey <- as.integer(subkey)
+    key_falls_within_children <- length(children()) >= subkey
+    stopifnot(key_falls_within_children)
+  } else {
+    matches <- grepl(subkey, names(children()))
+    stopifnot(length(matches) == 1)
+    key <- which(matches)
+  }
+  children()[[key]]$find(key_remainder)
 }
 
 #' This class implements iterators for a tree-based structure
@@ -122,16 +167,20 @@ treeSkeleton__.parent_index <- function() {
 #' @name treeSkeleton
 treeSkeleton <- setRefClass('treeSkeleton',
   fields = list(object = 'ANY', parent_caller = 'character',
-                children_caller = 'character'),
+                children_caller = 'character', .children = 'list',
+                .parent = 'ANY'),
   methods = list(
     initialize    = stagerunner:::treeSkeleton__initialize,
     successor     = stagerunner:::treeSkeleton__successor,
     parent        = stagerunner:::treeSkeleton__parent,
     children      = stagerunner:::treeSkeleton__children,
     first_leaf    = stagerunner:::treeSkeleton__first_leaf,
+    find          = stagerunner:::treeSkeleton__find,
     # TODO: I don't need any more iterators, but maybe implement them later
     #predecessor  = stagerunner:::treeSkeleton__predecessor,
-    .parent_index = stagerunner:::treeSkeleton__.parent_index 
+    .parent_index = stagerunner:::treeSkeleton__.parent_index,
+    .initialize_skeleton = stagerunner:::treeSkeleton__.initialize_skeleton,
+    show          = function() { cat("treeSkeleton wrapping:\n"); print(object) }
   )
 )
 
