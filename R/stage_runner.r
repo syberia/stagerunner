@@ -147,8 +147,11 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     run_stage <-
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
-        if (!is.stagerunner(stage)) nested_run <- FALSE
-        function(...) stage$run(...)
+        if (is.stagerunner(stage)) function(...) stage$run(...)
+        else {
+         nested_run <- FALSE
+         function(..., remember_flag = TRUE) stage$run(...)
+        }
       } else if (is.list(stage_key[[stage_index]])) {
         if (!is.stagerunner(stages[[stage_index]]))
           stop("Invalid stage key: attempted to make a nested stage reference ",
