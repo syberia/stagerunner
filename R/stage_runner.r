@@ -141,11 +141,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
         if (is.stagerunner(stage)) function(...) stage$run(...)
         else if (is.stageRunnerNode(stage)) {
           nested_run <- FALSE
-          function(...) stage$run(context)
-        }
-        else if (is.function(stage)) {
-          nested_run <- FALSE
-          function(...) stage(context)
+          function(...) stage$run(...)
         }
       } else if (is.list(stage_key[[stage_index]])) {
         if (!is.stagerunner(stages[[stage_index]]))
@@ -394,10 +390,9 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
                 .parent = 'ANY'),
   methods = list(
     initialize = function(.callable, .context = NULL, .recursive = TRUE) {
-      #stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
-      stopifnot(is_any(.callable, c('function', 'NULL')))
-      #if (is.function(.callable) && .recursive) 
-      #  .callable <- stageRunner$new(.context, .callable, .recursive = FALSE)
+      stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
+      if (is.function(.callable) && .recursive) 
+        .callable <- stageRunner$new(.context, .callable, .recursive = FALSE)
       callable <<- .callable; .context <<- .context
     },
     run = function(...) {
