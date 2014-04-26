@@ -138,11 +138,8 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     run_stage <-
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
-        if (is.stagerunner(stage)) function(...) stage$run(...)
-        else if (is.stageRunnerNode(stage)) {
-          nested_run <- FALSE
-          function(...) stage$run(...)
-        }
+        if (is.stageRunnerNode(stage)) nested_run <- FALSE
+        function(...) stage$run(...)
       } else if (is.list(stage_key[[stage_index]])) {
         if (!is.stagerunner(stages[[stage_index]]))
           stop("Invalid stage key: attempted to make a nested stage reference ",
@@ -339,6 +336,7 @@ stageRunner <- setRefClass('stageRunner',
     initialize   = stageRunner__initialize,
     run          = stageRunner__run,
     coalesce     = stageRunner__coalesce,
+    overlay      = stageRunner__overlay,
     stage_names  = stageRunner__stage_names,
     parent       = accessor_method(.parent),
     children     = function() stages,
@@ -403,7 +401,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
       stopifnot(is.stagerunner(other_node))
       # TODO: Fancier merging here
-      callable$stages <<- append(callable$stages, other_node$stages)
+      callable$stages <<- append(callable$stages, list(other_node$stages))
     },
     parent   = accessor_method(.parent),
     children = function() list()
