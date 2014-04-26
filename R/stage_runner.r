@@ -150,6 +150,8 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
         if (is.stagerunner(stage)) function(...) stage$run(...)
         else {
          nested_run <- FALSE
+         # Intercept the remember_flag argument to calls to the stageRunnerNode
+         # (since it doesn't know how to use it).
          function(..., remember_flag = TRUE) stage$run(...)
         }
       } else if (is.list(stage_key[[stage_index]])) {
