@@ -42,8 +42,8 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE, .recursi
   for (i in seq_along(stages))
     if (is.list(stages[[i]]))
       stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
-    else if (is.function(stages[[i]]) && .recursive)
-      stages[[i]] <<- stageRunnerNode$new(stages[[i]], context)
+    else if (is.function(stages[[i]]))
+      stages[[i]] <<- stageRunnerNode$new(stages[[i]], context, .recursive = .recursive)
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
@@ -58,7 +58,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE, .recursi
   if (remember) {
     # Set up parents for treeSkeleton.
     .self$.clear_cache()
-    #.self$.set_parents()
+    .self$.set_parents()
 
     # Set the first cache environment
     if (length(stages) > 0) {
@@ -393,10 +393,11 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
                 .context = 'ANY',
                 .parent = 'ANY'),
   methods = list(
-    initialize = function(.callable, .context = NULL) {
-      stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
-      if (is.function(.callable)) 
-        .callable <- stageRunner$new(.context, .callable, .recursive = FALSE)
+    initialize = function(.callable, .context = NULL, .recursive = TRUE) {
+      #stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
+      stopifnot(is_any(.callable, c('function', 'NULL')))
+      #if (is.function(.callable) && .recursive) 
+      #  .callable <- stageRunner$new(.context, .callable, .recursive = FALSE)
       callable <<- .callable; .context <<- .context
     },
     run = function(...) {

@@ -26,22 +26,12 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
 
   parent_caller <<- parent_caller
   children_caller <<- children_caller
-  .initialize_skeleton()
   NULL
 }
 
 #' Calculate and cache the children of our tree.
 treeSkeleton__.initialize_skeleton <- function() {
-  .children <<- lapply(
-    if (inherits(object, 'refClass'))
-      # bquote and other methods don't work here -- it's hard to dynamically
-      # fetch reference class methods!
-      eval(parse(text = paste0('`$`(object, "', children_caller, '")()')))
-    else if (children_caller %in% names(attributes(object)))
-      attr(object, children_caller)
-    else get(children_caller)(object)
-  , treeSkeleton$new, parent_caller = parent_caller,
-    children_caller = children_caller)
+  #if (!is(object, 'uninitializedField')) prev_obj <<- object
 }
 
 #' Attempt to find the successor of the current node.
@@ -58,18 +48,18 @@ treeSkeleton__successor <- function(index = NULL) {
 
   # If we are the last leaf in the list of our parent's children,
   # our successor is our parent's successor
-  if (parent_index == length(cs <- p$children()))
+  if (parent_index == length(p$children()))
     p$successor()
   else
-    cs[[parent_index + 1]]$first_leaf()
+    p$children()[[parent_index + 1]]$first_leaf()
 }
 
 #' Find the first leaf in a tree.
 #'
 #' The first leaf is the first terminal child node.
 treeSkeleton__first_leaf <- function() {
-  if (length(childs <- .self$children()) == 0) .self
-  else childs[[1]]$first_leaf()
+  if (length(children()) == 0) .self
+  else children()[[1]]$first_leaf()
 }
 
 #' Find the parent of the current object wrapped in a treeSkeleton.
@@ -94,7 +84,19 @@ treeSkeleton__parent <- function() {
 
 #' Find the children of the current object wrapped in treeSkeletons.
 treeSkeleton__children <- function() {
-   .children
+  .children <<- lapply(
+    if (inherits(object, 'refClass')) {
+      # bquote and other methods don't work here -- it's hard to dynamically
+      # fetch reference class methods!
+      eval(parse(text = paste0('`$`(object, "', children_caller, '")()')))
+    } else if (children_caller %in% names(attributes(object)))
+      attr(object, children_caller)
+    else {
+      get(children_caller)(object)
+    }
+  , treeSkeleton$new, parent_caller = parent_caller,
+    children_caller = children_caller)
+  .children
 }
 
 #' Find the index of the current object in the children of its parent.
