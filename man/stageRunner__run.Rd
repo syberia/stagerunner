@@ -3,7 +3,11 @@
 \title{Run the stages in a stageRunner object.}
 \usage{
 stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
+<<<<<<< Updated upstream
   verbose = FALSE, remember_flag = TRUE)
+=======
+  verbose = FALSE)
+>>>>>>> Stashed changes
 }
 \arguments{
   \item{stage_key}{an indexing parameter. Many forms are
@@ -44,6 +48,7 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
   assume the \code{stage_key} argument is a nested list of
   logicals.}
 
+<<<<<<< Updated upstream
   \item{remember_flag}{logical. An internal argument used
   by \code{run} recursively if the \code{stageRunner}
   object has the \code{remember} field set to \code{TRUE}.
@@ -54,6 +59,8 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
   be restored from cache but none of the remaining stages
   should).}
 
+=======
+>>>>>>> Stashed changes
   \item{verbose}{logical. Whether or not to display pretty
   colored text informing about stage progress.}
 }

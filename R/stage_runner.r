@@ -28,7 +28,7 @@ accessor_method <- function(attr) {
 #'    \code{run} method will be a list of two environments: one of what
 #'    the context looked like before the \code{run} call, and another
 #'    of the aftermath.
-stageRunner__initialize <- function(context, .stages, remember = FALSE, .recursive = TRUE) {
+stageRunner__initialize <- function(context, .stages, remember = FALSE) {
   context <<- context
 
   legal_types <- function(x) is.function(x) || all(vapply(x,
@@ -43,7 +43,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE, .recursi
     if (is.list(stages[[i]]))
       stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
     else if (is.function(stages[[i]]))
-      stages[[i]] <<- stageRunnerNode$new(stages[[i]], context, .recursive = .recursive)
+      stages[[i]] <<- stageRunnerNode$new(stages[[i]], context)
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
@@ -125,7 +125,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
   # *before* we ran anything.
   before_env <- NULL
 
-  lapply(seq_along(stage_key), function(stage_index) {
+  for (stage_index in seq_along(stage_key)) {
     display_message <- verbose && contains_true(stage_key[[stage_index]])
     if (display_message) show_message(names(stages), stage_index, begin = TRUE)
 
@@ -138,22 +138,23 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     run_stage <-
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
-        if (is.stageRunnerNode(stage)) nested_run <- FALSE
+        if (!is.stagerunner(stage)) nested_run <- FALSE
         function(...) stage$run(...)
       } else if (is.list(stage_key[[stage_index]])) {
         if (!is.stagerunner(stages[[stage_index]]))
           stop("Invalid stage key: attempted to make a nested stage reference ",
                "to a non-existent stage")
         function(...) stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE, ...)
-      } else return(FALSE)
+      } else next 
 
     # Now handle when remember = TRUE, i.e., we have to cache the
     # progress along each stage.
+
     if (remember && remember_flag && is.null(before_env)) {
       # If remember = remember_flag = TRUE and before_env has not been set
       # this is the first stage of a $run() call, so use the cached
       # environment.
-      assign('before_env',
+      before_env <-
         if (nested_run) run_stage(remember_flag = TRUE)$before
         else { # a leaf / terminal node
           if (is.null(env <- stages[[stage_index]]$cached_env))
@@ -163,8 +164,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
           # Restart execution from cache, so set context to the cached environment.
           copy_env(context, env)
           env
-        }, parent.env(environment())) # use parent.env(environment()) because
-                                      # this is happening in an lapply
+        }
       
       # If terminal node, execute the stage (if it was nested,  it's already been
       # executed in order to recursively fetch the before_env).
@@ -185,7 +185,7 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     }
 
     if (display_message) show_message(names(stages), stage_index, begin = FALSE)
-  })
+  }
 
   if (remember && remember_flag) list(before = before_env, after = context)
   else invisible(TRUE)
@@ -236,16 +236,29 @@ stageRunner__coalesce <- function(other_runner) {
 #'
 #' @param other_runner stageRunner. Another stageRunner from which to overlay.
 stageRunner__overlay <- function(other_runner) {
-  for (stage_index in seq_along(other_runner)) {
-    name <- names(other_runner)[[stage_index]]
+  stopifnot(is.stagerunner(other_runner))
+  for (stage_index in seq_along(other_runner$stages)) {
+    name <- names(other_runner$stages)[[stage_index]]
     index <-
       if (identical(name, '') || identical(name, NULL)) stage_index
       else if (name %in% names(stages)) name
       else stop('Cannot overlay because keys do not match')
     stages[[index]]$overlay(other_runner$stages[[stage_index]])
   }
+  TRUE
 }
 
+#' Append one stageRunner to the end of another.
+#'
+#' @param other_runner stageRunner. Another stageRunner to append to the current one.
+#' @param label character. The label for the new stages (this will be the name of the
+#'   newly appended list element.
+stageRunner__append <- function(other_runner, label = NULL) {
+  stopifnot(is.stagerunner(other_runner))
+  new_stage <- structure(list(other_runner), names = label)
+  stages <<- base::append(stages, new_stage)
+  TRUE
+}
 
 #' Retrieve a flattened list of canonical stage names for a stageRunner object
 #'
@@ -278,7 +291,7 @@ stageRunner__show <- function(indent = 0) {
 
   stage_names <- names(stages) %||% rep("", length(stages))
   lapply(seq_along(stage_names), function(index) {
-    prefix <- paste0(rep('  ', indent + 1), collapse = '')
+    prefix <- paste0(rep('  ', (if (is.numeric(indent)) indent else 0) + 1), collapse = '')
     prefix <- gsub('.$', '-', prefix)
     stage_name <- 
       if (is.na(stage_names[[index]]) || stage_names[[index]] == "")
@@ -337,6 +350,7 @@ stageRunner <- setRefClass('stageRunner',
     run          = stageRunner__run,
     coalesce     = stageRunner__coalesce,
     overlay      = stageRunner__overlay,
+    append       = stageRunner__append,
     stage_names  = stageRunner__stage_names,
     parent       = accessor_method(.parent),
     children     = function() stages,
@@ -387,24 +401,32 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
                 .context = 'ANY',
                 .parent = 'ANY'),
   methods = list(
-    initialize = function(.callable, .context = NULL, .recursive = TRUE) {
+    initialize = function(.callable, .context = NULL) {
       stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
-      if (is.function(.callable) && .recursive) 
-        .callable <- stageRunner$new(.context, .callable, .recursive = FALSE)
       callable <<- .callable; .context <<- .context
     },
     run = function(...) {
+      if (!is(cached_env, 'uninitializedField'))
+        .context$`*cached_env*` <<- cached_env
       if (is.stagerunner(callable)) callable$run(...)
       else callable(.context)
     }, 
-    overlay = function(other_node) {
+    overlay = function(other_node, label = NULL) {
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
-      stopifnot(is.stagerunner(other_node))
+      if (!is.stagerunner(other_node)) 
+        other_node <- stageRunner$new(.context, other_node)
+
+      # Coerce the current callable object to a stageRunner so that
+      # we can append the other_node's stageRunner.
+      if (!is.stagerunner(callable)) 
+        callable <<- stageRunner$new(.context, callable)
+
       # TODO: Fancier merging here
-      callable$stages <<- append(callable$stages, list(other_node$stages))
+      callable$append(other_node, label)
     },
     parent   = accessor_method(.parent),
-    children = function() list()
+    children = function() list(),
+    show     = function() { cat("A stageRunner node containing: \n"); print(callable) }
   )
 )
 

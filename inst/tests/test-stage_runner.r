@@ -221,8 +221,8 @@ test_that("it correctly parses a nested list of functions into nested stagerunne
   f1 <- function(){1}; f2 <- function(){2}; f3 <- function(){3}
   sr <- stageRunner$new(new.env(), list(list(f1, c = f2), d = f3))
   expect_is(sr$stages[[1]], 'stageRunner')
-  expect_identical(body(sr$stages[[1]]$stages[[1]]$callable$stages[[1]]$callable), body(f1))
-  expect_identical(body(sr$stages[[1]]$stages[[2]]$callable$stages[[1]]$callable), body(f2))
+  expect_identical(body(sr$stages[[1]]$stages[[1]]$callable), body(f1))
+  expect_identical(body(sr$stages[[1]]$stages[[2]]$callable), body(f2))
   expect_identical(names(sr$stages[[1]]$stages)[2], 'c')
   expect_identical(names(sr$stages)[2], 'd')
 })
