@@ -100,6 +100,8 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 #'   stages \code{"a/c", "d", "e/f"}.
 #' @param normalized logical. A convenience recursion performance helper. If
 #'   \code{TRUE}, stageRunner will assume the \code{stage_key} argument is a
+#' @param verbose logical. Whether or not to display pretty colored text
+#'   informing about stage progress.
 #'   nested list of logicals.
 #' @param remember_flag logical. An internal argument used by \code{run}
 #'   recursively if the \code{stageRunner} object has the \code{remember}
@@ -108,8 +110,15 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 #'   executing five stages simultaneously with \code{remember = TRUE},
 #'   the first stage's context should be restored from cache but none
 #'   of the remaining stages should).
-#' @param verbose logical. Whether or not to display pretty colored text
-#'   informing about stage progress.
+#' @param ... Any additional arguments to delegate to the \code{stageRunnerNode}
+#'   object that will execute its own \code{run} method.
+#'   (See \code{stageRunnerNode$run})
+#' @return TRUE or FALSE according as running the stages specified by the
+#'   \code{stage_key} succeeded or failed.  If \code{remember = TRUE},
+#'   this will instead be a list of the environment before and after
+#'   executing the aforementioned stages. (This allows comparing what
+#'   changes were made to the \code{context} during the execution of
+#'   the stageRunner.
 stageRunner__run <- function(stage_key = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
                              remember_flag = TRUE, ...) {
@@ -235,6 +244,11 @@ stageRunner__coalesce <- function(other_runner) {
 #' to the former (for example, to support tests).
 #'
 #' @param other_runner stageRunner. Another stageRunner from which to overlay.
+#' @param label character. The label for the overlayed stageRunner. This refers
+#'    to the name the former will get wrapped with when appended to the
+#'    stages of the current stageRunner. For example, if \code{label = 'test'},
+#'    and a current terminal node is unnamed, it will becomes
+#'    \code{list(current_node, test = other_runner_node)}.
 stageRunner__overlay <- function(other_runner, label = NULL) {
   stopifnot(is.stagerunner(other_runner))
   for (stage_index in seq_along(other_runner$stages)) {
@@ -339,9 +353,9 @@ stageRunner__.set_parents <- function() {
 #' Stage runner is a reference class for parametrizing and executing
 #' a linear sequence of actions.
 #' 
+#' @name stageRunner
 #' @docType class 
 #' @export
-#' @name stageRunner
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
                 .parent = 'ANY'),
@@ -353,16 +367,12 @@ stageRunner <- setRefClass('stageRunner',
     append       = stageRunner__append,
     stage_names  = stageRunner__stage_names,
     parent       = accessor_method(.parent),
-    children     = function() stages,
+    children     = function() { stages },
     show         = stageRunner__show,
     .set_parents = stageRunner__.set_parents,
     .clear_cache = stageRunner__.clear_cache 
   )
 )
-
-#' @name stageRunner
-#' @export
-NULL
 
 #' Check whether an R object is a stageRunner object
 #'

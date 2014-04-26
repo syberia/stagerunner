@@ -1,10 +1,8 @@
-\name{stageRunnerNode}
-\alias{stageRunnerNode}
+\docType{class}
+\name{stageRunnerNode-class}
+\alias{stageRunnerNode-class}
 \title{Stagerunner nodes are environment wrappers around individual stages
 (i.e. functions) in order to track meta-data (e.g., for caching).}
-\usage{
-stageRunnerNode(fn, parent_obj, parent_env = parent.frame())
-}
 \arguments{
   \item{fn}{function. This will be wrapped in an
   environment.}

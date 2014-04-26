@@ -1,0 +1,26 @@
+\name{stageRunner__overlay}
+\alias{stageRunner__overlay}
+\title{Overlaying a stageRunner object is taking another stageRunner object
+with similar stage names and adding the latter's stages as terminal stages
+to the former (for example, to support tests).}
+\usage{
+stageRunner__overlay(other_runner, label = NULL)
+}
+\arguments{
+  \item{other_runner}{stageRunner. Another stageRunner from
+  which to overlay.}
+
+  \item{label}{character. The label for the overlayed
+  stageRunner. This refers to the name the former will get
+  wrapped with when appended to the stages of the current
+  stageRunner. For example, if \code{label = 'test'}, and a
+  current terminal node is unnamed, it will becomes
+  \code{list(current_node, test = other_runner_node)}.}
+}
+\description{
+Overlaying a stageRunner object is taking another
+stageRunner object with similar stage names and adding the
+latter's stages as terminal stages to the former (for
+example, to support tests).
+}
+

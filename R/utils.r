@@ -11,6 +11,13 @@ is_any <- function(obj, klasses) {
 }
 
 #' Call a method on an object regardless of its OOP type.
+#'
+#' @param object any. An R object of variable OOP type (S3, S4, RC).
+#' @param method character. The method to call on the \code{object}. If the
+#'    latter is a reference class, it use the \code{$} operator to access the method.
+#'    (For example, \code{object$some_method}). If it has an attribute with the name
+#'    \code{method}, it will use that attribute as the method to call. Otherwise,
+#'    it will try to fetch a generic with the name \code{method} using \code{get}.
 OOP_type_independent_method <- function(object, method) {
   if (inherits(object, 'refClass')) {
     # bquote and other methods don't work here -- it's hard to dynamically

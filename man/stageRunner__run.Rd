@@ -3,11 +3,7 @@
 \title{Run the stages in a stageRunner object.}
 \usage{
 stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
-<<<<<<< Updated upstream
-  verbose = FALSE, remember_flag = TRUE)
-=======
-  verbose = FALSE)
->>>>>>> Stashed changes
+  verbose = FALSE, remember_flag = TRUE, ...)
 }
 \arguments{
   \item{stage_key}{an indexing parameter. Many forms are
@@ -45,10 +41,12 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
 
   \item{normalized}{logical. A convenience recursion
   performance helper. If \code{TRUE}, stageRunner will
-  assume the \code{stage_key} argument is a nested list of
-  logicals.}
+  assume the \code{stage_key} argument is a}
 
-<<<<<<< Updated upstream
+  \item{verbose}{logical. Whether or not to display pretty
+  colored text informing about stage progress.  nested list
+  of logicals.}
+
   \item{remember_flag}{logical. An internal argument used
   by \code{run} recursively if the \code{stageRunner}
   object has the \code{remember} field set to \code{TRUE}.
@@ -59,10 +57,17 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
   be restored from cache but none of the remaining stages
   should).}
 
-=======
->>>>>>> Stashed changes
-  \item{verbose}{logical. Whether or not to display pretty
-  colored text informing about stage progress.}
+  \item{...}{Any additional arguments to delegate to the
+  \code{stageRunnerNode} object that will execute its own
+  \code{run} method.  (See \code{stageRunnerNode$run})}
+}
+\value{
+TRUE or FALSE according as running the stages specified by
+the \code{stage_key} succeeded or failed.  If
+\code{remember = TRUE}, this will instead be a list of the
+environment before and after executing the aforementioned
+stages. (This allows comparing what changes were made to
+the \code{context} during the execution of the stageRunner.
 }
 \description{
 Run the stages in a stageRunner object.

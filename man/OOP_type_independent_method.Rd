@@ -1,0 +1,23 @@
+\name{OOP_type_independent_method}
+\alias{OOP_type_independent_method}
+\title{Call a method on an object regardless of its OOP type.}
+\usage{
+OOP_type_independent_method(object, method)
+}
+\arguments{
+  \item{object}{any. An R object of variable OOP type (S3,
+  S4, RC).}
+
+  \item{method}{character. The method to call on the
+  \code{object}. If the latter is a reference class, it use
+  the \code{$} operator to access the method.  (For
+  example, \code{object$some_method}). If it has an
+  attribute with the name \code{method}, it will use that
+  attribute as the method to call. Otherwise, it will try
+  to fetch a generic with the name \code{method} using
+  \code{get}.}
+}
+\description{
+Call a method on an object regardless of its OOP type.
+}
+
