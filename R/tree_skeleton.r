@@ -15,9 +15,14 @@
 #' @param children_caller character. The name of the reference class method
 #'    that returns the child objects, if the object was a node in a tree
 #'    structure.
+#' @param .child list. Internal parameter when building a treeSkeleton from a
+#'    non-root node: it will populate the ith child using the parameter,
+#'    where \code{.child} is of the form \code{list(index, child)}.
 #' @return a treeSkeleton object.
 treeSkeleton__initialize <- function(object, parent_caller = 'parent',
-                                     children_caller = 'children') {
+                                     children_caller = 'children',
+                                     .child = list(0,0), .parent = NULL) {
+  stopifnot(!is.null(object))
   object <<- object
 
   # Make sure parent_caller and children_caller are methods of object
@@ -26,12 +31,45 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
 
   parent_caller <<- parent_caller
   children_caller <<- children_caller
+  if (!missing(.parent)) .parent <<- .parent
+  .initialize_skeleton(.child)
   NULL
 }
 
 #' Calculate and cache the children of our tree.
-treeSkeleton__.initialize_skeleton <- function() {
-  #if (!is(object, 'uninitializedField')) prev_obj <<- object
+treeSkeleton__.initialize_skeleton <- function(.child = list(0,0)) {
+  prechildren <- 
+    tryCatch(error = function(.) browser(),
+    if (inherits(object, 'refClass')) {
+      # bquote and other methods don't work here -- it's hard to dynamically
+      # fetch reference class methods!
+      eval(parse(text = paste0('`$`(object, "', children_caller, '")()')))
+    } else if (children_caller %in% names(attributes(object)))
+      attr(object, children_caller)
+    else get(children_caller)(object))
+  indices <- seq_along(prechildren) != .child[[1]]
+  .children <<- vector('list', length(indices))
+  .children[indices] <<- lapply(prechildren[indices],
+    treeSkeleton$new, parent_caller = parent_caller,
+    children_caller = children_caller, .parent = .self)
+  .children[!indices] <<- .child[[2]]
+
+  if (is(.parent, 'uninitializedField')) {
+    obj <- 
+      if (inherits(object, 'refClass'))
+        # bquote and other methods don't work here -- it's hard to dynamically
+        # fetch reference class methods!
+        eval(parse(text = paste0('`$`(object, "', parent_caller, '")()')))
+      else if (parent_caller %in% names(attributes(object)))
+        attr(object, parent_caller)
+      else get(parent_caller)(object)
+
+    .parent <<- 
+      if (is.null(obj)) NULL
+      else treeSkeleton$new(obj, parent_caller = parent_caller,
+                            children_caller = children_caller,
+                            .child = list(.parent_index(), .self))
+  }
 }
 
 #' Attempt to find the successor of the current node.
@@ -65,37 +103,11 @@ treeSkeleton__first_leaf <- function() {
 #' Find the parent of the current object wrapped in a treeSkeleton.
 treeSkeleton__parent <- function() {
   # For some reason, we cannot do this in the constructor.
-  if (!inherits(.parent, 'uninitializedField')) return(.parent)
-  obj <- 
-    if (inherits(object, 'refClass'))
-      # bquote and other methods don't work here -- it's hard to dynamically
-      # fetch reference class methods!
-      eval(parse(text = paste0('`$`(object, "', parent_caller, '")()')))
-    else if (parent_caller %in% names(attributes(object)))
-      attr(object, parent_caller)
-    else get(parent_caller)(object)
-
-  .parent <<- 
-    if (is.null(obj)) NULL
-    else treeSkeleton$new(obj, parent_caller = parent_caller,
-                          children_caller = children_caller)
   .parent
 }
 
 #' Find the children of the current object wrapped in treeSkeletons.
 treeSkeleton__children <- function() {
-  .children <<- lapply(
-    if (inherits(object, 'refClass')) {
-      # bquote and other methods don't work here -- it's hard to dynamically
-      # fetch reference class methods!
-      eval(parse(text = paste0('`$`(object, "', children_caller, '")()')))
-    } else if (children_caller %in% names(attributes(object)))
-      attr(object, children_caller)
-    else {
-      get(children_caller)(object)
-    }
-  , treeSkeleton$new, parent_caller = parent_caller,
-    children_caller = children_caller)
   .children
 }
 
