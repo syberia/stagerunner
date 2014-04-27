@@ -4,7 +4,7 @@ Description: Stage Runner is an R package that helps with parametrizing
     and executing linear sequences of actions, common in the various
     stages of data analysis: data import, munging, modeling, export,
     and visualization.
-Version: 0.2
+Version: 0.2.2
 Authors@R: c(person("Robert", "Krzyzanowski",
     email = "technoguyrob@gmail.com", role = c("aut", "cre")))
 Depends:
