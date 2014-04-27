@@ -3,7 +3,7 @@
 \title{Run the stages in a stageRunner object.}
 \usage{
 stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
-  verbose = FALSE, remember_flag = TRUE)
+  verbose = FALSE, remember_flag = TRUE, .depth = 1)
 }
 \arguments{
   \item{stage_key}{an indexing parameter. Many forms are
@@ -53,6 +53,9 @@ stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
   \code{remember = TRUE}, the first stage's context should
   be restored from cache but none of the remaining stages
   should).}
+
+  \item{.depth}{integer. Internal parameter for keeping
+  track of nested running level.}
 
   \item{verbose}{logical. Whether or not to display pretty
   colored text informing about stage progress.}

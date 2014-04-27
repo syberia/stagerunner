@@ -97,11 +97,12 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE) {
 #'   executing five stages simultaneously with \code{remember = TRUE},
 #'   the first stage's context should be restored from cache but none
 #'   of the remaining stages should).
+#' @param .depth integer. Internal parameter for keeping track of nested running level.
 #' @param verbose logical. Whether or not to display pretty colored text
 #'   informing about stage progress.
 stageRunner__run <- function(stage_key = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
-                             remember_flag = TRUE) {
+                             remember_flag = TRUE, .depth = 1) {
   if (identical(normalized, FALSE))
     stage_key <- normalize_stage_keys(stage_key, stages, to = to)
 
@@ -115,9 +116,6 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
   before_env <- NULL
 
   lapply(seq_along(stage_key), function(stage_index) {
-    display_message <- verbose && contains_true(stage_key[[stage_index]])
-    if (display_message) show_message(names(stages), stage_index, begin = TRUE)
-
     nested_run <- TRUE
     
     # Determine how to run this stage, depending on whether it is an
@@ -127,7 +125,8 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
     run_stage <-
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
-        if (is.stagerunner(stage)) function(...) stage$run(...)
+        if (is.stagerunner(stage))
+          function(...) stage$run(verbose = verbose, .depth = .depth + 1, ...)
         else { # stages[[stage_index]] is a stageRunnerNode so has a $fn
           nested_run <- FALSE
           function(...) stage$fn(context)
@@ -136,8 +135,15 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
         if (!is.stagerunner(stages[[stage_index]]))
           stop("Invalid stage key: attempted to make a nested stage reference ",
                "to a non-existent stage")
-        function(...) stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE, ...)
+        function(...) stages[[stage_index]]$run(stage_key[[stage_index]],
+                                                normalized = TRUE, verbose = verbose,
+                                                .depth = .depth + 1, ...)
       } else return(FALSE)
+
+    display_message <- verbose && contains_true(stage_key[[stage_index]])
+    if (display_message)
+      show_message(names(stages), stage_index, begin = TRUE,
+                   nested = nested_run, depth = .depth)
 
     # Now handle when remember = TRUE, i.e., we have to cache the
     # progress along each stage.
@@ -176,7 +182,9 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
         copy_env(node$object$cached_env <- new.env(parent = parent.env(context)), context)
     }
 
-    if (display_message) show_message(names(stages), stage_index, begin = FALSE)
+    if (display_message)
+      show_message(names(stages), stage_index, begin = FALSE,
+                   nested = nested_run, depth = .depth)
   })
 
   if (remember && remember_flag) list(before = before_env, after = context)
