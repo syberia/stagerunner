@@ -4,7 +4,10 @@
 \usage{
 treeSkeleton__first_leaf()
 }
+\value{
+The first leaf, that is, the first terminal child node.
+}
 \description{
-The first leaf is the first terminal child node.
+Find the first leaf in a tree.
 }
 
