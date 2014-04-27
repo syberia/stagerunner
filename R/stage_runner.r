@@ -275,8 +275,8 @@ stageRunner__show <- function(indent = 0) {
             (!is.null(next_stage) && !began_stage(next_stage))) 
           '*' # Use a * if this is the next stage to be executed
           # TODO: Fix the bug where we are unable to tell if the last stage
-          # finished. We need to look at and set predecessors, not
-          # successors
+          # finished without a .finished internal field.
+          # We need to look at and set predecessors, not successors.
         else '+' # Other use a + for completely executed stage
       } else '-'
     prefix <- gsub('.$', marker, prefix)
