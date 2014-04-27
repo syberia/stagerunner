@@ -102,4 +102,11 @@ test_that('it correctly prints a two-stage caching stageRunner with nested stage
   expect_output(print(sr), wrapc(' \\+ a  \\* b    \\+ c    \\* d ', 3))
 })
 
+test_that('it correctly prints a two-stage caching stageRunner with nested stages after executing all but the penultimate stage', {
+  sr <- stageRunner$new(new.env(), list(a = force, b = list(c = force, d = force, e = force)), remember = TRUE)
+  sr$run(1, to = '2/1')
+  expect_output(print(sr), wrapc(' \\+ a  \\* b    \\+ c    \\* d    \\- e ', 4))
+})
+
+
 
