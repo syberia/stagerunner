@@ -252,9 +252,9 @@ stageRunner__stage_names <- function() {
 #' @param indent integer. Internal parameter for keeping track of nested
 #'   indentation level.
 stageRunner__show <- function(indent = 0) {
-  sum_stages <- function(x) sum(vapply(x,
-    function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
   if (missing(indent)) {
+    sum_stages <- function(x) sum(vapply(x,
+      function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
     caching <- if (remember) ' caching' else ''
     cat("A", caching, " stageRunner with ", sum_stages(.self$stages), " stages:\n", sep = '')
   }
