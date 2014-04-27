@@ -56,7 +56,6 @@ test_that('it correctly prints a nested stagerunner two flat stages wrapping a n
 context('printing stageRunner with caching') 
 
 wrapc <- function(...) wrap(..., prefix = ' caching')
-bugmarker <- '+' # End of stage should be + not * -- TODO: Flip this when fixed
 
 test_that('it correctly prints a trivial caching stageRunner', {
   sr <- stageRunner$new(new.env(), list(), remember = TRUE)
@@ -70,13 +69,13 @@ test_that('it correctly prints a one-stage caching stageRunner with an unnamed s
 
 test_that('it correctly prints a one-stage caching stageRunner with an unnamed stage after execution', {
   sr <- stageRunner$new(new.env(), list(force), remember = TRUE); sr$run()
-  expect_output(print(sr), wrapc(' \\', bugmarker, unnamed(1), 1))
+  expect_output(print(sr), wrapc(' \\+', unnamed(1), 1))
 })
 
 test_that('it correctly prints a two-stage caching stageRunner with unnamed stages after execution', {
   sr <- stageRunner$new(new.env(), list(force, force), remember = TRUE); sr$run()
   expect_output(print(sr),
-    wrapc(' \\+', unnamed(1), ' \\', bugmarker, unnamed(2), 2))
+    wrapc(' \\+', unnamed(1), ' \\+', unnamed(2), 2))
 })
 
 test_that('it correctly prints a two-stage caching stageRunner with nested stages', {
@@ -93,7 +92,7 @@ test_that('it correctly prints a two-stage caching stageRunner with nested stage
 test_that('it correctly prints a two-stage caching stageRunner with nested stages after execution', {
   sr <- stageRunner$new(new.env(), list(a = force, b = list(c = force, d = force)), remember = TRUE)
   sr$run()
-  expect_output(print(sr), wrapc(' \\+ a  \\+ b    \\+ c    \\', bugmarker, ' d ', 3))
+  expect_output(print(sr), wrapc(' \\+ a  \\+ b    \\+ c    \\+ d ', 3))
 })
 
 test_that('it correctly prints a two-stage caching stageRunner with nested stages after executing all but the last stage', {
