@@ -361,7 +361,8 @@ NULL
 #' Check whether an R object is a stageRunner object
 #'
 #' @export
-#' @param obj any object. \code{TRUE} if the object is of class
+#' @param obj any object.
+#' @return \code{TRUE} if the object is of class
 #'    \code{stageRunner}, \code{FALSE} otherwise.
 is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
 
