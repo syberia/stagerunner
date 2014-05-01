@@ -18,6 +18,7 @@
 #'    the context looked like before the \code{run} call, and another
 #'    of the aftermath.
 stageRunner__initialize <- function(context, .stages, remember = FALSE) {
+  .finished <<- FALSE # TODO: Remove this hack for printing
   context <<- context
 
   legal_types <- function(x) is.function(x) || all(vapply(x,
@@ -174,6 +175,11 @@ stageRunner__run <- function(stage_key = NULL, to = NULL,
       node <- treeSkeleton$new(stages[[stage_index]])$successor()
       if (!is.null(node)) # Prepare a cache for the future!
         copy_env(node$object$cached_env <- new.env(parent = parent.env(context)), context)
+      # TODO: Remove this hack used for printing
+      else {
+        root <- .self$.root()
+        root$.finished <- TRUE
+      }
     }
 
     if (display_message) show_message(names(stages), stage_index, begin = FALSE)
@@ -246,21 +252,45 @@ stageRunner__stage_names <- function() {
 #' @param indent integer. Internal parameter for keeping track of nested
 #'   indentation level.
 stageRunner__show <- function(indent = 0) {
-  sum_stages <- function(x) sum(vapply(x,
-    function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
-  if (missing(indent)) cat("A stageRunner with", sum_stages(.self$stages), "stages:\n")
+  if (missing(indent)) {
+    sum_stages <- function(x) sum(vapply(x,
+      function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
+    caching <- if (remember) ' caching' else ''
+    cat("A", caching, " stageRunner with ", sum_stages(.self$stages), " stages:\n", sep = '')
+  }
   stage_names <- names(stages) %||% rep("", length(stages))
+
+  # A helper function for determining if a stage has been run yet.
+  began_stage <- function(stage)
+    if (is.stagerunner(stage)) any(vapply(stage$stages, began_stage, logical(1)))
+    else if (is.stageRunnerNode(stage)) !is.null(stage$cached_env)
+    else FALSE
+
   lapply(seq_along(stage_names), function(index) {
-    prefix <- paste0('  ', vapply(seq_len(indent), function(.) '   ', character(1)), collapse = '')
-    prefix <- gsub('.$', '-', prefix)
+    prefix <- paste0(rep('  ', (if (is.numeric(indent)) indent else 0) + 1), collapse = '')
+    marker <-
+      if (remember && began_stage(stages[[index]])) {
+        next_stage <- treeSkeleton$new(stages[[index]])$last_leaf()$successor()$object
+        if (( is.null(next_stage) && !.self$.root()$.finished) ||
+            (!is.null(next_stage) && !began_stage(next_stage))) 
+          '*' # Use a * if this is the next stage to be executed
+          # TODO: Fix the bug where we are unable to tell if the last stage
+          # finished without a .finished internal field.
+          # We need to look at and set predecessors, not successors.
+        else '+' # Other use a + for completely executed stage
+      } else '-'
+    prefix <- gsub('.$', marker, prefix)
     stage_name <- 
       if (is.na(stage_names[[index]]) || stage_names[[index]] == "")
         paste0("< Unnamed (stage ", index, ") >")
       else stage_names[[index]]
     cat(prefix, stage_name, "\n")
-    if (is.stagerunner(stages[[stage_name]]))
-      stages[[stage_name]]$show(indent = indent + 1)
+    if (is.stagerunner(stages[[index]]))
+      stages[[index]]$show(indent = indent + 1)
   })
+
+  if (missing(indent)) { cat('Context '); print(context) }
+  NULL
 }
 
 #' Clear all caches in this stageRunner, and recursively.
@@ -294,6 +324,13 @@ stageRunner__.set_parents <- function() {
   .parent <<- NULL
 }
 
+#' Determine the root of the stageRunner.
+#'
+#' @return the root of the stageRunner
+stageRunner__.root <- function() {
+  treeSkeleton$new(.self)$root()$object
+}
+
 #' Stage runner is a reference class for parametrizing and executing
 #' a linear sequence of actions.
 #' 
@@ -302,7 +339,7 @@ stageRunner__.set_parents <- function() {
 #' @name stageRunner
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
-                .parent = 'ANY'),
+                .parent = 'ANY', .finished = 'logical'),
   methods = list(
     initialize   = stageRunner__initialize,
     run          = stageRunner__run,
@@ -312,7 +349,8 @@ stageRunner <- setRefClass('stageRunner',
     children     = function() stages,
     show         = stageRunner__show,
     .set_parents = stageRunner__.set_parents,
-    .clear_cache = stageRunner__.clear_cache 
+    .clear_cache = stageRunner__.clear_cache,
+    .root        = stageRunner__.root
   )
 )
 
@@ -351,3 +389,4 @@ stageRunnerNode <- function(fn, parent_obj, parent_env = parent.frame()) {
   env
 }
 
+is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
