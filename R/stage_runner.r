@@ -275,6 +275,19 @@ stageRunner__overlay <- function(other_runner, label = NULL) {
   TRUE
 }
 
+#' Transform the callable's of the terminal nodes of a stageRunner.
+#'
+#' Every terminal node in a stageRunner is of type stageRunnerNode.
+#' These each have a callable, and this method transforms those
+#' callables in the way given by the first argument.
+#'
+#' @param transformation function. The function which transforms one callable
+#'   into another.
+stageRunner__transform <- function(transformation) {
+  for (stage_index in seq_along(stages))
+    stages[[stage_index]]$transform(transformation)
+}
+
 #' Append one stageRunner to the end of another.
 #'
 #' @param other_runner stageRunner. Another stageRunner to append to the current one.
@@ -377,6 +390,7 @@ stageRunner <- setRefClass('stageRunner',
     run          = stageRunner__run,
     coalesce     = stageRunner__coalesce,
     overlay      = stageRunner__overlay,
+    transform    = stageRunner__transform,
     append       = stageRunner__append,
     stage_names  = stageRunner__stage_names,
     parent       = accessor_method(.parent),
@@ -452,6 +466,10 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
 
       # TODO: Fancier merging here
       callable$append(other_node, label)
+    },
+    transform = function(transformation) {
+      if (is.stagerunner(callable)) callable$transform(transformation)
+      else callable <<- transformation(callable)
     },
     parent   = accessor_method(.parent),
     children = function() list(),
