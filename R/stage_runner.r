@@ -363,11 +363,11 @@ stageRunner__.set_parents <- function() {
   .parent <<- NULL
 }
 
+
 #' Stage runner is a reference class for parametrizing and executing
 #' a linear sequence of actions.
 #' 
 #' @name stageRunner
-#' @docType class 
 #' @export
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
@@ -429,6 +429,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       callable <<- .callable; .context <<- .context
     },
     run = function(..., .cached_env = NULL) {
+      # TODO: Clean this up by using environment injection utility fn
       correct_cache <- .cached_env %||% cached_env
       if (is.stagerunner(callable)) callable$run(..., .cached_env = correct_cache)
       else {

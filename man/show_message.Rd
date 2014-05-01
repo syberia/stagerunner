@@ -2,7 +2,8 @@
 \alias{show_message}
 \title{Show a progress message.}
 \usage{
-show_message(stage_names, stage_index, begin = TRUE)
+show_message(stage_names, stage_index, begin = TRUE, nested = FALSE,
+  depth = 1)
 }
 \arguments{
   \item{stage_names}{character.}
@@ -11,6 +12,12 @@ show_message(stage_names, stage_index, begin = TRUE)
 
   \item{begin}{logical. Whether we are showing the begin or
   end message.}
+
+  \item{nested}{logical. Whether or not this is a nested
+  stage (i.e.  contains another stageRunner).}
+
+  \item{depth}{integer. How many tabs to space by (for
+  nested stages).}
 }
 \value{
 the message to standard output
