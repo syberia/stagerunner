@@ -28,7 +28,7 @@ accessor_method <- function(attr) {
 #'    \code{run} method will be a list of two environments: one of what
 #'    the context looked like before the \code{run} call, and another
 #'    of the aftermath.
-stageRunner__initialize <- function(context, .stages, remember = FALSE) {
+stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE) {
   context <<- context
 
   legal_types <- function(x) is.function(x) || all(vapply(x,
@@ -429,25 +429,14 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       callable <<- .callable; .context <<- .context
     },
     run = function(..., .cached_env = NULL) {
-      # TODO: Clean this up by using environment injection utility fn
-      if (identical(.cached_env, NULL)) {
-        if (is.stagerunner(callable)) callable$run(..., .cached_env = cached_env)
-        else {
-          tmp <- new.env(parent = environment(callable))
-          environment(callable) <<- tmp
-          environment(callable)$cached_env <<- cached_env
-          callable(.context, ...)
-          environment(callable) <<- parent.env(environment(callable))
-        }
-      } else {
-        if (is.stagerunner(callable)) callable$run(..., .cached_env = .cached_env)
-        else {
-          tmp <- new.env(parent = environment(callable))
-          environment(callable) <<- tmp
-          environment(callable)$cached_env <<- .cached_env
-          callable(.context, ...)
-          environment(callable) <<- parent.env(environment(callable))
-        }
+      correct_cache <- .cached_env %||% cached_env
+      if (is.stagerunner(callable)) callable$run(..., .cached_env = correct_cache)
+      else {
+        tmp <- new.env(parent = environment(callable))
+        environment(callable) <<- tmp
+        environment(callable)$cached_env <<- correct_cache
+        callable(.context, ...)
+        environment(callable) <<- parent.env(environment(callable))
       }
     }, 
     overlay = function(other_node, label = NULL) {
