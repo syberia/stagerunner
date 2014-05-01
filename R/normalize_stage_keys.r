@@ -77,20 +77,21 @@ normalize_stage_keys <- function(keys, stages, parent_key = "", to = NULL) {
         # to reference arbitrarily nested stages.
         if (length(key) == 0) stop("Stage key of length zero")
         key <- strsplit(key, '/')[[1]]
-        finds <- grepl(key[[1]], names(stages), ignore.case = TRUE)
-        if (length(finds) == 0 || sum(finds) == 0) {
-          # if we have a key like foo/3/bar, process the 3 as a numeric index
-          if (is.finite(suppressWarnings(tmp <- as.numeric(key[[1]]))) &&
-              tmp > 0 && tmp <= length(stages)) finds <- tmp
-          else stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
-        } else if (sum(finds) > 1) {
+
+        key_index <- grepl(key[[1]], names(stages), ignore.case = TRUE)
+        if (is.finite(suppressWarnings(tmp <- as.numeric(key[[1]]))) &&
+            tmp > 0 && tmp <= length(stages)) key_index <- tmp
+        else if (length(key_index) == 0 || sum(key_index) == 0) {
+          stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
+        } else if (sum(key_index) > 1) {
           stop("Multiple stages with key '", paste0(parent_key, key[[1]]),
-                 "', found: ", paste0(parent_key, names(stages)[finds], collapse = ', '))
-        } else finds <- which(finds) # now an integer of length 1
-        normalized_keys[[finds]] <<- special_or_lists(
-          normalized_keys[[finds]],
+                 "', found: ", paste0(parent_key, names(stages)[key_index], collapse = ', '))
+        } else key_index <- which(key_index) # now an integer of length 1
+
+        normalized_keys[[key_index]] <<- special_or_lists(
+          normalized_keys[[key_index]],
           normalize_stage_keys(append(paste0(key[-1], collapse = '/'), rest_keys), 
-            stages[[finds]], paste0(parent_key, key[[1]], '/')))
+            stages[[key_index]], paste0(parent_key, key[[1]], '/')))
       } else stop("Invalid stage key")
     })
   }
