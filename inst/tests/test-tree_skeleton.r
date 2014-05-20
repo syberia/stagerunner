@@ -5,10 +5,22 @@ test_that('it errors when not given methods of a reference class object for the 
   expect_error(treeSkeleton$new(sr, '', ''), 'methods\\(\\)) is not TRUE')
 })
 
-test_that('it does not error when given methods of a reference class object for the callers', {
-  sr <- stageRunner$new(new.env(), list())
-  out <- tryCatch(treeSkeleton$new(sr, 'run', 'run'), error = function(.) NULL)
+test_that('it does not error when given different child and parent callers on an S3 object', {
+  testlist <- list()
+  tmp <- list(list(1), list(2))
+  attr(tmp[[1]], 'childs') <- list(); attr(tmp[[1]], 'child_index') <- 1
+  attr(tmp[[2]], 'childs') <- list(); attr(tmp[[2]], 'child_index') <- 2
+  attr(testlist, 'childs') <- tmp; attr(testlist, 'par') <- NULL
+  out <- tryCatch(treeSkeleton$new(testlist, 'childs', 'par'), error = function(.) NULL)
   expect_false(identical(out, NULL))
+})
+
+test_that('it does not error when given different child and parent callers on a reference class object', {
+  local({
+    #testobj <- suppressWarnings(setRefClass('testclass', methods = list(childs = function() list()))$new())
+    #out <- tryCatch(treeSkeleton$new(testobj, 'childs', 'childs'), error = function(.) NULL)
+    #expect_false(identical(out, NULL))
+  })
 })
 
 test_that('it finds the index as a child of a simple stageRunner object correctly', {
