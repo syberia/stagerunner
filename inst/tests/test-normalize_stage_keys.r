@@ -52,4 +52,11 @@ test_that('it prefers numeric to matching on nested references', {
     list(FALSE, list(TRUE, FALSE)))
 })
 
+test_that('it correctly handles a to parameter in a nested setting', {
+  keys <- normalize_stage_keys('one/two', to = 'one',
+    list(one = list(one = 1, two = 2, three = 3)))
+
+  expect_identical(keys, list(list(FALSE, TRUE, TRUE)))
+})
+
 

@@ -17,6 +17,7 @@ compare_stage_keys <- function(key1, key2) {
     if (is.atomic(key1) && is.atomic(key2)) return(TRUE) # tie!
     compare_stage_keys(key1[[ix[1]]], key2[[ix[2]]])
   }
+  else if (all(sapply(key2, identical, TRUE))) TRUE # This is a special case
   else ix[1] < ix[2]
 }
 

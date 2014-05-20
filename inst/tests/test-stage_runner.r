@@ -240,6 +240,16 @@ test_that("it correctly uses the to parameter", {
     info = "this stagerunner should execute only stages 1/one and 2/one")
 })
 
+test_that("it correctly goes to the end of a section", {
+  tmp <- new.env()
+  sr <- stageRunner$new(tmp,
+    list(a = list(b = force, c = function(e)e$z <- 1,
+                  d = function(e) e$x <- 1, e = function(e) e$y <- 1)))
+  sr$run('a/d', 'a')
+  expect_false('z' %in% ls(tmp), 'must run just a/d and a/e')
+  expect_true(all(c('y', 'x') %in% ls(tmp)), 'must run just a/d and a/e')
+})
+
 test_that("it correctly uses the to parameter in a more complicated example", {
   context <- new.env()
   fn <- function(x) {
