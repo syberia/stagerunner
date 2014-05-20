@@ -413,9 +413,10 @@ stageRunner__.root <- function() {
 #' Stage runner is a reference class for parametrizing and executing
 #' a linear sequence of actions.
 #' 
-#' @docType class 
 #' @name stageRunner
 #' @export
+NULL
+
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
                 .parent = 'ANY', .finished = 'logical'),
