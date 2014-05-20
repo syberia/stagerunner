@@ -335,6 +335,7 @@ stageRunner__.root <- function() {
 #' a linear sequence of actions.
 #' 
 #' @docType class 
+#' @name stageRunner
 #' @export
 #' @name stageRunner
 stageRunner <- setRefClass('stageRunner',
