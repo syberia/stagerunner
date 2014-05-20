@@ -18,6 +18,7 @@
 #' @return a treeSkeleton object.
 treeSkeleton__initialize <- function(object, parent_caller = 'parent',
                                      children_caller = 'children') {
+  stopifnot(!is.null(object))
   object <<- object
 
   # Make sure parent_caller and children_caller are methods of object
@@ -26,8 +27,8 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
 
   parent_caller <<- parent_caller
   children_caller <<- children_caller
+  NULL
 }
-
 
 #' Attempt to find the successor of the current node.
 #'
@@ -43,10 +44,10 @@ treeSkeleton__successor <- function(index = NULL) {
 
   # If we are the last leaf in the list of our parent's children,
   # our successor is our parent's successor
-  if (parent_index == length(cs <- p$children()))
+  if (parent_index == length(p$children()))
     p$successor()
   else
-    cs[[parent_index + 1]]$first_leaf()
+    p$children()[[parent_index + 1]]$first_leaf()
 }
 
 
@@ -62,8 +63,8 @@ treeSkeleton__root <- function() {
 #'
 #' @return The first leaf, that is, the first terminal child node.
 treeSkeleton__first_leaf <- function() {
-  if (length(childs <- .self$children()) == 0) .self
-  else childs[[1]]$first_leaf()
+  if (length(children()) == 0) .self
+  else children()[[1]]$first_leaf()
 }
 
 #' Find the last leaf in a tree.
@@ -76,32 +77,19 @@ treeSkeleton__last_leaf <- function() {
 
 #' Find the parent of the current object wrapped in a treeSkeleton.
 treeSkeleton__parent <- function() {
-  obj <- 
-    if (inherits(object, 'refClass'))
-      # bquote and other methods don't work here -- it's hard to dynamically
-      # fetch reference class methods!
-      eval(parse(text = paste0('`$`(object, "', parent_caller, '")()')))
-    else if (parent_caller %in% names(attributes(object)))
-      attr(object, parent_caller)
-    else get(parent_caller)(object)
-
-  if (is.null(obj)) NULL
-  else treeSkeleton$new(obj, parent_caller = parent_caller,
-                        children_caller = children_caller)
+  if (!inherits(.parent, 'uninitializedField')) return(.parent)
+  .parent <<-
+    if (is.null(obj <- OOP_type_independent_method(object, parent_caller))) NULL
+    else treeSkeleton$new(obj, parent_caller = parent_caller,
+                          children_caller = children_caller)
 }
 
 #' Find the children of the current object wrapped in treeSkeletons.
 treeSkeleton__children <- function() {
-  lapply(
-    if (inherits(object, 'refClass'))
-      # bquote and other methods don't work here -- it's hard to dynamically
-      # fetch reference class methods!
-      eval(parse(text = paste0('`$`(object, "', children_caller, '")()')))
-    else if (children_caller  %in% names(attributes(object)))
-      attr(object, children_caller)
-    else get(children_caller)(object)
-  , treeSkeleton$new, parent_caller = parent_caller,
-    children_caller = children_caller)
+  if (!inherits(.children, 'uninitializedField')) return(.children)
+  prechildren <- OOP_type_independent_method(object, children_caller)
+  .children <<- lapply(prechildren, treeSkeleton$new,
+                       parent_caller = parent_caller)
 }
 
 #' Find the index of the current object in the children of its parent.
@@ -117,6 +105,41 @@ treeSkeleton__.parent_index <- function() {
     which(vapply(
       .self$parent()$children(),
       function(node) identical(node$object, object), logical(1)))[1]
+}
+
+#' Find the key with the given index using the names of the lists
+#' that parametrize each node's children.
+#'
+#' For example, if our tree structure is given by
+#'   \code{list(a = list(b = 1, c = 2))}
+#' then calling \code{find('a/b')} on the root node will return \code{1}.
+#'
+#' @param key character. The key to find in the given tree structure,
+#'    whether nodes are named by their name in the \code{children()}
+#'    list. Numeric indices can be used to refer to unnamed nodes.
+#'    For example, if key is \code{a/2/b}, this method would try to find
+#'    the current node's child \code{a}'s second child's \code{b} child.
+#'    (Just look at the examples).
+#' @return the subtree or terminal node with the given key.
+#' @examples 
+#' sr <- stageRunner$new(new.env(), list(a = list(force, list(b = function(x) x + 1))))
+#' treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
+treeSkeleton__find <- function(key) {
+  stopifnot(is.character(key))
+  if (length(key) == 0 || identical(key, '')) return(object)
+  # Extract "foo" from "foo/bar/baz"
+  subkey <- regmatches(key, regexec('^[^/]+', key))[[1]]
+  key_remainder <- substr(key, nchar(subkey) + 2, nchar(key))
+  if (grepl('^[0-9]+', subkey)) {
+    subkey <- as.integer(subkey)
+    key_falls_within_children <- length(children()) >= subkey
+    stopifnot(key_falls_within_children)
+  } else {
+    matches <- grepl(subkey, names(children()))
+    stopifnot(length(matches) == 1)
+    key <- which(matches)
+  }
+  children()[[key]]$find(key_remainder)
 }
 
 #' This class implements iterators for a tree-based structure
@@ -139,14 +162,20 @@ treeSkeleton__.parent_index <- function() {
 #' @name treeSkeleton
 treeSkeleton <- setRefClass('treeSkeleton',
   fields = list(object = 'ANY', parent_caller = 'character',
-                children_caller = 'character'),
+                children_caller = 'character', .children = 'ANY',
+                .parent = 'ANY'),
   methods = list(
     initialize    = stagerunner:::treeSkeleton__initialize,
     successor     = stagerunner:::treeSkeleton__successor,
+    # TODO: I don't need any more iterators, but maybe implement them later
+    #predecessor  = stagerunner:::treeSkeleton__predecessor,
     parent        = stagerunner:::treeSkeleton__parent,
     children      = stagerunner:::treeSkeleton__children,
     root          = stagerunner:::treeSkeleton__root,
     first_leaf    = stagerunner:::treeSkeleton__first_leaf,
+    find          = stagerunner:::treeSkeleton__find,
+    .parent_index = stagerunner:::treeSkeleton__.parent_index,
+    show          = function() { cat("treeSkeleton wrapping:\n"); print(object) },
     last_leaf     = stagerunner:::treeSkeleton__last_leaf,
     # TODO: I don't need any more iterators, but maybe implement them later
     #predecessor  = stagerunner:::treeSkeleton__predecessor,
