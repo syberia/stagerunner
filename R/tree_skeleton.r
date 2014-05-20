@@ -50,12 +50,29 @@ treeSkeleton__successor <- function(index = NULL) {
     p$children()[[parent_index + 1]]$first_leaf()
 }
 
+
+#' Find the root node of the tree (the only one with no parent).
+#'
+#' @return The root node of the tree or NULL if empty tree.
+treeSkeleton__root <- function() {
+  if (is.null(.self$parent())) .self
+  else .self$parent()
+}
+
 #' Find the first leaf in a tree.
 #'
-#' The first leaf is the first terminal child node.
+#' @return The first leaf, that is, the first terminal child node.
 treeSkeleton__first_leaf <- function() {
   if (length(children()) == 0) .self
   else children()[[1]]$first_leaf()
+}
+
+#' Find the last leaf in a tree.
+#'
+#' @return The last leaf, that is, the last terminal child node.
+treeSkeleton__last_leaf <- function() {
+  if (length(childs <- .self$children()) == 0) .self
+  else childs[[length(childs)]]$last_leaf()
 }
 
 #' Find the parent of the current object wrapped in a treeSkeleton.
@@ -154,10 +171,15 @@ treeSkeleton <- setRefClass('treeSkeleton',
     #predecessor  = stagerunner:::treeSkeleton__predecessor,
     parent        = stagerunner:::treeSkeleton__parent,
     children      = stagerunner:::treeSkeleton__children,
+    root          = stagerunner:::treeSkeleton__root,
     first_leaf    = stagerunner:::treeSkeleton__first_leaf,
     find          = stagerunner:::treeSkeleton__find,
     .parent_index = stagerunner:::treeSkeleton__.parent_index,
-    show          = function() { cat("treeSkeleton wrapping:\n"); print(object) }
+    show          = function() { cat("treeSkeleton wrapping:\n"); print(object) },
+    last_leaf     = stagerunner:::treeSkeleton__last_leaf,
+    # TODO: I don't need any more iterators, but maybe implement them later
+    #predecessor  = stagerunner:::treeSkeleton__predecessor,
+    .parent_index = stagerunner:::treeSkeleton__.parent_index 
   )
 )
 

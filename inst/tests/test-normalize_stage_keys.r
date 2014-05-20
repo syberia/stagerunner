@@ -42,4 +42,14 @@ test_that('it errors on nonexistent keys', {
                "No stage with key 'a/b/c/d' found")
 })
 
+test_that('it prefers numeric to matching', {
+  expect_identical(normalize_stage_keys('1', list(one = 1, 'this 1' = 2)), list(TRUE, FALSE))
+})
+
+test_that('it prefers numeric to matching on nested references', {
+  expect_identical(
+    normalize_stage_keys('two/1', list(uno = 1, two = list(one = 1, 'this 1' = 2))),
+    list(FALSE, list(TRUE, FALSE)))
+})
+
 
