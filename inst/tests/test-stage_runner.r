@@ -275,4 +275,52 @@ test_that("it correctly uses the to parameter in a more complicated example", {
     })
 })
 
+### next_stage method
+test_that('it can figure out the next stage in a non-caching stageRunner', {
+  # TODO: (RK) Maybe it should just track stage execution without necessarily
+  # tracking full environments.
+  sr <- stageRunner(new.env(), list(force, force))
+  expect_identical(sr$next_stage(), '1')
+  sr$run(1)
+  expect_identical(sr$next_stage(), '2')
+  sr$run(2)
+  expect_identical(sr$next_stage(), FALSE)
+})
+
+test_that('it correctly figures out the next stage in a fresh stageRunner', {
+  sr <- stageRunner(new.env(), list(force, force), remember = TRUE)
+  expect_identical(sr$next_stage(), '1')
+})
+
+test_that('it correctly figures out the next stage in a stageRunner with one executed stage', {
+  sr <- stageRunner(new.env(), list(force, force), remember = TRUE)
+  sr$run(1)
+  expect_identical(sr$next_stage(), '2')
+})
+
+test_that('it correctly figures out the next stage in a stageRunner with all executed stages', {
+  sr <- stageRunner(new.env(), list(force, force), remember = TRUE)
+  sr$run()
+  expect_identical(sr$next_stage(), FALSE)
+})
+
+test_that('it correctly figures out the next stage in a stageRunner with nested executed stages', {
+  sr <- stageRunner(new.env(), list(force, list(force, force)))
+  sr$run(to = '2/1')
+  expect_identical(sr$next_stage(), '2/2',
+    info = 'this stageRunner should not execute the last stage')
+  sr$run('2/2')
+  expect_identical(sr$next_stage(), FALSE,
+    info = 'this stageRunner should claim to be completely done')
+})
+
+test_that('it correctly figures out the next stage in a stageRunner with deeply nested executed stages', {
+  sr <- stageRunner(new.env(),
+    list(a = force, b = list(c = list(force, d = list(force, force, force))), force))
+                                # this stage should be marked as next ^
+
+  sr$run(to = 'b/c/d/2')
+  expect_identical(sr$next_stage(), '2/1/2/3')
+})
+
 
