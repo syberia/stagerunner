@@ -51,6 +51,3 @@ test_that('it overlays by index if no names are present with a NULL overlay', {
                   'stageRunner as its callable.'))
 })
 
-
-
-
