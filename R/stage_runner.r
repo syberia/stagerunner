@@ -72,7 +72,7 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE) {
 
 #' Run the stages in a stageRunner object.
 #'
-#' @param stage_key an indexing parameter. Many forms are accepted, but the
+#' @param from an indexing parameter. Many forms are accepted, but the
 #'   easiest is the name of the stage. For example, if we have
 #'   \code{stageRunner$new(context, list(stage_one = some_fn, stage_two = some_other_fn))}
 #'   then using \code{run('stage_one')} will execute \code{some_fn}.
@@ -121,11 +121,12 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE) {
 #'   executing the aforementioned stages. (This allows comparing what
 #'   changes were made to the \code{context} during the execution of
 #'   the stageRunner.
-stageRunner__run <- function(stage_key = NULL, to = NULL,
+stageRunner__run <- function(from = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
                              remember_flag = TRUE, .depth = 1, ...) {
   if (identical(normalized, FALSE))
-    stage_key <- normalize_stage_keys(stage_key, stages, to = to)
+    stage_key <- normalize_stage_keys(from, stages, to = to)
+  else stage_key <- from
 
   # Now that we have determined which stages to run, cycle through them all.
   # It is up to the user to determine that context changes make sense.
