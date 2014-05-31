@@ -516,4 +516,3 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
 
 is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
 
-is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
