@@ -4,7 +4,7 @@
 \title{Initialize a stageRunner object.}
 \usage{
 stageRunner__initialize(context = NULL, .stages, remember = FALSE,
-  mode = "head")
+  .mode = getOption("stagerunner.mode") \%||\% "head")
 }
 \arguments{
 \item{context}{an environment. The initial environment that is getting
@@ -21,7 +21,7 @@ developing a package for "diffing" two environments. The default is
 the context looked like before the \code{run} call, and another
 of the aftermath.}
 
-\item{mode}{character. Controls the default behavior of calling the
+\item{.mode}{character. Controls the default behavior of calling the
 \code{run} method for this stageRunner. The two supported options are
 "head" and "next". The former gives a stageRunner which always begins
 from the first stage if the \code{from} parameter to the \code{run}

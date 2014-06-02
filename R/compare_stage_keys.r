@@ -12,6 +12,8 @@ compare_stage_keys <- function(key1, key2) {
   ix <- vapply(list(key1, key2),
                function(el) which(vapply(el, contains_true, logical(1)))[1],
                numeric(1))
+  if (!is.finite(ix[1])) return(FALSE)
+  else if (!is.finite(ix[2])) return(TRUE)
   stopifnot(is.finite(ix[1]) && is.finite(ix[2]))
   if (ix[1] == ix[2]) {
     if (is.atomic(key1) && is.atomic(key2)) return(TRUE) # tie!

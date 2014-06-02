@@ -41,7 +41,7 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
   context <<- context
 
   if (identical(remember, TRUE) && !(is.character(mode) &&
-      any((mode <<- tolower(mode)) == c('head', 'next')))) {
+      any((.mode <<- tolower(mode)) == c('head', 'next')))) {
     stop("The mode parameter to the stageRunner constructor must be ",
          "either 'head' or 'next'.")
   }
@@ -139,7 +139,7 @@ stageRunner__run <- function(from = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
                              remember_flag = TRUE, .depth = 1, ...) {
   if (identical(normalized, FALSE)) {
-    if (missing(from) && identical(remember, TRUE) && identical(mode, 'next')) {
+    if (missing(from) && identical(remember, TRUE) && identical(.mode, 'next')) {
       from <- next_stage()
       if (missing(to)) to <- TRUE
     }
@@ -269,9 +269,12 @@ stageRunner__coalesce <- function(other_runner) {
           ) {
         stages[[names(stages)[stage_index]]]$cached_env <<-
           new.env(parent = parent.env(context))
-        if (is.environment(other_runner$stages[[stage_index]]$cached_env))
+        if (is.environment(other_runner$stages[[stage_index]]$cached_env)) {
           copy_env(stages[[names(stages)[stage_index]]]$cached_env,
                    other_runner$stages[[stage_index]]$cached_env)
+          stages[[names(stages)[stage_index]]]$executed <<- 
+            other_runner$stages[[stage_index]]$executed
+        }
       }
     }
   })
@@ -410,6 +413,15 @@ stageRunner__show <- function(indent = 0) {
   NULL
 }
 
+#' Whether or not the stageRunner has a key matching this input.
+#'
+#' @param key ANY. The potential key.
+#' @return \code{TRUE} or \code{FALSE} accordingly.
+stageRunner__has_key <- function(key) {
+  has <- tryCatch(normalize_stage_keys(key, stages), error = function(.) FALSE)
+  any(c(has, recursive = TRUE))
+}
+
 #' Clear all caches in this stageRunner, and recursively.
 stageRunner__.clear_cache <- function() {
   for (i in seq_along(stages)) {
@@ -459,7 +471,7 @@ NULL
 
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
-                mode = 'character', .parent = 'ANY', .finished = 'logical'),
+                .mode = 'character', .parent = 'ANY', .finished = 'logical'),
   methods = list(
     initialize   = stageRunner__initialize,
     run          = stageRunner__run,
@@ -472,6 +484,8 @@ stageRunner <- setRefClass('stageRunner',
     children     = function() { stages },
     next_stage   = stageRunner__next_stage,
     show         = stageRunner__show,
+    has_key      = stageRunner__has_key,
+    mode         = accessor_method(.mode),
     .set_parents = stageRunner__.set_parents,
     .clear_cache = stageRunner__.clear_cache,
     .root        = stageRunner__.root
