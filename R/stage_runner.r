@@ -137,9 +137,9 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
 #'   the stageRunner.
 stageRunner__run <- function(from = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
-                             remember_flag = TRUE, .depth = 1, ...) {
+                             remember_flag = TRUE, mode = .mode, .depth = 1, ...) {
   if (identical(normalized, FALSE)) {
-    if (missing(from) && identical(remember, TRUE) && identical(.mode, 'next')) {
+    if (missing(from) && identical(remember, TRUE) && identical(mode, 'next')) {
       from <- next_stage()
       if (missing(to)) to <- TRUE
     }
