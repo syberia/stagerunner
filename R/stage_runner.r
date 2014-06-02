@@ -327,6 +327,26 @@ stageRunner__stage_names <- function() {
   nested_names(lapply(stages, nested_stages))
 }
 
+#' For stageRunners with caching, find the next unexecuted stage.
+#'
+#' @return a character stage key giving the next unexecuted stage.
+#'   If all stages have been executed, this returns \code{FALSE}.
+#'   If the stageRunner does not have caching enabled, this will
+#'   always return the first stage key (`'1'`).
+stageRunner__next_stage <- function() {
+  for (stage_index in seq_along(stages)) {
+    is_unexecuted_terminal_node <- is.stageRunnerNode(stages[[stage_index]]) &&
+      !stages[[stage_index]]$was_executed()
+    has_unexecuted_terminal_node <- is.stagerunner(stages[[stage_index]]) &&
+      is.character(tmp <- stages[[stage_index]]$next_stage())
+
+    if (is_unexecuted_terminal_node) return(as.character(stage_index))
+    else if (has_unexecuted_terminal_node)
+      return(paste(c(stage_index, tmp), collapse = '/'))
+  }
+  FALSE
+}
+
 #' Generic for printing stageRunner objects.
 #' @param indent integer. Internal parameter for keeping track of nested
 #'   indentation level.
@@ -432,6 +452,7 @@ stageRunner <- setRefClass('stageRunner',
     stage_names  = stageRunner__stage_names,
     parent       = accessor_method(.parent),
     children     = function() { stages },
+    next_stage   = stageRunner__next_stage,
     show         = stageRunner__show,
     .set_parents = stageRunner__.set_parents,
     .clear_cache = stageRunner__.clear_cache,
@@ -446,6 +467,8 @@ stageRunner <- setRefClass('stageRunner',
 #' @return \code{TRUE} if the object is of class
 #'    \code{stageRunner}, \code{FALSE} otherwise.
 is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
+#' @export
+is.stageRunner <- is.stagerunner
 
 #' Stagerunner nodes are environment wrappers around individual stages
 #' (i.e. functions) in order to track meta-data (e.g., for caching).
@@ -474,11 +497,12 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
   fields = list(callable = 'ANY',
                 cached_env = 'ANY',
                 .context = 'ANY',
-                .parent = 'ANY'),
+                .parent = 'ANY',
+                executed = 'logical'),
   methods = list(
     initialize = function(.callable, .context = NULL) {
       stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
-      callable <<- .callable; .context <<- .context
+      callable <<- .callable; .context <<- .context; executed <<- FALSE
     },
     run = function(..., .cached_env = NULL) {
       # TODO: Clean this up by using environment injection utility fn
@@ -491,6 +515,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
         callable(.context, ...)
         environment(callable) <<- parent.env(environment(callable))
       }
+      executed <<- TRUE
     }, 
     overlay = function(other_node, label = NULL) {
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
@@ -509,6 +534,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       if (is.stagerunner(callable)) callable$transform(transformation)
       else callable <<- transformation(callable)
     },
+    was_executed = function() { executed },
     parent   = accessor_method(.parent),
     children = function() list(),
     show     = function() { cat("A stageRunner node containing: \n"); print(callable) }
