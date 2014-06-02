@@ -3,7 +3,8 @@
 \alias{stageRunner__initialize}
 \title{Initialize a stageRunner object.}
 \usage{
-stageRunner__initialize(context = NULL, .stages, remember = FALSE)
+stageRunner__initialize(context = NULL, .stages, remember = FALSE,
+  mode = "head")
 }
 \arguments{
 \item{context}{an environment. The initial environment that is getting
@@ -19,6 +20,14 @@ developing a package for "diffing" two environments. The default is
 \code{run} method will be a list of two environments: one of what
 the context looked like before the \code{run} call, and another
 of the aftermath.}
+
+\item{mode}{character. Controls the default behavior of calling the
+\code{run} method for this stageRunner. The two supported options are
+"head" and "next". The former gives a stageRunner which always begins
+from the first stage if the \code{from} parameter to the \code{run}
+method is blank. Otherwise, it will begin from the previous unexecuted
+stage.  The default is "head". This argument has no effect if
+\code{remember = FALSE}.}
 }
 \description{
 stageRunner objects are used for executing a linear sequence of

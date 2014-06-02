@@ -28,9 +28,23 @@ accessor_method <- function(attr) {
 #'    \code{run} method will be a list of two environments: one of what
 #'    the context looked like before the \code{run} call, and another
 #'    of the aftermath.
-stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE) {
+#' @param mode character. Controls the default behavior of calling the
+#'    \code{run} method for this stageRunner. The two supported options are
+#'    "head" and "next". The former gives a stageRunner which always begins
+#'    from the first stage if the \code{from} parameter to the \code{run}
+#'    method is blank. Otherwise, it will begin from the previous unexecuted
+#'    stage.  The default is "head". This argument has no effect if
+#'    \code{remember = FALSE}.
+stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
+                                    mode = 'head') {
   .finished <<- FALSE # TODO: Remove this hack for printing
   context <<- context
+
+  if (identical(remember, TRUE) && !(is.character(mode) &&
+      any((mode <<- tolower(mode)) == c('head', 'next')))) {
+    stop("The mode parameter to the stageRunner constructor must be ",
+         "either 'head' or 'next'.")
+  }
 
   legal_types <- function(x) is.function(x) || all(vapply(x,
     function(s) is.function(s) || is.stagerunner(s) ||
@@ -124,9 +138,13 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE) {
 stageRunner__run <- function(from = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
                              remember_flag = TRUE, .depth = 1, ...) {
-  if (identical(normalized, FALSE))
+  if (identical(normalized, FALSE)) {
+    if (missing(from) && identical(remember, TRUE) && identical(mode, 'next')) {
+      from <- next_stage()
+      if (missing(to)) to <- TRUE
+    }
     stage_key <- normalize_stage_keys(from, stages, to = to)
-  else stage_key <- from
+  } else stage_key <- from
 
   # Now that we have determined which stages to run, cycle through them all.
   # It is up to the user to determine that context changes make sense.
@@ -441,7 +459,7 @@ NULL
 
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'environment', stages = 'list', remember = 'logical',
-                .parent = 'ANY', .finished = 'logical'),
+                mode = 'character', .parent = 'ANY', .finished = 'logical'),
   methods = list(
     initialize   = stageRunner__initialize,
     run          = stageRunner__run,
