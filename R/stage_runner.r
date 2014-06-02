@@ -36,7 +36,7 @@ accessor_method <- function(attr) {
 #'    stage.  The default is "head". This argument has no effect if
 #'    \code{remember = FALSE}.
 stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
-                                    mode = 'head') {
+                                    mode = getOption(stagerunner.mode) %||% 'head') {
   .finished <<- FALSE # TODO: Remove this hack for printing
   context <<- context
 
