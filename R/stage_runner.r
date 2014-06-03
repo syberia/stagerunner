@@ -17,6 +17,7 @@ accessor_method <- function(attr) {
 #' \code{stages = list(function(e) e$x <- e$x + 1, function(e) e$y <- e$y - e$x)}
 #' will cause \code{x = 2, y = 0} after running the stages.
 #'
+#' @name stageRunner__initialize
 #' @param context an environment. The initial environment that is getting
 #'    modified during the execution of the stages. 
 #' @param .stages a list. The functions to execute on the \code{context}.
@@ -72,6 +73,7 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE) {
 
 #' Run the stages in a stageRunner object.
 #'
+#' @name stageRunner__run
 #' @param from an indexing parameter. Many forms are accepted, but the
 #'   easiest is the name of the stage. For example, if we have
 #'   \code{stageRunner$new(context, list(stage_one = some_fn, stage_two = some_other_fn))}
@@ -224,6 +226,7 @@ stageRunner__run <- function(from = NULL, to = NULL,
 #' with similar stage names and replacing the latter's cached environments
 #' with the former's.
 #'
+#' @name stageRunner__coalesce
 #' @param other_runner stageRunner. Another stageRunner from which to coalesce.
 stageRunner__coalesce <- function(other_runner) {
   # TODO: Should we care about insertion of new stages causing cache wipes?
@@ -264,6 +267,7 @@ stageRunner__coalesce <- function(other_runner) {
 #' with similar stage names and adding the latter's stages as terminal stages
 #' to the former (for example, to support tests).
 #'
+#' @name stageRunner__overlay
 #' @param other_runner stageRunner. Another stageRunner from which to overlay.
 #' @param label character. The label for the overlayed stageRunner. This refers
 #'    to the name the former will get wrapped with when appended to the
@@ -289,6 +293,7 @@ stageRunner__overlay <- function(other_runner, label = NULL) {
 #' These each have a callable, and this method transforms those
 #' callables in the way given by the first argument.
 #'
+#' @name stageRunner__transform
 #' @param transformation function. The function which transforms one callable
 #'   into another.
 stageRunner__transform <- function(transformation) {
@@ -298,6 +303,7 @@ stageRunner__transform <- function(transformation) {
 
 #' Append one stageRunner to the end of another.
 #'
+#' @name stageRunner__append
 #' @param other_runner stageRunner. Another stageRunner to append to the current one.
 #' @param label character. The label for the new stages (this will be the name of the
 #'   newly appended list element.
@@ -315,6 +321,7 @@ stageRunner__append <- function(other_runner, label = NULL) {
 #' then this method would return
 #'   \code{list('a/b', 'a/c', 'd', 'e/f', 'e/g')}
 #'
+#' @name stageRunner__stage_names
 #' @return a list of canonical stage names.
 #' @examples
 #' f <- function() {}
@@ -329,6 +336,7 @@ stageRunner__stage_names <- function() {
 
 #' For stageRunners with caching, find the next unexecuted stage.
 #'
+#' @name stageRunner__next_stage
 #' @return a character stage key giving the next unexecuted stage.
 #'   If all stages have been executed, this returns \code{FALSE}.
 #'   If the stageRunner does not have caching enabled, this will
@@ -348,6 +356,8 @@ stageRunner__next_stage <- function() {
 }
 
 #' Generic for printing stageRunner objects.
+#' 
+#' @name stageRunner__show
 #' @param indent integer. Internal parameter for keeping track of nested
 #'   indentation level.
 stageRunner__show <- function(indent = 0) {
@@ -393,6 +403,7 @@ stageRunner__show <- function(indent = 0) {
 }
 
 #' Clear all caches in this stageRunner, and recursively.
+#' @name stageRunner__.clear_cache
 stageRunner__.clear_cache <- function() {
   for (i in seq_along(stages)) {
     if (is.stagerunner(stages[[i]])) stages[[i]]$.clear_cache()
@@ -402,6 +413,7 @@ stageRunner__.clear_cache <- function() {
 }
 
 #' Set all parents for this stageRunner, and recursively
+#' @name stageRunner__.set_parents
 stageRunner__.set_parents <- function() {
   for (i in seq_along(stages)) {
     # Set convenience helper attribute "child_index" to ensure that treeSkeleton
@@ -427,6 +439,7 @@ stageRunner__.set_parents <- function() {
 
 #' Determine the root of the stageRunner.
 #'
+#' @name stageRunner__.root
 #' @return the root of the stageRunner
 stageRunner__.root <- function() {
   treeSkeleton$new(.self)$root()$object
@@ -493,6 +506,8 @@ is.stageRunner <- is.stagerunner
 #  env
 #}
 
+#' @name stageRunnerNode
+#' @docType class
 stageRunnerNode <- setRefClass('stageRunnerNode',
   fields = list(callable = 'ANY',
                 cached_env = 'ANY',

@@ -3,6 +3,7 @@
 #' This is a helper function to implement the \code{to} parameter
 #' in the \code{run} method on a stageRunner object.
 #'
+#' @name boolean_fill
 #' @param el list. A nested list of logicals with exactly one entry TRUE.
 #' @param forward logical. FALSE for backwards, and TRUE for forwards.
 #'   The default is TRUE.

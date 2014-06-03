@@ -4,6 +4,7 @@
 #' as if it had a tree structure, merely by knowing how to call parent
 #' or child nodes.
 #'
+#' @name treeSkeleton__initialize
 #' @param object ANY. If a reference class object, then \code{parent_caller}
 #'    and \code{children_caller} will refer to reference class methods.
 #'    If an attribute on the object with names of \code{children_caller} and
@@ -32,6 +33,7 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
 
 #' Attempt to find the successor of the current node.
 #'
+#' @name treeSkeleton__successor
 #' @param index integer. If specified, this is the index of the current node
 #'   in the children of its parent. (Sometimes, this cannot be computed
 #'   automatically, and should usually be provided.)
@@ -53,6 +55,7 @@ treeSkeleton__successor <- function(index = NULL) {
 
 #' Find the root node of the tree (the only one with no parent).
 #'
+#' @name treeSkeleton__root
 #' @return The root node of the tree or NULL if empty tree.
 treeSkeleton__root <- function() {
   if (is.null(.self$parent())) .self
@@ -61,6 +64,7 @@ treeSkeleton__root <- function() {
 
 #' Find the first leaf in a tree.
 #'
+#' @name treeSkeleton__first_leaf
 #' @return The first leaf, that is, the first terminal child node.
 treeSkeleton__first_leaf <- function() {
   if (length(children()) == 0) .self
@@ -69,6 +73,7 @@ treeSkeleton__first_leaf <- function() {
 
 #' Find the last leaf in a tree.
 #'
+#' @name treeSkeleton__last_leaf
 #' @return The last leaf, that is, the last terminal child node.
 treeSkeleton__last_leaf <- function() {
   if (length(childs <- .self$children()) == 0) .self
@@ -76,6 +81,7 @@ treeSkeleton__last_leaf <- function() {
 }
 
 #' Find the parent of the current object wrapped in a treeSkeleton.
+#' @name treeSkeleton__parent
 treeSkeleton__parent <- function() {
   if (!inherits(.parent, 'uninitializedField')) return(.parent)
   .parent <<-
@@ -85,6 +91,7 @@ treeSkeleton__parent <- function() {
 }
 
 #' Find the children of the current object wrapped in treeSkeletons.
+#' @name treeSkeleton__children
 treeSkeleton__children <- function() {
   if (!inherits(.children, 'uninitializedField')) return(.children)
   prechildren <- OOP_type_independent_method(object, children_caller)
@@ -93,6 +100,7 @@ treeSkeleton__children <- function() {
 }
 
 #' Find the index of the current object in the children of its parent.
+#' @name treeSkeleton__.parent_index
 treeSkeleton__.parent_index <- function() {
   if (!is.null(ci <- attr(object, 'child_index'))) ci
   # Hack for accessing attribute modifications on a reference class object
@@ -114,6 +122,7 @@ treeSkeleton__.parent_index <- function() {
 #'   \code{list(a = list(b = 1, c = 2))}
 #' then calling \code{find('a/b')} on the root node will return \code{1}.
 #'
+#' @name treeSkeleton__find
 #' @param key character. The key to find in the given tree structure,
 #'    whether nodes are named by their name in the \code{children()}
 #'    list. Numeric indices can be used to refer to unnamed nodes.
@@ -122,8 +131,10 @@ treeSkeleton__.parent_index <- function() {
 #'    (Just look at the examples).
 #' @return the subtree or terminal node with the given key.
 #' @examples 
+#' \dontrun{
 #' sr <- stageRunner$new(new.env(), list(a = list(force, list(b = function(x) x + 1))))
-#' treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
+#' stagerunner:::treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
+#' }
 treeSkeleton__find <- function(key) {
   stopifnot(is.character(key))
   if (length(key) == 0 || identical(key, '')) return(object)
@@ -158,6 +169,7 @@ treeSkeleton__find <- function(key) {
 #'
 #' The iterators on a \code{treeSkeleton} use the standard definition of
 #' successor, predecessor, ancestor, etc.
+#'
 #' @docType class
 #' @name treeSkeleton
 treeSkeleton <- setRefClass('treeSkeleton',
