@@ -4,9 +4,6 @@
 \title{Overlaying a stageRunner object is taking another stageRunner object
 with similar stage names and adding the latter's stages as terminal stages
 to the former (for example, to support tests).}
-\usage{
-stageRunner__overlay(other_runner, label = NULL)
-}
 \arguments{
 \item{other_runner}{stageRunner. Another stageRunner from which to overlay.}
 

@@ -2,9 +2,6 @@
 \name{treeSkeleton__root}
 \alias{treeSkeleton__root}
 \title{Find the root node of the tree (the only one with no parent).}
-\usage{
-treeSkeleton__root()
-}
 \value{
 The root node of the tree or NULL if empty tree.
 }

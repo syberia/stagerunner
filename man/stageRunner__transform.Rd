@@ -2,9 +2,6 @@
 \name{stageRunner__transform}
 \alias{stageRunner__transform}
 \title{Transform the callable's of the terminal nodes of a stageRunner.}
-\usage{
-stageRunner__transform(transformation)
-}
 \arguments{
 \item{transformation}{function. The function which transforms one callable
 into another.}

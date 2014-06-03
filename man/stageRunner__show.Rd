@@ -2,9 +2,6 @@
 \name{stageRunner__show}
 \alias{stageRunner__show}
 \title{Generic for printing stageRunner objects.}
-\usage{
-stageRunner__show(indent = 0)
-}
 \arguments{
 \item{indent}{integer. Internal parameter for keeping track of nested
 indentation level.}

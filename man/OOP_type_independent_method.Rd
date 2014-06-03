@@ -2,9 +2,6 @@
 \name{OOP_type_independent_method}
 \alias{OOP_type_independent_method}
 \title{Call a method on an object regardless of its OOP type.}
-\usage{
-OOP_type_independent_method(object, method)
-}
 \arguments{
 \item{object}{any. An R object of variable OOP type (S3, S4, RC).}
 

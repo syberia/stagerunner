@@ -1,5 +1,6 @@
 #' Copy one environment into another recursively.
 #' 
+#' @name copy_env
 #' @param to environment. The new environment.
 #' @param from environment. The old environment.
 copy_env <- function(to, from) {

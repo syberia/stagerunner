@@ -1,5 +1,6 @@
 #' Show a progress message.
 #'
+#' @name show_message
 #' @param stage_names character.
 #' @param stage_index integer.
 #' @param begin logical. Whether we are showing the begin or end message.

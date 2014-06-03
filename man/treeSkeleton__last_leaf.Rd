@@ -2,9 +2,6 @@
 \name{treeSkeleton__last_leaf}
 \alias{treeSkeleton__last_leaf}
 \title{Find the last leaf in a tree.}
-\usage{
-treeSkeleton__last_leaf()
-}
 \value{
 The last leaf, that is, the last terminal child node.
 }

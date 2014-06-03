@@ -2,9 +2,6 @@
 \name{nested_names}
 \alias{nested_names}
 \title{Delimited names of a nested list.}
-\usage{
-nested_names(el, delim = "/", prefix = "")
-}
 \arguments{
 \item{el}{list.}
 

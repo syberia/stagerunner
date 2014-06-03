@@ -2,12 +2,8 @@
 \name{stageRunner__run}
 \alias{stageRunner__run}
 \title{Run the stages in a stageRunner object.}
-\usage{
-stageRunner__run(stage_key = NULL, to = NULL, normalized = FALSE,
-  verbose = FALSE, remember_flag = TRUE, .depth = 1, ...)
-}
 \arguments{
-\item{stage_key}{an indexing parameter. Many forms are accepted, but the
+\item{from}{an indexing parameter. Many forms are accepted, but the
 easiest is the name of the stage. For example, if we have
 \code{stageRunner$new(context, list(stage_one = some_fn, stage_two = some_other_fn))}
 then using \code{run('stage_one')} will execute \code{some_fn}.

@@ -2,9 +2,6 @@
 \name{normalize_stage_keys}
 \alias{normalize_stage_keys}
 \title{Normalize a reference to stage keys}
-\usage{
-normalize_stage_keys(keys, stages, parent_key = "", to = NULL)
-}
 \arguments{
 \item{keys}{a list. The keys to normalize.}
 

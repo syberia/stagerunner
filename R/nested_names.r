@@ -2,6 +2,7 @@
 #'
 #' Unnamed values will use index number instead.
 #'
+#' @name nested_names
 #' @param el list.
 #' @param delim character. The delimiter with which to separate nested names.
 #' @param prefix character. A prefix to every name.

@@ -2,9 +2,6 @@
 \name{stageRunner__next_stage}
 \alias{stageRunner__next_stage}
 \title{For stageRunners with caching, find the next unexecuted stage.}
-\usage{
-stageRunner__next_stage()
-}
 \value{
 a character stage key giving the next unexecuted stage.
   If all stages have been executed, this returns \code{FALSE}.

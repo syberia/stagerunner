@@ -2,9 +2,6 @@
 \name{treeSkeleton__children}
 \alias{treeSkeleton__children}
 \title{Find the children of the current object wrapped in treeSkeletons.}
-\usage{
-treeSkeleton__children()
-}
 \description{
 Find the children of the current object wrapped in treeSkeletons.
 }

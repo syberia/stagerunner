@@ -2,9 +2,6 @@
 \name{compare_stage_keys}
 \alias{compare_stage_keys}
 \title{Compare two stage keys to see which one has a stage run first}
-\usage{
-compare_stage_keys(key1, key2)
-}
 \arguments{
 \item{key1}{list}
 

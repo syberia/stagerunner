@@ -2,9 +2,6 @@
 \name{stageRunner__stage_names}
 \alias{stageRunner__stage_names}
 \title{Retrieve a flattened list of canonical stage names for a stageRunner object}
-\usage{
-stageRunner__stage_names()
-}
 \value{
 a list of canonical stage names.
 }

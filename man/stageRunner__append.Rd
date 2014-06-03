@@ -2,9 +2,6 @@
 \name{stageRunner__append}
 \alias{stageRunner__append}
 \title{Append one stageRunner to the end of another.}
-\usage{
-stageRunner__append(other_runner, label = NULL)
-}
 \arguments{
 \item{other_runner}{stageRunner. Another stageRunner to append to the current one.}
 

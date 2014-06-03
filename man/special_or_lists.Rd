@@ -2,9 +2,6 @@
 \name{special_or_lists}
 \alias{special_or_lists}
 \title{OR two lists together with some regards for nesting}
-\usage{
-special_or_lists(list1, list2)
-}
 \arguments{
 \item{list1}{a list.}
 
