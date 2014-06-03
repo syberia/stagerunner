@@ -131,8 +131,10 @@ treeSkeleton__.parent_index <- function() {
 #'    (Just look at the examples).
 #' @return the subtree or terminal node with the given key.
 #' @examples 
+#' \dontrun{
 #' sr <- stageRunner$new(new.env(), list(a = list(force, list(b = function(x) x + 1))))
-#' treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
+#' stagerunner:::treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
+#' }
 treeSkeleton__find <- function(key) {
   stopifnot(is.character(key))
   if (length(key) == 0 || identical(key, '')) return(object)
