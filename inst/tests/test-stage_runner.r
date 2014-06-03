@@ -17,7 +17,7 @@ test_that("it runs a simple single stage correctly", {
   context$x <- 1
   sr <- stageRunner$new(context, list(function(cx) cx$x <- 2))
   sr$run()
-  expect_equal(scale = 1, tolerance = 0.001, 2, context$x)
+  expect_equal(scale = 1, tolerance = 0.001, 3, context$x) # TEST FAILURE: change to 2
 })
 
 test_that("it accepts functions (not lists) as stages", {
