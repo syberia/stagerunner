@@ -507,6 +507,7 @@ is.stageRunner <- is.stagerunner
 #}
 
 #' @name stageRunnerNode
+#' @docType class
 stageRunnerNode <- setRefClass('stageRunnerNode',
   fields = list(callable = 'ANY',
                 cached_env = 'ANY',

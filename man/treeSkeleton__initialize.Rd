@@ -2,6 +2,10 @@
 \name{treeSkeleton__initialize}
 \alias{treeSkeleton__initialize}
 \title{Initialize a treeSkeleton object.}
+\usage{
+treeSkeleton__initialize(object, parent_caller = "parent",
+  children_caller = "children")
+}
 \arguments{
 \item{object}{ANY. If a reference class object, then \code{parent_caller}
 and \code{children_caller} will refer to reference class methods.

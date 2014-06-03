@@ -2,6 +2,9 @@
 \name{special_and_lists}
 \alias{special_and_lists}
 \title{AND two lists together with some regards for nesting}
+\usage{
+special_and_lists(list1, list2)
+}
 \arguments{
 \item{list1}{a list.}
 

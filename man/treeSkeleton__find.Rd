@@ -3,6 +3,9 @@
 \alias{treeSkeleton__find}
 \title{Find the key with the given index using the names of the lists
 that parametrize each node's children.}
+\usage{
+treeSkeleton__find(key)
+}
 \arguments{
 \item{key}{character. The key to find in the given tree structure,
 whether nodes are named by their name in the \code{children()}

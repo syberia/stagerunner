@@ -2,6 +2,9 @@
 \name{treeSkeleton__successor}
 \alias{treeSkeleton__successor}
 \title{Attempt to find the successor of the current node.}
+\usage{
+treeSkeleton__successor(index = NULL)
+}
 \arguments{
 \item{index}{integer. If specified, this is the index of the current node
 in the children of its parent. (Sometimes, this cannot be computed

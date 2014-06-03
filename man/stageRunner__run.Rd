@@ -2,6 +2,10 @@
 \name{stageRunner__run}
 \alias{stageRunner__run}
 \title{Run the stages in a stageRunner object.}
+\usage{
+stageRunner__run(from = NULL, to = NULL, normalized = FALSE,
+  verbose = FALSE, remember_flag = TRUE, .depth = 1, ...)
+}
 \arguments{
 \item{from}{an indexing parameter. Many forms are accepted, but the
 easiest is the name of the stage. For example, if we have

@@ -2,6 +2,10 @@
 \name{show_message}
 \alias{show_message}
 \title{Show a progress message.}
+\usage{
+show_message(stage_names, stage_index, begin = TRUE, nested = FALSE,
+  depth = 1)
+}
 \arguments{
 \item{stage_names}{character.}
 
