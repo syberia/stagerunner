@@ -24,4 +24,11 @@ notifications:
     on_failure: change
 
   hipchat:
-    secure: "ZpMjoT1RX0WlETs8+3oo9TBLwXOvxBPqMGepeJNZ4sDCIVVC7DAc+FCC06esJ2/jzk4wDRS0YULGnpLzqueSDlYXPt6kcE2VW1zmQ+9QjhZ3dzweNVoq+EWA1HE59TZhHjpaSsGvWmUk1WWl7CutWcUt1jR6G6/+mgEdWNJBjXs="
+
+  hipchat:
+    rooms:
+      secure: "ZpMjoT1RX0WlETs8+3oo9TBLwXOvxBPqMGepeJNZ4sDCIVVC7DAc+FCC06esJ2/jzk4wDRS0YULGnpLzqueSDlYXPt6kcE2VW1zmQ+9QjhZ3dzweNVoq+EWA1HE59TZhHjpaSsGvWmUk1WWl7CutWcUt1jR6G6/+mgEdWNJBjXs="
+    on_success: change
+    on_failure: change
+    template:
+      - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}'
