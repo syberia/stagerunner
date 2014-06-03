@@ -271,7 +271,7 @@ test_that("it correctly uses the to parameter in a more complicated example", {
         list(z = 2, a = 1, b = 2, c = 2, d = 2, e = 2, f = 1, g = 1), as.list(context),
         info = paste0("this stagerunner should correctly execute all the stages ",
                       "between b and e above, namely b,c,d,e, when running: ",
-                      paste0(deparse(test_exprs[[ix]]), collapse = "\n"))a)
+                      paste0(deparse(test_exprs[[ix]]), collapse = "\n")))
     })
 })
 

@@ -33,7 +33,7 @@ local({
   test_that("it correctly prints a nested stagerunner with one superstage and two unnamed substages", {
     sr <- stageRunner$new(new.env(), list(one = list(force, force))); sr$run()
     expect_output(print(sr),
-      wrap(" - one [\\n\\r]*   -", unnamed(1), "[\\n\\r]*  -", unnamed(2), 2))
+      wrap(" - one [\\n\\r]*   -", unnamed(1), "[ \\n\\r]*  -", unnamed(2), 2))
   })
 
   test_that("it correctly prints a nested stagerunner with one superstage and two named substages", {
