@@ -6,7 +6,8 @@ local({
     args <- list(...)
     n <- args[[length(args)]]
     txt <- paste0(args[-length(args)], collapse = '')
-    paste0("A", prefix, " stageRunner with ", n, " stages:", txt, "Context <environment: [^>]+>")
+    paste0("A", prefix, " stageRunner with ", n, " stages:[\n\r]*", txt,
+           "[\n\r]*Context <environment: [^>]+>")
   }
 
   test_that('it correctly prints a trivial stageRunner', {
@@ -32,26 +33,26 @@ local({
   test_that('it correctly prints a nested stagerunner with one superstage and two unnamed substages', {
     sr <- stageRunner$new(new.env(), list(one = list(force, force))); sr$run()
     expect_output(print(sr),
-      wrap(" - one    -", unnamed(1), "   -", unnamed(2), 2))
+      wrap(" - one [\n\r]*   -", unnamed(1), " [\n\r]*  -", unnamed(2), 2))
   })
 
   test_that('it correctly prints a nested stagerunner with one superstage and two named substages', {
     sr <- stageRunner$new(new.env(), list(one = list(two = force, three = force))); sr$run()
     expect_output(print(sr),
-      wrap(" - one    - two    - three ", 2))
+      wrap(" - one [\n\r]*   - two [\n\r]*   - three ", 2))
   })
 
   test_that('it correctly prints a nested stagerunner with one superstage, one named substage, and one unnamed substage', {
     sr <- stageRunner$new(new.env(), list(one = list(two = force, force))); sr$run()
     expect_output(print(sr),
-      wrap(" - one    - two    -", unnamed(2), 2))
+      wrap(" - one [\n\r]*   - two [\n\r]*   -", unnamed(2), 2))
   })
 
   test_that('it correctly prints a nested stagerunner two flat stages wrapping a nested stage, all named', {
     sr <- stageRunner$new(new.env(), list(a = force, b = list(c = force, d = force), e = force))
     sr$run()
     expect_output(print(sr),
-      wrap(" - a  - b    - c    - d  - e ", 4))
+      wrap(" - a [\n\r]* - b [\n\r]*   - c [\n\r]*   - d [\n\r]* - e ", 4))
   })
 
   context('printing stageRunner with caching') 
@@ -76,36 +77,36 @@ local({
   test_that('it correctly prints a two-stage caching stageRunner with unnamed stages after execution', {
     sr <- stageRunner$new(new.env(), list(force, force), remember = TRUE); sr$run()
     expect_output(print(sr),
-      wrapc(' \\+', unnamed(1), ' \\+', unnamed(2), 2))
+      wrapc(' \\+', unnamed(1), '[\n\r]* \\+', unnamed(2), 2))
   })
 
   test_that('it correctly prints a two-stage caching stageRunner with nested stages', {
     sr <- stageRunner$new(new.env(), list(a = force, b = list(c = force, d = force)), remember = TRUE)
-    expect_output(print(sr), wrapc(' \\* a  - b    - c    - d ', 3))
+    expect_output(print(sr), wrapc(' \\* a [\n\r]* - b [\n\r]*   - c [\n\r]*   - d ', 3))
   })
 
   test_that('it correctly prints a two-stage caching stageRunner with nested stages after partial execution', {
     sr <- stageRunner$new(new.env(), list(a = force, b = list(c = force, d = force)), remember = TRUE)
     sr$run(1)
-    expect_output(print(sr), wrapc(' \\+ a  \\* b    \\* c    - d ', 3))
+    expect_output(print(sr), wrapc(' \\+ a [\n\r]* \\* b [\n\r]*   \\* c [\n\r]*   - d ', 3))
   })
 
   test_that('it correctly prints a two-stage caching stageRunner with nested stages after execution', {
     sr <- stageRunner$new(new.env(), list(a = force, b = list(c = force, d = force)), remember = TRUE)
     sr$run()
-    expect_output(print(sr), wrapc(' \\+ a  \\+ b    \\+ c    \\+ d ', 3))
+    expect_output(print(sr), wrapc(' \\+ a [\n\r]* \\+ b [\n\r]*   \\+ c [\n\r]*   \\+ d ', 3))
   })
 
   test_that('it correctly prints a two-stage caching stageRunner with nested stages after executing all but the last stage', {
     sr <- stageRunner$new(new.env(), list(a = force, b = list(c = force, d = force)), remember = TRUE)
     sr$run(1, to = '2/1')
-    expect_output(print(sr), wrapc(' \\+ a  \\* b    \\+ c    \\* d ', 3))
+    expect_output(print(sr), wrapc(' \\+ a [\n\r]* \\* b [\n\r]*   \\+ c [\n\r]*   \\* d ', 3))
   })
 
   test_that('it correctly prints a two-stage caching stageRunner with nested stages after executing all but the penultimate stage', {
     sr <- stageRunner$new(new.env(), list(a = force, b = list(c = force, d = force, e = force)), remember = TRUE)
     sr$run(1, to = '2/1')
-    expect_output(print(sr), wrapc(' \\+ a  \\* b    \\+ c    \\* d    \\- e ', 4))
+    expect_output(print(sr), wrapc(' \\+ a [\n\r]* \\* b [\n\r]*   \\+ c [\n\r]*   \\* d [\n\r]*   \\- e ', 4))
   })
 
 })
