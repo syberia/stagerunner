@@ -22,6 +22,7 @@ show_message <- function(stage_names, stage_index, begin = TRUE, nested = FALSE,
                                      if (begin) 'green' else 'blue')
   stage_name <- gsub("(?:Begin|Run) (.*) stage(\\.{3})?", "\\1", stage_name)
   depth <- paste(rep("  ", depth - 1), collapse = '')
+  stage_name <- paste0(stage_index, ". ", stage_name)
   if (nested) cat(paste0(depth, if (begin) "Beginn" else "End", "ing ", stage_name, " stage...\n"))
   else if (begin) cat(paste0(depth, "Running ", stage_name, "...\n"))
 }

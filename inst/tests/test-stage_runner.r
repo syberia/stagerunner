@@ -183,12 +183,12 @@ test_that("it accepts nested stagerunners", {
 test_that("it runs nested stagerunners", {
   example1()
   sr$run()
-  expect_equal(scale = 1, tolerance = 0.001, context$x, 4, "stagerunner must execute nested stages")
+  expect_identical(context$x, 4, "stagerunner must execute nested stages")
 
   sr <- stageRunner$new(context,
     list(stage_three = function(cx) cx$x <- 4, sr2, sr3))
   sr$run()
-  expect_equal(scale = 1, tolerance = 0.001, context$x, 5, "stagerunner must execute nested stages")
+  expect_identical(context$x, 5, "stagerunner must execute nested stages")
 })
 
 test_that("it allows referencing nested stage keys", {
@@ -196,8 +196,8 @@ test_that("it allows referencing nested stage keys", {
   sr2 <- stageRunner$new(context, list(stage_one = function(cx) cx$x <- 2))
   sr <- stageRunner$new(context, list(sub = sr2, function(cx) cx$y <- 1))
   sr$run('sub/stage_one')
-  expect_equal(scale = 1, tolerance = 0.001, context$x, 2, "stagerunner must execute nested stages referred to by keyname")
-  expect_equal(scale = 1, tolerance = 0.001, context$y, 0, "stagerunner must not execute unrun stages")
+  expect_identical(context$x, 2, "stagerunner must execute nested stages referred to by keyname")
+  expect_identical(context$y, 0, "stagerunner must not execute unrun stages")
 })
 
 test_that("it can detect mixed numeric-character key collisions", {
