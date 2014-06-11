@@ -188,10 +188,7 @@ treeSkeleton <- setRefClass('treeSkeleton',
     last_leaf     = stagerunner:::treeSkeleton__last_leaf,
     find          = stagerunner:::treeSkeleton__find,
     .parent_index = stagerunner:::treeSkeleton__.parent_index,
-    show          = function() { cat("treeSkeleton wrapping:\n"); print(object) },
-    # TODO: I don't need any more iterators, but maybe implement them later
-    #predecessor  = stagerunner:::treeSkeleton__predecessor,
-    .parent_index = stagerunner:::treeSkeleton__.parent_index 
+    show          = function() { cat("treeSkeleton wrapping:\n"); print(object) }
   )
 )
 
