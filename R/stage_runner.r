@@ -306,7 +306,7 @@ stageRunner__transform <- function(transformation) {
 #' @name stageRunner__append
 #' @param other_runner stageRunner. Another stageRunner to append to the current one.
 #' @param label character. The label for the new stages (this will be the name of the
-#'   newly appended list element.
+#'   newly appended list element).
 stageRunner__append <- function(other_runner, label = NULL) {
   stopifnot(is.stagerunner(other_runner))
   new_stage <- structure(list(other_runner), names = label)
