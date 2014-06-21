@@ -9,7 +9,7 @@ stageRunner__append(other_runner, label = NULL)
 \item{other_runner}{stageRunner. Another stageRunner to append to the current one.}
 
 \item{label}{character. The label for the new stages (this will be the name of the
-newly appended list element.}
+newly appended list element).}
 }
 \description{
 Append one stageRunner to the end of another.

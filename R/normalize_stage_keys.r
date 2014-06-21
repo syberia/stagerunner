@@ -3,6 +3,7 @@
 #' For example, \code{list('data/one', 2)} would be converted to
 #' \code{list('data', list('one')), 2)}.
 #'
+#' @name normalize_stage_keys
 #' @param keys a list. The keys to normalize.
 #' @param stages a list. The stages we're normalizing with respect to.
 #' @param parent_key character. A helper for sane recursive error handling.

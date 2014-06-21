@@ -3,6 +3,7 @@
 #' This is a helper function to implement the \code{to} parameter
 #' in the \code{run} method on a stageRunner object.
 #'
+#' @name compare_stage_keys
 #' @param key1 list
 #' @param key2 list
 #' @return logical. Whether or not key1 runs a stage before key2.

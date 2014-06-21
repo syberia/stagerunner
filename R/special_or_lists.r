@@ -17,6 +17,7 @@
 #' For example, \code{special_or_lists(list(a = TRUE, b = FALSE), list(b = FALSE, a = TRUE))}
 #' would mistakenly return \code{list(a = TRUE, b = TRUE)}.
 #'
+#' @name special_or_lists
 #' @param list1 a list.
 #' @param list2 a list.
 #' @seealso \code{\link{special_and_lists}}

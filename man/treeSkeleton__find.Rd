@@ -23,7 +23,9 @@ For example, if our tree structure is given by
 then calling \code{find('a/b')} on the root node will return \code{1}.
 }
 \examples{
+\dontrun{
 sr <- stageRunner$new(new.env(), list(a = list(force, list(b = function(x) x + 1))))
-treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
+stagerunner:::treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
+}
 }
 
