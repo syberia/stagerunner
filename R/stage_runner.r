@@ -34,7 +34,7 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE) {
   context <<- context
 
   legal_types <- function(x) is.function(x) || all(vapply(x,
-    function(s) is.function(s) || is.stagerunner(s) ||
+    function(s) is.function(s) || is.stagerunner(s) || is.null(s) ||
       (is.list(s) && legal_types(s)), logical(1)))
   stopifnot(legal_types(.stages))
   if (is.function(.stages)) .stages <- list(.stages)
@@ -44,7 +44,7 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE) {
   for (i in seq_along(stages))
     if (is.list(stages[[i]]))
       stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
-    else if (is.function(stages[[i]]))
+    else if (is.function(stages[[i]]) || is.null(stages[[i]]))
       stages[[i]] <<- stageRunnerNode$new(stages[[i]], context)
 
   # Do not allow the '/' character in stage names, as it's reserved for
@@ -522,7 +522,9 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
     run = function(..., .cached_env = NULL) {
       # TODO: Clean this up by using environment injection utility fn
       correct_cache <- .cached_env %||% cached_env
-      if (is.stagerunner(callable)) callable$run(..., .cached_env = correct_cache)
+      if (is.null(callable)) FALSE
+      else if (is.stagerunner(callable))
+        callable$run(..., .cached_env = correct_cache)
       else {
         tmp <- new.env(parent = environment(callable))
         environment(callable) <<- tmp
@@ -534,6 +536,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
     }, 
     overlay = function(other_node, label = NULL) {
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
+      if (is.null(other_node)) return(FALSE)
       if (!is.stagerunner(other_node)) 
         other_node <- stageRunner$new(.context, other_node)
 
