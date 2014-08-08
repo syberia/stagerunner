@@ -51,3 +51,27 @@ test_that('it overlays by index if no names are present with a NULL overlay', {
                   'stageRunner as its callable.'))
 })
 
+test_that('it correctly uses the flat parameter', {
+  sr1 <- stageRunner(cx <- new.env(), list(a = function(x) x$x <- 1))
+  sr2 <- stageRunner(cx, list(a = function(x) x$y <- 1))
+  sr1$overlay(sr2, label = 'two', flat = FALSE)
+  sr3 <- stageRunner(cx, list(a = function(x) x$z <- 1))
+  sr1$overlay(sr3, label = 'two', flat = FALSE)
+  sr1$run()
+
+  expect_identical(cx$y, 1, info = 'both sr2 and sr3 should have ran, but y is not 1')
+  expect_identical(cx$z, 1, info = 'both sr2 and sr3 should have ran, but z is not 1')
+})
+
+test_that('it correctly uses the flat parameter', {
+  sr1 <- stageRunner(cx <- new.env(), list(a = function(x) x$x <- 1))
+  sr2 <- stageRunner(cx, list(a = function(x) x$y <- 1))
+  sr1$overlay(sr2, label = 'two', flat = TRUE)
+  sr3 <- stageRunner(cx, list(a = function(x) x$z <- 1))
+  sr1$overlay(sr3, label = 'two', flat = TRUE)
+  sr1$run()
+  
+  expect_identical(cx$y, NULL, info = 'only sr3 should have ran, but y is not NULL')
+  expect_identical(cx$z, 1, info = 'only sr3 should have ran, but z is not 1')
+})
+

@@ -127,6 +127,13 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
 #'   executing five stages simultaneously with \code{remember = TRUE},
 #'   the first stage's context should be restored from cache but none
 #'   of the remaining stages should).
+#' @param mode character. If \code{mode = 'head'}, then by default the
+#'   \code{from} parameter will be used to execute that stage and that
+#'   stage only. If \code{mode = 'next'}, then the \code{from} parameter
+#'   will be used to run (by default, if \code{to} is left missing)
+#'   from the last successfully executed stage to the stage given by
+#'   \code{from}. If \code{from} occurs before the last successfully
+#'   executed stage (say S), the stages will be run from \code{from} to S.
 #' @param .depth integer. Internal parameter for keeping track of nested running level.
 #' @param ... Any additional arguments to delegate to the \code{stageRunnerNode}
 #'   object that will execute its own \code{run} method.
@@ -295,7 +302,10 @@ stageRunner__coalesce <- function(other_runner) {
 #'    stages of the current stageRunner. For example, if \code{label = 'test'},
 #'    and a current terminal node is unnamed, it will becomes
 #'    \code{list(current_node, test = other_runner_node)}.
-stageRunner__overlay <- function(other_runner, label = NULL) {
+#' @param flat logical. Whether to use the \code{stageRunner$append} method to
+#'    overlay, or simply overwrite the given \code{label}. If \code{flat = TRUE},
+#'    you must supply a \code{label}. The default is \code{flat = FALSE}.
+stageRunner__overlay <- function(other_runner, label = NULL, flat = FALSE) {
   stopifnot(is.stagerunner(other_runner))
   for (stage_index in seq_along(other_runner$stages)) {
     name <- names(other_runner$stages)[[stage_index]]
@@ -303,7 +313,7 @@ stageRunner__overlay <- function(other_runner, label = NULL) {
       if (identical(name, '') || identical(name, NULL)) stage_index
       else if (name %in% names(stages)) name
       else stop('Cannot overlay because keys do not match')
-    stages[[index]]$overlay(other_runner$stages[[stage_index]], label)
+    stages[[index]]$overlay(other_runner$stages[[stage_index]], label, flat)
   }
   TRUE
 }
@@ -566,7 +576,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       }
       executed <<- TRUE
     }, 
-    overlay = function(other_node, label = NULL) {
+    overlay = function(other_node, label = NULL, flat = FALSE) {
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
       if (is.null(other_node)) return(FALSE)
       if (!is.stagerunner(other_node)) 
@@ -578,7 +588,10 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
         callable <<- stageRunner$new(.context, callable)
 
       # TODO: Fancier merging here
-      callable$append(other_node, label)
+      if (isTRUE(flat)) {
+        if (!is.character(label)) stop("flat coalescing needs a label")
+        callable$stages[[label]] <<- other_node
+      } else callable$append(other_node, label)
     },
     transform = function(transformation) {
       if (is.stagerunner(callable)) callable$transform(transformation)
