@@ -566,7 +566,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       }
       executed <<- TRUE
     }, 
-    overlay = function(other_node, label = NULL) {
+    overlay = function(other_node, label = NULL, flat = FALSE) {
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
       if (is.null(other_node)) return(FALSE)
       if (!is.stagerunner(other_node)) 
@@ -578,7 +578,10 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
         callable <<- stageRunner$new(.context, callable)
 
       # TODO: Fancier merging here
-      callable$append(other_node, label)
+      if (isTRUE(flat)) {
+        if (!is.character(label)) stop("flat coalescing needs a label")
+        callable$stages[[label]] <<- other_node
+      } else callable$append(other_node, label)
     },
     transform = function(transformation) {
       if (is.stagerunner(callable)) callable$transform(transformation)
