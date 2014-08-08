@@ -295,7 +295,10 @@ stageRunner__coalesce <- function(other_runner) {
 #'    stages of the current stageRunner. For example, if \code{label = 'test'},
 #'    and a current terminal node is unnamed, it will becomes
 #'    \code{list(current_node, test = other_runner_node)}.
-stageRunner__overlay <- function(other_runner, label = NULL) {
+#' @param flat logical. Whether to use the \code{stageRunner$append} method to
+#'    overlay, or simply overwrite the given \code{label}. If \code{flat = TRUE},
+#'    you must supply a \code{label}. The default is \code{flat = FALSE}.
+stageRunner__overlay <- function(other_runner, label = NULL, flat = FALSE) {
   stopifnot(is.stagerunner(other_runner))
   for (stage_index in seq_along(other_runner$stages)) {
     name <- names(other_runner$stages)[[stage_index]]
@@ -303,7 +306,7 @@ stageRunner__overlay <- function(other_runner, label = NULL) {
       if (identical(name, '') || identical(name, NULL)) stage_index
       else if (name %in% names(stages)) name
       else stop('Cannot overlay because keys do not match')
-    stages[[index]]$overlay(other_runner$stages[[stage_index]], label)
+    stages[[index]]$overlay(other_runner$stages[[stage_index]], label, flat)
   }
   TRUE
 }
