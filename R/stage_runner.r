@@ -127,6 +127,13 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
 #'   executing five stages simultaneously with \code{remember = TRUE},
 #'   the first stage's context should be restored from cache but none
 #'   of the remaining stages should).
+#' @param mode character. If \code{mode = 'head'}, then by default the
+#'   \code{from} parameter will be used to execute that stage and that
+#'   stage only. If \code{mode = 'next'}, then the \code{from} parameter
+#'   will be used to run (by default, if \code{to} is left missing)
+#'   from the last successfully executed stage to the stage given by
+#'   \code{from}. If \code{from} occurs before the last successfully
+#'   executed stage (say S), the stages will be run from \code{from} to S.
 #' @param .depth integer. Internal parameter for keeping track of nested running level.
 #' @param ... Any additional arguments to delegate to the \code{stageRunnerNode}
 #'   object that will execute its own \code{run} method.
