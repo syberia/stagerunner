@@ -256,7 +256,7 @@ stageRunner__run <- function(from = NULL, to = NULL,
 stageRunner__coalesce <- function(other_runner) {
   # TODO: Should we care about insertion of new stages causing cache wipes?
   # For now it seems like this would just be an annoyance.
-  stopifnot(remember)
+  # stopifnot(remember)
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
   lapply(seq_along(other_runner$stages), function(stage_index) {
     # TODO: Match by name *OR* index
