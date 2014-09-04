@@ -256,7 +256,7 @@ stageRunner__run <- function(from = NULL, to = NULL,
 stageRunner__coalesce <- function(other_runner) {
   # TODO: Should we care about insertion of new stages causing cache wipes?
   # For now it seems like this would just be an annoyance.
-  stopifnot(remember)
+  # stopifnot(remember)
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
   lapply(seq_along(other_runner$stages), function(stage_index) {
     # TODO: Match by name *OR* index
@@ -279,7 +279,8 @@ stageRunner__coalesce <- function(other_runner) {
           ) {
         stages[[names(stages)[stage_index]]]$cached_env <<-
           new.env(parent = parent.env(context))
-        if (is.environment(other_runner$stages[[stage_index]]$cached_env)) {
+        if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
+            is.environment(stages[[names(stages)[stage_index]]]$cached_env)) {
           copy_env(stages[[names(stages)[stage_index]]]$cached_env,
                    other_runner$stages[[stage_index]]$cached_env)
           stages[[names(stages)[stage_index]]]$executed <<- 
@@ -288,6 +289,7 @@ stageRunner__coalesce <- function(other_runner) {
       }
     }
   })
+  .set_parents()
   .self
 }
 
