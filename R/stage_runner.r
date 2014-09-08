@@ -247,6 +247,33 @@ stageRunner__run <- function(from = NULL, to = NULL,
   else invisible(TRUE)
 }
 
+#' Wrap a function around a stageRunner's terminal nodes
+#'
+#' If we want to execute some behavior just before and just after executing
+#' terminal nodes in a stageRunner, a solution without this method would be
+#' to overlay two runners -- one before and one after. However, this is messy,
+#' so this function is intended to replace this approach with just one function.
+#'
+#' Consider the runner
+#'   \code{sr <- stageRunner$new(some_env, list(a = function(e) print('2'))}
+#' If we run 
+#'   \code{sr2 <- stageRunner$new(some_env, list(a = function(e) {
+#'     print('1'); yield(); print('3') }))
+#'    sr1$around(sr2)
+#'    sr1$run()
+#'  }
+#' then we will see 1, 2, and 3 printed in succession. The \code{yield()}
+#' keyword is used to specify when to execute the terminal node that
+#' is sandwiched in the "around" runner.
+#'
+#' @name stageRunner__around
+#' @param other_runner stageRunner. Another stageRunner from which to create
+#'   an around procedure. Alternatively, we could give a function or a list
+#'   of functions.
+stageRunner__around <- function(other_runner) {
+
+}
+
 #' Coalescing a stageRunner object is taking another stageRunner object
 #' with similar stage names and replacing the latter's cached environments
 #' with the former's.
