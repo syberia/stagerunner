@@ -271,7 +271,27 @@ stageRunner__run <- function(from = NULL, to = NULL,
 #'   an around procedure. Alternatively, we could give a function or a list
 #'   of functions.
 stageRunner__around <- function(other_runner) {
+  if (is.stagerunner(other_runner)) other_runner <- other_runner$stages
+  stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
+  lapply(seq_along(other_runner), function(stage_index) {
+    name <- names(other_runner)[[stage_index]]
+    this_index <- 
+      if (name == "") stage_index
+      else if (is.element(name, names(stages))) name
+      else return()
 
+    if (is.stagerunner(stages[[this_index]]) &&
+        is.stagerunner(other_runner[[stage_index]])) {
+      stages[[this_index]]$around(other_runner[[stage_index]])
+    } else if (is.stageRunnerNode(stages[[this_index]]) &&
+               is.stageRunnerNode(other_runner[[stage_index]])) {
+      stages[[this_index]]$around(other_runner[[stage_index]])
+    } else {
+      warning("Cannot apply around stageRunner because ",
+              this_index, " is not a terminal node.")
+    }
+  })
+  .self
 }
 
 #' Coalescing a stageRunner object is taking another stageRunner object
@@ -591,21 +611,53 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
       callable <<- .callable; .context <<- .context; executed <<- FALSE
     },
-    run = function(..., .cached_env = NULL) {
+    run = function(..., .cached_env = NULL, .callable = callable) {
       # TODO: Clean this up by using environment injection utility fn
       correct_cache <- .cached_env %||% cached_env
-      if (is.null(callable)) FALSE
-      else if (is.stagerunner(callable))
-        callable$run(..., .cached_env = correct_cache)
+      if (is.null(.callable)) FALSE
+      else if (is.stagerunner(.callable))
+        .callable$run(..., .cached_env = correct_cache)
       else {
-        tmp <- new.env(parent = environment(callable))
-        environment(callable) <<- tmp
-        environment(callable)$cached_env <<- correct_cache
-        callable(.context, ...)
-        environment(callable) <<- parent.env(environment(callable))
+        tmp <- new.env(parent = environment(.callable))
+        environment(.callable) <- tmp
+        environment(.callable)$cached_env <- correct_cache
+        .callable(.context, ...)
+        environment(.callable) <- parent.env(environment(.callable))
       }
       executed <<- TRUE
     }, 
+
+    # This function goes hand in hand with stageRunner$around
+    around = function(other_node) {
+      if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
+      if (is.null(other_node)) return(FALSE)
+      if (!is.function(other_node)) {
+        warning("Cannot apply stageRunner$around in a terminal ",
+                "node except with a function. Instead, I got a ",
+                class(other_node)[1])
+        return(FALSE)
+      }
+
+      new_callable <- other_node
+      # Inject yield() keyword
+      yield_env <- new.env(parent = environment(new_callable))
+      yield_env$.parent_context <- .self
+      yield_env$yield <- function() {
+        # ... lives up two frames, but the run function lives up 1,
+        # so we have to do something ugly
+        run <- eval.parent(quote(.parent_context$run))
+        args <- append(eval.parent(quote(list(...)), n = 2),
+          list(.callable = callable))
+        do.call(run, args, envir = parent.frame())
+      }
+      environment(yield_env$yield) <- new.env(parent = baseenv())
+      environment(yield_env$yield)$callable <- callable
+
+      environment(new_callable) <- yield_env
+      callable <<- new_callable
+      TRUE
+    },
+
     overlay = function(other_node, label = NULL, flat = FALSE) {
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
       if (is.null(other_node)) return(FALSE)
