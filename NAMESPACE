@@ -3,5 +3,6 @@
 export(is.stageRunner)
 export(is.stagerunner)
 export(stageRunner)
+import(testthat)
 import(testthatsomemore)
 importFrom(testthat,colourise)
