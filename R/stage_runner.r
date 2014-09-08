@@ -271,21 +271,21 @@ stageRunner__run <- function(from = NULL, to = NULL,
 #'   an around procedure. Alternatively, we could give a function or a list
 #'   of functions.
 stageRunner__around <- function(other_runner) {
-  if (is.stagerunner(other_runner)) other_runner <- other_runner$stages
+  if (!is.stagerunner(other_runner)) other_runner <- stageRunner$new(context, other_runner)
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
-  lapply(seq_along(other_runner), function(stage_index) {
-    name <- names(other_runner)[[stage_index]]
+  lapply(seq_along(other_runner$stages), function(stage_index) {
+    name <- stagenames[stage_index]
     this_index <- 
-      if (name == "") stage_index
+      if (identical(name, "")) stage_index
       else if (is.element(name, names(stages))) name
       else return()
 
     if (is.stagerunner(stages[[this_index]]) &&
-        is.stagerunner(other_runner[[stage_index]])) {
-      stages[[this_index]]$around(other_runner[[stage_index]])
+        is.stagerunner(other_runner$stages[[stage_index]])) {
+      stages[[this_index]]$around(other_runner$stages[[stage_index]])
     } else if (is.stageRunnerNode(stages[[this_index]]) &&
-               is.stageRunnerNode(other_runner[[stage_index]])) {
-      stages[[this_index]]$around(other_runner[[stage_index]])
+               is.stageRunnerNode(other_runner$stages[[stage_index]])) {
+      stages[[this_index]]$around(other_runner$stages[[stage_index]])
     } else {
       warning("Cannot apply around stageRunner because ",
               this_index, " is not a terminal node.")
@@ -548,6 +548,7 @@ stageRunner <- setRefClass('stageRunner',
   methods = list(
     initialize   = stageRunner__initialize,
     run          = stageRunner__run,
+    around       = stageRunner__around,
     coalesce     = stageRunner__coalesce,
     overlay      = stageRunner__overlay,
     transform    = stageRunner__transform,
