@@ -271,6 +271,7 @@ stageRunner__run <- function(from = NULL, to = NULL,
 #'   an around procedure. Alternatively, we could give a function or a list
 #'   of functions.
 stageRunner__around <- function(other_runner) {
+  if (is.null(other_runner)) return(.self)
   if (!is.stagerunner(other_runner)) other_runner <- stageRunner$new(context, other_runner)
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
   lapply(seq_along(other_runner$stages), function(stage_index) {
