@@ -56,6 +56,13 @@ test_that('it correctly wraps a simple example with run-time arguments', {
   expect_output(sn$run(x = 2), '^123$')
 })
 
+test_that('it can nest $around calls, like Rack Middleware!', {
+  sr <- stageRunner$new(new.env(), function(e) cat('2'))
+  sr$around(function(e) { cat('1'); yield(); cat('3') })
+  sr$around(function(e) { cat('0'); yield(); cat('4') })
+  expect_output(sr$run(), '^01234$')
+})
+
 test_that('it throws a warning when an invalid $around operation is performed', {
   sr <- stageRunner$new(new.env(), list(a = function(e) cat('2')))
   expect_warning(sr$around(list(a = list(b = function(e) {} ))),
