@@ -29,3 +29,28 @@ OOP_type_independent_method <- function(object, method) {
   else get(method)(object)
 }
 
+# Stolen from testthat:::colourise
+.fg_colours <- 
+  structure(c("0;30", "0;34", "0;32", "0;36", "0;31", "0;35", "0;33",
+  "0;37", "1;30", "1;34", "1;32", "1;36", "1;31", "1;35", "1;33",
+  "1;37"), .Names = c("black", "blue", "green", "cyan", "red",
+  "purple", "brown", "light gray", "dark gray", "light blue", "light green",
+  "light cyan", "light red", "light purple", "yellow", "white"))
+.bg_colours <- 
+  structure(c("40", "41", "42", "43", "44", "45", "46", "47"), .Names = c("black",
+  "red", "green", "brown", "blue", "purple", "cyan", "light gray"
+  ))
+
+colourise <- function (text, fg = "black", bg = NULL) {
+  term <- Sys.getenv()["TERM"]
+  colour_terms <- c("xterm-color", "xterm-256color", "screen",
+      "screen-256color")
+  if (!any(term %in% colour_terms, na.rm = TRUE)) return(text)
+  col_escape <- function(col) paste0("\033[", col, "m")
+  col <- .fg_colours[tolower(fg)]
+  if (!is.null(bg)) col <- paste0(col, .bg_colours[tolower(bg)], sep = ";")
+  init <- col_escape(col)
+  reset <- col_escape("0")
+  paste0(init, text, reset)
+}
+
