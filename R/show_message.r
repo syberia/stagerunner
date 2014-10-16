@@ -7,7 +7,7 @@
 #' @param nested logical. Whether or not this is a nested stage (i.e.
 #'    contains another stageRunner).
 #' @param depth integer. How many tabs to space by (for nested stages).
-#' @importFrom testthat colourise
+#' @importFrom director colourise
 #' @return the message to standard output
 #' @examples 
 #' \dontrun{
@@ -18,7 +18,7 @@ show_message <- function(stage_names, stage_index, begin = TRUE, nested = FALSE,
   if (is.null(stage_name) || stage_name == "")
     stage_name <- list('first', 'second', 'third')[stage_index][[1]] %||%
                   paste0(stage_index, 'th')
-  stage_name <- testthat:::colourise(stage_name,
+  stage_name <- director:::colourise(stage_name,
                                      if (begin) 'green' else 'blue')
   stage_name <- gsub("(?:Begin|Run) (.*) stage(\\.{3})?", "\\1", stage_name)
   depth <- paste(rep("  ", depth - 1), collapse = '')
