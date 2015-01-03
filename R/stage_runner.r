@@ -623,8 +623,8 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
         tmp <- new.env(parent = environment(.callable))
         environment(.callable) <- tmp
         environment(.callable)$cached_env <- correct_cache
+        on.exit(environment(.callable) <- parent.env(environment(.callable)))
         .callable(.context, ...)
-        environment(.callable) <- parent.env(environment(.callable))
       }
       executed <<- TRUE
     }, 
