@@ -543,8 +543,14 @@ stageRunner__.root <- function() {
 #' @export
 NULL
 
+
+setClass('tracked_environment')
+
+#' @export
+setClassUnion('anyEnvironment', c('environment', 'tracked_environment'))
+
 stageRunner <- setRefClass('stageRunner',
-  fields = list(context = 'environment', stages = 'list', remember = 'logical',
+  fields = list(context = 'anyEnvironment', stages = 'list', remember = 'logical',
                 .mode = 'character', .parent = 'ANY', .finished = 'logical'),
   methods = list(
     initialize   = stageRunner__initialize,
@@ -625,6 +631,9 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
         environment(.callable)$cached_env <- correct_cache
         on.exit(environment(.callable) <- parent.env(environment(.callable)))
         .callable(.context, ...)
+      }
+      if (is(.context, 'tracked_environment')) {
+        objectdiff::commit(.context) <<- ''
       }
       executed <<- TRUE
     }, 
