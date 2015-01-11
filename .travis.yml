@@ -1,37 +1,28 @@
-# Sample .travis.yml for R projects.
-#
-# See README.md for instructions, or for more configuration options,
-# see the wiki:
-#   https://github.com/craigcitro/r-travis/wiki
-
 language: c
-
 before_install:
-  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-  - chmod 755 ./travis-tool.sh
-  - ./travis-tool.sh bootstrap
+- curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+- chmod 755 ./travis-tool.sh
+- "./travis-tool.sh bootstrap"
 install:
-  - ./travis-tool.sh install_deps
-  - ./travis-tool.sh install_r microbenchmark knitr testthat testthatsomemore
+- "./travis-tool.sh install_deps"
+- "./travis-tool.sh github_package hadley/testthat"
+- "./travis-tool.sh install_r microbenchmark knitr testthatsomemore"
 - "./travis-tool.sh github_package jimhester/covr"
-script: ./travis-tool.sh run_tests
-
+- "./travis-tool.sh github_package robertzk/objectdiff"
+script: "./travis-tool.sh run_tests"
 after_failure:
   - ./travis-tool.sh dump_logs
 after_success:
   - "Rscript -e 'library(covr);coveralls()'"
-
 notifications:
   email:
     on_success: change
     on_failure: change
-
   hipchat:
-
-  hipchat:
-    rooms: # Added using: travis encrypt "[api token]@[room]" --add notifications.hipchat.rooms
-      secure: "ZpMjoT1RX0WlETs8+3oo9TBLwXOvxBPqMGepeJNZ4sDCIVVC7DAc+FCC06esJ2/jzk4wDRS0YULGnpLzqueSDlYXPt6kcE2VW1zmQ+9QjhZ3dzweNVoq+EWA1HE59TZhHjpaSsGvWmUk1WWl7CutWcUt1jR6G6/+mgEdWNJBjXs="
+    rooms:
+      secure: mrJnMQv+nNC2lbEBlsS9q3Uaqevt0bRSMp8Nw7OBLQwVP+gfqkz6omvlatYhMwumiZxUZZdb1qPggx0gx8N0C3galJoaq9U1fjtZnX0nAL519uYbwNGlK6Z0Pq/27BW3014ZVrRcTKQa0xJM5/LfN1tzD+hyAyJiocOEIkdABAA=
     on_success: change
     on_failure: change
     template:
-      - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} | Details: %{build_url} | Changes: %{compare_url}'
+    - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
+      | Details: %{build_url} | Changes: %{compare_url}"

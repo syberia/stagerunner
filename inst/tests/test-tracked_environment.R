@@ -1,3 +1,5 @@
+library(testthatsomemore)
+
 context('tracked_environment')
 
 # The objectdiff package provides the ability to use a single environment
@@ -10,4 +12,10 @@ context('tracked_environment')
 # if its remember parameter is set to TRUE, it will use the tracked_environment's
 # rollback abilities to provide the correct behavior when executing an
 # earlier stage.
+
+describe('tracked_environments', {
+  test_that('it can initialize a stageRunner using a tracked_environment', {
+    assert(stageRunner$new(tracked_environment(), list()))
+  })
+})
 
