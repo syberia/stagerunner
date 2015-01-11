@@ -82,6 +82,7 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE,
     # Set up parents for treeSkeleton.
     .self$.clear_cache()
     .self$.set_parents()
+    .self$.set_prefixes()
 
     # Set the first cache environment
     if (length(stages) > 0) {
@@ -533,6 +534,19 @@ stageRunner__.set_parents <- function() {
     }
   }
   .parent <<- NULL
+}
+
+#' Set all prefixes for child stageRunners.
+#'
+#' When a stageRunner is used in conjunction with an
+#' \code{objectdiff::tracked_environment}, we need to remember
+#' the full nested tree structure. This function sets up the
+#' \code{prefix} member of each sub-stageRunner recursively to enable
+#' correct remembering functionality.
+#'
+#' @name stageRunner__.set_prefixes
+stageRunner__.set_prefixes <- function() {
+
 }
 
 #' Determine the root of the stageRunner.
