@@ -3,5 +3,6 @@
 export(is.stageRunner)
 export(is.stagerunner)
 export(stageRunner)
+exportClass(tracked_environment)
 import(testthat)
 import(testthatsomemore)

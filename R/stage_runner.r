@@ -36,8 +36,15 @@ accessor_method <- function(attr) {
 #'    method is blank. Otherwise, it will begin from the previous unexecuted
 #'    stage.  The default is "head". This argument has no effect if
 #'    \code{remember = FALSE}.
-stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
+stageRunner__initialize <- function(context, .stages, remember = FALSE,
                                     mode = getOption("stagerunner.mode") %||% 'head') {
+  # We must do our own type checking on context for compatibility with
+  # objectdiff::tracked_environment.
+  if (!is.environment(context)) {
+    stop("Please pass an ", sQuote("environment"), " as the context for ",
+         "a stageRunner")
+  }
+
   .finished <<- FALSE # TODO: Remove this hack for printing
   context <<- context
 
@@ -543,14 +550,8 @@ stageRunner__.root <- function() {
 #' @export
 NULL
 
-
-setClass('tracked_environment')
-
-#' @export
-setClassUnion('anyEnvironment', c('environment', 'tracked_environment'))
-
 stageRunner <- setRefClass('stageRunner',
-  fields = list(context = 'anyEnvironment', stages = 'list', remember = 'logical',
+  fields = list(context = 'ANY', stages = 'list', remember = 'logical',
                 .mode = 'character', .parent = 'ANY', .finished = 'logical'),
   methods = list(
     initialize   = stageRunner__initialize,

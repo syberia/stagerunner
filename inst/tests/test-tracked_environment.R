@@ -1,4 +1,5 @@
 library(testthatsomemore)
+library(objectdiff)
 
 context('tracked_environment')
 
