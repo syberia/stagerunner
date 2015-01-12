@@ -225,7 +225,7 @@ stageRunner__run <- function(from = NULL, to = NULL,
       
       # If terminal node, execute the stage (if it was nested,  it's already been
       # executed in order to recursively fetch the before_env).
-      if (!nested_run) run_stage(...) 
+      if (!nested_run) { run_stage(...) }
     }
     else if (remember) { run_stage(..., remember_flag = FALSE) }
     else { run_stage(...) }
@@ -236,23 +236,17 @@ stageRunner__run <- function(from = NULL, to = NULL,
       # (since that node will execute starting with what's in the context now --
       # this also ensures that running that node with a separate call to
       # $run will not bump into a "you haven't executed this stage yet" error).
-      node <- treeSkeleton$new(stages[[stage_index]])$successor()
-      if (!is.null(node)) # Prepare a cache for the future!
-        copy_env(node$object$cached_env <- new.env(parent = parent.env(context)), context)
-      # TODO: Remove this hack used for printing
-      else {
-        root <- .self$.root()
-        root$.finished <- TRUE
-      }
+      .self$.mark_finished(stage_index)
     }
 
-    if (display_message)
+    if (display_message) {
       show_message(names(stages), stage_index, begin = FALSE,
                    nested = nested_run, depth = .depth)
+    }
   }
 
-  if (remember && remember_flag) list(before = before_env, after = context)
-  else invisible(TRUE)
+  if (remember && remember_flag) { list(before = before_env, after = context) }
+  else { invisible(TRUE) }
 }
 
 #' Wrap a function around a stageRunner's terminal nodes
@@ -554,7 +548,7 @@ stageRunner__.before_env <- function(stage_index) {
   if (.self$with_tracked_environment()) {
     # We are using the objectdiff package and its tracked_environment,
     # so we have to "roll back" to a previous commit.
-    current_commit <- paste(.prefix, stage_index)
+    current_commit <- paste(.self$.prefix, stage_index)
     if (!current_commit %in% names(package_function("objectdiff", "commits")(context))) {
       cannot_run_error()
     }
@@ -573,6 +567,28 @@ stageRunner__.before_env <- function(stage_index) {
   }
 }
 
+#' Mark a given stage as being finished.
+#' 
+#' @param stage_index integer. The index of the substage in this stageRunner.
+stageRunner__.mark_finished <- function(stage_index) {
+  node <- treeSkeleton$new(stages[[stage_index]])$successor()
+
+  if (!is.null(node)) { # Prepare a cache for the future!
+    if (.self$with_tracked_environment()) {
+      # We assume the head for the tracked_environment is set correctly.
+      new_commit <- paste0(.self$.prefix, stage_index)
+      package_function("objectdiff", "commit")(context, new_commit)
+    } else {
+      node$object$cached_env <- new.env(parent = parent.env(context))
+      copy_env(node$object$cached_env, context)
+    }
+  } else {
+    # TODO: Remove this hack used for printing
+    root <- .self$.root()
+    root$.finished <- TRUE
+  }
+}
+
 #' Determine the root of the stageRunner.
 #'
 #' @name stageRunner__.root
@@ -585,9 +601,8 @@ stageRunner__.root <- function() {
 #' a linear sequence of actions.
 #' 
 #' @name stageRunner
+#' @docType class
 #' @export
-NULL
-
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'ANY', stages = 'list', remember = 'logical',
                 .mode = 'character', .parent = 'ANY', .finished = 'logical',
@@ -611,9 +626,10 @@ stageRunner <- setRefClass('stageRunner',
     .clear_cache = stageRunner__.clear_cache,
     .root        = stageRunner__.root,
 
-    # objectdiff related functionality
-    .set_prefixes = stageRunner__.set_prefixes,
-    .before_env   = stageRunner__.before_env,
+    # objectdiff intertwined functionality
+    .set_prefixes  = stageRunner__.set_prefixes,
+    .before_env    = stageRunner__.before_env,
+    .mark_finished = stageRunner__.mark_finished,
     with_tracked_environment = function() { is(context, 'tracked_environment') }
   )
 )
@@ -638,19 +654,6 @@ is.stageRunner <- is.stagerunner
 #'   environment (i.e., \code{parent.frame()}).
 #' @return an environment with some additional attributes for
 #'   navigating in a tree-like structure.
-#stageRunnerNode <- function(fn, parent_obj, parent_env = parent.frame()) {
-#  env <- new.env(parent = parent_env)
-#  class(env) <- c('stageRunnerNode', class(env))
-#  env$fn <- fn
-#
-#  # Make a stageRunnerNode commensurate with treeSkeleton
-#  # parent will be set later
-#  if (!missing(parent_obj)) attr(env, 'parent') <- parent_obj
-#  attr(env, 'children') <- list()
-#
-#  env
-#}
-
 #' @name stageRunnerNode
 #' @docType class
 stageRunnerNode <- setRefClass('stageRunnerNode',

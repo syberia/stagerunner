@@ -2,6 +2,6 @@
 
 export(is.stageRunner)
 export(is.stagerunner)
-export(stageRunner)
+exportClasses(stageRunner)
 import(testthat)
 import(testthatsomemore)
