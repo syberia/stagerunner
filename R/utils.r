@@ -10,7 +10,7 @@ is_any <- function(obj, klasses) {
   any(vapply(klasses, inherits, logical(1), x = obj))
 }
 
-package_function(pkg, fn) { # for when using :: breaks R CMD check
+package_function <- function(pkg, fn) { # for when using :: breaks R CMD check
   get(fn, envir = getNamespace(pkg))
 }
 
