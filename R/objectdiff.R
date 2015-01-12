@@ -10,6 +10,13 @@
 #' \code{prefix} member of each sub-stageRunner recursively to enable
 #' correct remembering functionality.
 #'
+#' @param prefix character. The prefix to assign to this stageRunner.
 #' @name stageRunner__.set_prefixes
-stageRunner__.set_prefixes <- function() {
+stageRunner__.set_prefixes <- function(prefix = '') {
+  .prefix <<- prefix
+  for (i in seq_along(stages)) {
+    if (is.stageRunner(stages[[i]])) {
+      stages[[i]]$.set_prefixes(paste0(prefix, i, '/'))
+    }
+  }
 }

@@ -82,7 +82,9 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE,
     # Set up parents for treeSkeleton.
     .self$.clear_cache()
     .self$.set_parents()
-    .self$.set_prefixes()
+    if (.self$with_tracked_environment()) {
+      .self$.set_prefixes()
+    }
 
     # Set the first cache environment
     if (length(stages) > 0) {
@@ -182,27 +184,31 @@ stageRunner__run <- function(from = NULL, to = NULL,
     run_stage <-
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
-        if (is.stagerunner(stage))
-          function(...) stage$run(verbose = verbose, .depth = .depth + 1, ...)
-        else {
+        if (is.stagerunner(stage)) { 
+          function(...) { stage$run(verbose = verbose, .depth = .depth + 1, ...) }
+        } else {
          nested_run <- FALSE
          # Intercept the remember_flag argument to calls to the stageRunnerNode
          # (since it doesn't know how to use it).
-         function(..., remember_flag = TRUE) stage$run(...)
+         function(..., remember_flag = TRUE) { stage$run(...) }
         }
       } else if (is.list(stage_key[[stage_index]])) {
-        if (!is.stagerunner(stages[[stage_index]]))
+        if (!is.stagerunner(stages[[stage_index]])) {
           stop("Invalid stage key: attempted to make a nested stage reference ",
                "to a non-existent stage")
-        function(...)
+        }
+
+        function(...) {
           stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE,
                                     verbose = verbose, .depth = .depth + 1, ...)
+        }
       } else next 
 
     display_message <- verbose && contains_true(stage_key[[stage_index]])
-    if (display_message)
+    if (display_message) {
       show_message(names(stages), stage_index, begin = TRUE,
                    nested = nested_run, depth = .depth)
+    }
 
     # Now handle when remember = TRUE, i.e., we have to cache the
     # progress along each stage.
@@ -212,11 +218,12 @@ stageRunner__run <- function(from = NULL, to = NULL,
       # this is the first stage of a $run() call, so use the cached
       # environment.
       before_env <-
-        if (nested_run) run_stage(..., remember_flag = TRUE)$before
+        if (nested_run) { run_stage(..., remember_flag = TRUE)$before }
         else { # a leaf / terminal node
-          if (is.null(env <- stages[[stage_index]]$cached_env))
+          if (is.null(env <- stages[[stage_index]]$cached_env)) {
             stop("Cannot run this stage yet because some previous stages have ",
                  "not been executed.")
+          }
 
           # Restart execution from cache, so set context to the cached environment.
           copy_env(context, env)
@@ -227,8 +234,8 @@ stageRunner__run <- function(from = NULL, to = NULL,
       # executed in order to recursively fetch the before_env).
       if (!nested_run) run_stage(...) 
     }
-    else if (remember) run_stage(..., remember_flag = FALSE)
-    else run_stage(...)
+    else if (remember) { run_stage(..., remember_flag = FALSE) }
+    else { run_stage(...) }
 
     if (remember && !nested_run) {
       # When we're done running a stage (i.e., processing a terminal node),
@@ -536,19 +543,6 @@ stageRunner__.set_parents <- function() {
   .parent <<- NULL
 }
 
-#' Set all prefixes for child stageRunners.
-#'
-#' When a stageRunner is used in conjunction with an
-#' \code{objectdiff::tracked_environment}, we need to remember
-#' the full nested tree structure. This function sets up the
-#' \code{prefix} member of each sub-stageRunner recursively to enable
-#' correct remembering functionality.
-#'
-#' @name stageRunner__.set_prefixes
-stageRunner__.set_prefixes <- function() {
-
-}
-
 #' Determine the root of the stageRunner.
 #'
 #' @name stageRunner__.root
@@ -566,7 +560,8 @@ NULL
 
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'ANY', stages = 'list', remember = 'logical',
-                .mode = 'character', .parent = 'ANY', .finished = 'logical'),
+                .mode = 'character', .parent = 'ANY', .finished = 'logical',
+                .prefix = 'character'),
   methods = list(
     initialize   = stageRunner__initialize,
     run          = stageRunner__run,
@@ -584,7 +579,11 @@ stageRunner <- setRefClass('stageRunner',
     mode         = accessor_method(.mode),
     .set_parents = stageRunner__.set_parents,
     .clear_cache = stageRunner__.clear_cache,
-    .root        = stageRunner__.root
+    .root        = stageRunner__.root,
+
+    # objectdiff related functionality
+    .set_prefixes = stageRunner__.set_prefixes,
+    with_tracked_environment = function() { is(context, 'tracked_environment') }
   )
 )
 
