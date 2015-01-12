@@ -78,16 +78,14 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE,
   }
 
   remember <<- remember
-  if (remember) {
+  if (isTRUE(remember)) {
     # Set up parents for treeSkeleton.
     .self$.clear_cache()
     .self$.set_parents()
     if (.self$with_tracked_environment()) {
       .self$.set_prefixes()
-    }
-
-    # Set the first cache environment
-    if (length(stages) > 0) {
+    } else if (length(stages) > 0) {
+      # Set the first cache environment
       first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
       first_env$cached_env <- new.env(parent = parent.env(context))
       copy_env(first_env$cached_env, context)
@@ -548,14 +546,22 @@ stageRunner__.before_env <- function(stage_index) {
   if (.self$with_tracked_environment()) {
     # We are using the objectdiff package and its tracked_environment,
     # so we have to "roll back" to a previous commit.
-    current_commit <- paste(.self$.prefix, stage_index)
+    current_commit <- paste0(.self$.prefix, stage_index)
+
     if (!current_commit %in% names(package_function("objectdiff", "commits")(context))) {
-      cannot_run_error()
+      if (`first_commit?`(current_commit)) {
+        # The first commit.
+        # TODO: (RK) Do this more robustly.
+        package_function("objectdiff", "commit")(context, current_commit)
+      } else {
+        cannot_run_error()
+      }
+    } else {
+      package_function("objectdiff", "force_push")(context, current_commit)
     }
 
-    package_function("objectdiff", "force_push")(context, current_commit)
-    env <- new.env(parent = parent.env(context))
-    copy_env(env, environment(current_commit))
+    env <- new.env(parent = package_function("objectdiff", "parent.env.tracked_environment")(context))
+    copy_env(env, package_function("objectdiff", "environment")(context))
     env
   } else {
     env <- stages[[stage_index]]$cached_env
@@ -576,8 +582,7 @@ stageRunner__.mark_finished <- function(stage_index) {
   if (!is.null(node)) { # Prepare a cache for the future!
     if (.self$with_tracked_environment()) {
       # We assume the head for the tracked_environment is set correctly.
-      new_commit <- paste0(.self$.prefix, stage_index)
-      package_function("objectdiff", "commit")(context, new_commit)
+      package_function("objectdiff", "commit")(context, node$object$index())
     } else {
       node$object$cached_env <- new.env(parent = parent.env(context))
       copy_env(node$object$cached_env, context)
@@ -680,9 +685,6 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
         on.exit(environment(.callable) <- parent.env(environment(.callable)))
         .callable(.context, ...)
       }
-      if (is(.context, 'tracked_environment')) {
-        objectdiff::commit(.context) <<- ''
-      }
       executed <<- TRUE
     }, 
 
@@ -741,7 +743,14 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
     was_executed = function() { executed },
     parent   = accessor_method(.parent),
     children = function() list(),
-    show     = function() { cat("A stageRunner node containing: \n"); print(callable) }
+    show     = function() { cat("A stageRunner node containing: \n"); print(callable) },
+
+    # objectdiff intertwining functions
+    index    = function() {
+      ix <- which(vapply(.self$.parent$stages,
+        function(x) identical(.self, x$.self), logical(1)))
+      paste0(.self$.parent$.prefix, ix)
+    }
   )
 )
 

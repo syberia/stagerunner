@@ -20,3 +20,7 @@ stageRunner__.set_prefixes <- function(prefix = '') {
     }
   }
 }
+
+`first_commit?` <- function(commit) {
+  all(strsplit(commit, "/", fixed = TRUE)[[1]] == '1')
+}

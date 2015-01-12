@@ -16,7 +16,24 @@ context('tracked_environment')
 
 describe('tracked_environments', {
   test_that('it can initialize a stageRunner using a tracked_environment', {
-    assert(stageRunner$new(tracked_environment(), list()))
+    assert(stageRunner$new(tracked_environment(), list(), remember = TRUE))
+  })
+
+  test_that('it can run a simple example with a tracked_environment', {
+    sr <- stageRunner$new(tracked_environment(), remember = TRUE,
+      list(a = function(e) e$x <- 1, b = function(e) e$y <- 2))
+    sr$run()
+    expect_equal(sr$context$x, 1)
+    expect_equal(sr$context$y, 2)
+  })
+
+  test_that('it can re-run a previous stage with a tracked_environment', {
+    sr <- stageRunner$new(tracked_environment(), remember = TRUE,
+      list(a = function(e) e$x <- 1, b = function(e) e$y <- 2))
+    sr$run()
+    sr$run('a')
+    expect_equal(sr$context$x, 1)
+    expect_null(sr$context$y)
   })
 })
 
