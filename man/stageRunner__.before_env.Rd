@@ -12,7 +12,7 @@ environment.}
 }
 \value{
 a fresh new environment representing what would have been in
-  the context as of right before the executing that substage.
+  the context as of right before the execution of that substage.
 }
 \description{
 Get an environment representing the context directly before executing a given stage.

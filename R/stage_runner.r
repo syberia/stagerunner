@@ -536,7 +536,7 @@ stageRunner__.set_parents <- function() {
 #' @param stage_index integer. The substage for which to grab the before
 #'   environment.
 #' @return a fresh new environment representing what would have been in
-#'   the context as of right before the executing that substage.
+#'   the context as of right before the execution of that substage.
 stageRunner__.before_env <- function(stage_index) {
   cannot_run_error <- function() {
     stop("Cannot run this stage yet because some previous stages have ",
@@ -550,8 +550,8 @@ stageRunner__.before_env <- function(stage_index) {
 
     if (!current_commit %in% names(package_function("objectdiff", "commits")(context))) {
       if (`first_commit?`(current_commit)) {
-        # The first commit.
-        # TODO: (RK) Do this more robustly.
+        # TODO: (RK) Do this more robustly. This will fail if there is a 
+        # first sub-stageRunner with an empty list as its stages.
         package_function("objectdiff", "commit")(context, current_commit)
       } else {
         cannot_run_error()
@@ -606,8 +606,9 @@ stageRunner__.root <- function() {
 #' a linear sequence of actions.
 #' 
 #' @name stageRunner
-#' @docType class
 #' @export
+NULL
+
 stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'ANY', stages = 'list', remember = 'logical',
                 .mode = 'character', .parent = 'ANY', .finished = 'logical',
