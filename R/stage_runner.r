@@ -217,18 +217,11 @@ stageRunner__run <- function(from = NULL, to = NULL,
       # If remember = remember_flag = TRUE and before_env has not been set
       # this is the first stage of a $run() call, so use the cached
       # environment.
-      before_env <-
-        if (nested_run) { run_stage(..., remember_flag = TRUE)$before }
-        else { # a leaf / terminal node
-          if (is.null(env <- stages[[stage_index]]$cached_env)) {
-            stop("Cannot run this stage yet because some previous stages have ",
-                 "not been executed.")
-          }
-
-          # Restart execution from cache, so set context to the cached environment.
-          copy_env(context, env)
-          env
-        }
+      if (nested_run) {
+        before_env <- run_stage(..., remember_flag = TRUE)$before
+      } else { # a leaf / terminal node
+        before_env <- .self$.before_env(stage_index)
+      }
       
       # If terminal node, execute the stage (if it was nested,  it's already been
       # executed in order to recursively fetch the before_env).
@@ -543,6 +536,43 @@ stageRunner__.set_parents <- function() {
   .parent <<- NULL
 }
 
+#' Get an environment representing the context directly before executing a given stage.
+#'
+#' @note If there is a lot of data in the remembered environment, this function
+#'   may be computationally expensive as it has to create a new environment
+#'   with a copy of all the relevant data.
+#' @param stage_index integer. The substage for which to grab the before
+#'   environment.
+#' @return a fresh new environment representing what would have been in
+#'   the context as of right before the executing that substage.
+stageRunner__.before_env <- function(stage_index) {
+  cannot_run_error <- function() {
+    stop("Cannot run this stage yet because some previous stages have ",
+         "not been executed.")
+  }
+
+  if (.self$with_tracked_environment()) {
+    # We are using the objectdiff package and its tracked_environment,
+    # so we have to "roll back" to a previous commit.
+    current_commit <- paste(.prefix, stage_index)
+    if (!current_commit %in% names(package_function("objectdiff", "commits")(context))) {
+      cannot_run_error()
+    }
+
+    package_function("objectdiff", "force_push")(context, current_commit)
+    env <- new.env(parent = parent.env(context))
+    copy_env(env, environment(current_commit))
+    env
+  } else {
+    env <- stages[[stage_index]]$cached_env
+    if (is.null(env)) { cannot_run_error() }
+
+    # Restart execution from cache, so set context to the cached environment.
+    copy_env(context, env)
+    env
+  }
+}
+
 #' Determine the root of the stageRunner.
 #'
 #' @name stageRunner__.root
@@ -583,6 +613,7 @@ stageRunner <- setRefClass('stageRunner',
 
     # objectdiff related functionality
     .set_prefixes = stageRunner__.set_prefixes,
+    .before_env   = stageRunner__.before_env,
     with_tracked_environment = function() { is(context, 'tracked_environment') }
   )
 )
