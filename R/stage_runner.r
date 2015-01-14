@@ -333,7 +333,7 @@ stageRunner__coalesce <- function(other_runner) {
             #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
             ) {
           stages[[names(stages)[stage_index]]]$cached_env <<-
-            ne.env(parent = parent.env(context))
+            new.env(parent = parent.env(context))
           if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
               is.environment(stages[[names(stages)[stage_index]]]$cached_env)) {
             copy_env(stages[[names(stages)[stage_index]]]$cached_env,
