@@ -310,7 +310,31 @@ stageRunner__coalesce <- function(other_runner) {
   if (!isTRUE(remember)) return()
 
   if (.self$with_tracked_environment()) {
-
+    common <- sum(cumsum(.self$stage_names() != other_runner$stage_names()) == 0)
+    # Warning: Coalescing stageRunners with tracked_environments does not
+    # duplicate the tracked_environment, so the other_runner becomes invalidated,
+    # and this is a destructive action.
+    # TODO: (RK) What if the tracked_environment given initially to the stageRunner
+    # already has some commits?
+    commits     <- package_function("objectdiff", "commits")
+    `context<-` <- function(obj, value) {
+      if (is.stagerunner(obj)) {
+        obj$context <- value
+        for (stage in obj$stages) { Recall(stage, value) }
+      } else if (is.stageRunnerNode(obj)) {
+        obj$.context <- value
+        if (is.stagerunner(obj$callable)) { Recall(obj$callable, value) }
+      }
+    }
+    .self$context  <- other_runner$context
+    for (stage in .self$stages) { context(stage) <- other_runner$context }
+    other_runner$context <- new.env(parent = emptyenv())
+    commit_count   <- length(commits(.self$context)) 
+    mismatch_count <- commit_count - (common + 1)
+    if (mismatch_count > 0) {
+      package_function("objectdiff", "force_push")(.self$context, commit_count)
+      package_function("objectdiff", "rollback")  (.self$context, mismatch_count)
+    }
   } else {
     stagenames <- names(other_runner$stages) %||% character(length(other_runner$stages))
     lapply(seq_along(other_runner$stages), function(stage_index) {
