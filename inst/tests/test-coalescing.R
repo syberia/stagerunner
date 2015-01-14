@@ -25,6 +25,16 @@ describe('with regular environments', {
     sr2$coalesce(sr1)
     expect_error(sr2$run(2), "some previous stages have not been executed")
   })
+
+  test_that("it cannot coalesce when a stage is renamed", {
+    sr1 <- stageRunner$new(new.env(), remember = TRUE,
+      list(a = function(e) e$x <- 1, b = function(e) e$y <- 2))
+    sr2 <- stageRunner$new(new.env(), remember = TRUE,
+      list(a = function(e) e$x <- 1, c = function(e) e$y <- 4))
+    sr1$run(1)
+    sr2$coalesce(sr1)
+    expect_error(sr2$run(2), "some previous stages have not been executed")
+  })
 })
 
 describe('with tracked_environments', {
