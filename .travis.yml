@@ -11,7 +11,7 @@ install:
 - "./travis-tool.sh github_package robertzk/objectdiff"
 script: "./travis-tool.sh run_tests"
 after_failure:
-- "./travis-tool.sh dump_logs"
+  - ./travis-tool.sh dump_logs
 after_success:
   - "Rscript -e 'library(covr);coveralls()'"
 notifications:

@@ -36,8 +36,15 @@ accessor_method <- function(attr) {
 #'    method is blank. Otherwise, it will begin from the previous unexecuted
 #'    stage.  The default is "head". This argument has no effect if
 #'    \code{remember = FALSE}.
-stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
+stageRunner__initialize <- function(context, .stages, remember = FALSE,
                                     mode = getOption("stagerunner.mode") %||% 'head') {
+  # We must do our own type checking on context for compatibility with
+  # objectdiff::tracked_environment.
+  if (!is.environment(context)) {
+    stop("Please pass an ", sQuote("environment"), " as the context for ",
+         "a stageRunner")
+  }
+
   .finished <<- FALSE # TODO: Remove this hack for printing
   context <<- context
 
@@ -71,13 +78,14 @@ stageRunner__initialize <- function(context = NULL, .stages, remember = FALSE,
   }
 
   remember <<- remember
-  if (remember) {
+  if (isTRUE(remember)) {
     # Set up parents for treeSkeleton.
     .self$.clear_cache()
     .self$.set_parents()
-
-    # Set the first cache environment
-    if (length(stages) > 0) {
+    if (.self$with_tracked_environment()) {
+      .self$.set_prefixes()
+    } else if (length(stages) > 0) {
+      # Set the first cache environment
       first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
       first_env$cached_env <- new.env(parent = parent.env(context))
       copy_env(first_env$cached_env, context)
@@ -174,27 +182,31 @@ stageRunner__run <- function(from = NULL, to = NULL,
     run_stage <-
       if (identical(stage_key[[stage_index]], TRUE)) {
         stage <- stages[[stage_index]]
-        if (is.stagerunner(stage))
-          function(...) stage$run(verbose = verbose, .depth = .depth + 1, ...)
-        else {
+        if (is.stagerunner(stage)) { 
+          function(...) { stage$run(verbose = verbose, .depth = .depth + 1, ...) }
+        } else {
          nested_run <- FALSE
          # Intercept the remember_flag argument to calls to the stageRunnerNode
          # (since it doesn't know how to use it).
-         function(..., remember_flag = TRUE) stage$run(...)
+         function(..., remember_flag = TRUE) { stage$run(...) }
         }
       } else if (is.list(stage_key[[stage_index]])) {
-        if (!is.stagerunner(stages[[stage_index]]))
+        if (!is.stagerunner(stages[[stage_index]])) {
           stop("Invalid stage key: attempted to make a nested stage reference ",
                "to a non-existent stage")
-        function(...)
+        }
+
+        function(...) {
           stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE,
                                     verbose = verbose, .depth = .depth + 1, ...)
+        }
       } else next 
 
     display_message <- verbose && contains_true(stage_key[[stage_index]])
-    if (display_message)
+    if (display_message) {
       show_message(names(stages), stage_index, begin = TRUE,
                    nested = nested_run, depth = .depth)
+    }
 
     # Now handle when remember = TRUE, i.e., we have to cache the
     # progress along each stage.
@@ -203,24 +215,18 @@ stageRunner__run <- function(from = NULL, to = NULL,
       # If remember = remember_flag = TRUE and before_env has not been set
       # this is the first stage of a $run() call, so use the cached
       # environment.
-      before_env <-
-        if (nested_run) run_stage(..., remember_flag = TRUE)$before
-        else { # a leaf / terminal node
-          if (is.null(env <- stages[[stage_index]]$cached_env))
-            stop("Cannot run this stage yet because some previous stages have ",
-                 "not been executed.")
-
-          # Restart execution from cache, so set context to the cached environment.
-          copy_env(context, env)
-          env
-        }
+      if (nested_run) {
+        before_env <- run_stage(..., remember_flag = TRUE)$before
+      } else { # a leaf / terminal node
+        before_env <- .self$.before_env(stage_index)
+      }
       
       # If terminal node, execute the stage (if it was nested,  it's already been
       # executed in order to recursively fetch the before_env).
-      if (!nested_run) run_stage(...) 
+      if (!nested_run) { run_stage(...) }
     }
-    else if (remember) run_stage(..., remember_flag = FALSE)
-    else run_stage(...)
+    else if (remember) { run_stage(..., remember_flag = FALSE) }
+    else { run_stage(...) }
 
     if (remember && !nested_run) {
       # When we're done running a stage (i.e., processing a terminal node),
@@ -228,23 +234,17 @@ stageRunner__run <- function(from = NULL, to = NULL,
       # (since that node will execute starting with what's in the context now --
       # this also ensures that running that node with a separate call to
       # $run will not bump into a "you haven't executed this stage yet" error).
-      node <- treeSkeleton$new(stages[[stage_index]])$successor()
-      if (!is.null(node)) # Prepare a cache for the future!
-        copy_env(node$object$cached_env <- new.env(parent = parent.env(context)), context)
-      # TODO: Remove this hack used for printing
-      else {
-        root <- .self$.root()
-        root$.finished <- TRUE
-      }
+      .self$.mark_finished(stage_index)
     }
 
-    if (display_message)
+    if (display_message) {
       show_message(names(stages), stage_index, begin = FALSE,
                    nested = nested_run, depth = .depth)
+    }
   }
 
-  if (remember && remember_flag) list(before = before_env, after = context)
-  else invisible(TRUE)
+  if (remember && remember_flag) { list(before = before_env, after = context) }
+  else { invisible(TRUE) }
 }
 
 #' Wrap a function around a stageRunner's terminal nodes
@@ -301,44 +301,75 @@ stageRunner__around <- function(other_runner) {
 #'
 #' @name stageRunner__coalesce
 #' @param other_runner stageRunner. Another stageRunner from which to coalesce.
+#' @note coalescing is ill-defined for stageRunner with unnamed stages,
+#'    since it is impossible to tell when a stage has changed.
 stageRunner__coalesce <- function(other_runner) {
   # TODO: Should we care about insertion of new stages causing cache wipes?
   # For now it seems like this would just be an annoyance.
   # stopifnot(remember)
   if (!isTRUE(remember)) return()
-  stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
-  lapply(seq_along(other_runner$stages), function(stage_index) {
-    # TODO: Match by name *OR* index
-    if (stagenames[[stage_index]] %in% names(stages)) {
-      # If both are stageRunners, try to coalesce our sub-stages.
-      if (is.stagerunner(stages[[names(stages)[stage_index]]]) &&
-          is.stagerunner(other_runner$stages[[stage_index]])) {
-          stages[[names(stages)[stage_index]]]$coalesce(
-            other_runner$stages[[stage_index]])
-      # If both are not stageRunners, copy the cached_env if and only if
-      # the stored function and its environment are identical
-      } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
-          !is.stagerunner(other_runner$stages[[stage_index]]) &&
-          !is.null(other_runner$stages[[stage_index]]$cached_env) #&&
-          #identical(deparse(stages[[names(stages)[stage_index]]]$fn),
-          #          deparse(other_runner$stages[[stage_index]]$fn)) # &&
-          # This is way too tricky and far beyond my abilities..
-          #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
-          #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
-          ) {
-        stages[[names(stages)[stage_index]]]$cached_env <<-
-          new.env(parent = parent.env(context))
-        if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
-            is.environment(stages[[names(stages)[stage_index]]]$cached_env)) {
-          copy_env(stages[[names(stages)[stage_index]]]$cached_env,
-                   other_runner$stages[[stage_index]]$cached_env)
-          stages[[names(stages)[stage_index]]]$executed <<- 
-            other_runner$stages[[stage_index]]$executed
-        }
+
+  if (.self$with_tracked_environment()) {
+    common <- sum(cumsum(.self$stage_names() != other_runner$stage_names()) == 0)
+    # Warning: Coalescing stageRunners with tracked_environments does not
+    # duplicate the tracked_environment, so the other_runner becomes invalidated,
+    # and this is a destructive action.
+    # TODO: (RK) What if the tracked_environment given initially to the stageRunner
+    # already has some commits?
+    commits     <- package_function("objectdiff", "commits")
+    `context<-` <- function(obj, value) {
+      if (is.stagerunner(obj)) {
+        obj$context <- value
+        for (stage in obj$stages) { Recall(stage, value) }
+      } else if (is.stageRunnerNode(obj)) {
+        obj$.context <- value
+        if (is.stagerunner(obj$callable)) { Recall(obj$callable, value) }
       }
     }
-  })
-  .set_parents()
+    .self$context  <- other_runner$context
+    for (stage in .self$stages) { context(stage) <- other_runner$context }
+    other_runner$context <- new.env(parent = emptyenv())
+    commit_count   <- length(commits(.self$context)) 
+    mismatch_count <- commit_count - (common + 1)
+    if (mismatch_count > 0) {
+      package_function("objectdiff", "force_push")(.self$context, commit_count)
+      package_function("objectdiff", "rollback")  (.self$context, mismatch_count)
+    }
+  } else {
+    stagenames <- names(other_runner$stages) %||% character(length(other_runner$stages))
+    lapply(seq_along(other_runner$stages), function(stage_index) {
+      # TODO: Match by name *OR* index
+      if (stagenames[[stage_index]] %in% names(stages)) {
+        # If both are stageRunners, try to coalesce our sub-stages.
+        if (is.stagerunner(stages[[names(stages)[stage_index]]]) &&
+            is.stagerunner(other_runner$stages[[stage_index]])) {
+            stages[[names(stages)[stage_index]]]$coalesce(
+              other_runner$stages[[stage_index]])
+        # If both are not stageRunners, copy the cached_env if and only if
+        # the stored function and its environment are identical
+        } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
+            !is.stagerunner(other_runner$stages[[stage_index]]) &&
+            !is.null(other_runner$stages[[stage_index]]$cached_env) #&&
+            #identical(deparse(stages[[names(stages)[stage_index]]]$fn),
+            #          deparse(other_runner$stages[[stage_index]]$fn)) # &&
+            # This is way too tricky and far beyond my abilities..
+            #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
+            #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
+            ) {
+          stages[[names(stages)[stage_index]]]$cached_env <<-
+            new.env(parent = parent.env(context))
+          if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
+              is.environment(stages[[names(stages)[stage_index]]]$cached_env)) {
+            copy_env(stages[[names(stages)[stage_index]]]$cached_env,
+                     other_runner$stages[[stage_index]]$cached_env)
+            stages[[names(stages)[stage_index]]]$executed <<- 
+              other_runner$stages[[stage_index]]$executed
+          }
+        }
+      }
+    })
+    .set_parents()
+  }
   .self
 }
 
@@ -528,6 +559,72 @@ stageRunner__.set_parents <- function() {
   .parent <<- NULL
 }
 
+#' Get an environment representing the context directly before executing a given stage.
+#'
+#' @note If there is a lot of data in the remembered environment, this function
+#'   may be computationally expensive as it has to create a new environment
+#'   with a copy of all the relevant data.
+#' @param stage_index integer. The substage for which to grab the before
+#'   environment.
+#' @return a fresh new environment representing what would have been in
+#'   the context as of right before the execution of that substage.
+stageRunner__.before_env <- function(stage_index) {
+  cannot_run_error <- function() {
+    stop("Cannot run this stage yet because some previous stages have ",
+         "not been executed.")
+  }
+
+  if (.self$with_tracked_environment()) {
+    # We are using the objectdiff package and its tracked_environment,
+    # so we have to "roll back" to a previous commit.
+    current_commit <- paste0(.self$.prefix, stage_index)
+
+    if (!current_commit %in% names(package_function("objectdiff", "commits")(context))) {
+      if (`first_commit?`(current_commit)) {
+        # TODO: (RK) Do this more robustly. This will fail if there is a 
+        # first sub-stageRunner with an empty list as its stages.
+        package_function("objectdiff", "commit")(context, current_commit)
+      } else {
+        cannot_run_error()
+      }
+    } else {
+      package_function("objectdiff", "force_push")(context, current_commit)
+    }
+
+    env <- new.env(parent = package_function("objectdiff", "parent.env.tracked_environment")(context))
+    copy_env(env, package_function("objectdiff", "environment")(context))
+    env
+  } else {
+    env <- stages[[stage_index]]$cached_env
+    if (is.null(env)) { cannot_run_error() }
+
+    # Restart execution from cache, so set context to the cached environment.
+    copy_env(context, env)
+    env
+  }
+}
+
+#' Mark a given stage as being finished.
+#' 
+#' @param stage_index integer. The index of the substage in this stageRunner.
+stageRunner__.mark_finished <- function(stage_index) {
+  node <- treeSkeleton$new(stages[[stage_index]])$successor()
+
+  if (!is.null(node)) { # Prepare a cache for the future!
+    if (.self$with_tracked_environment()) {
+      # We assume the head for the tracked_environment is set correctly.
+      package_function("objectdiff", "commit")(context, node$object$index())
+    } else {
+      node$object$cached_env <- new.env(parent = parent.env(context))
+      copy_env(node$object$cached_env, context)
+    }
+  } else {
+    # TODO: Remove this hack used for printing
+    root <- .self$.root()
+    root$.finished <- TRUE
+  }
+}
+
 #' Determine the root of the stageRunner.
 #'
 #' @name stageRunner__.root
@@ -544,8 +641,9 @@ stageRunner__.root <- function() {
 NULL
 
 stageRunner <- setRefClass('stageRunner',
-  fields = list(context = 'environment', stages = 'list', remember = 'logical',
-                .mode = 'character', .parent = 'ANY', .finished = 'logical'),
+  fields = list(context = 'ANY', stages = 'list', remember = 'logical',
+                .mode = 'character', .parent = 'ANY', .finished = 'logical',
+                .prefix = 'character'),
   methods = list(
     initialize   = stageRunner__initialize,
     run          = stageRunner__run,
@@ -563,7 +661,13 @@ stageRunner <- setRefClass('stageRunner',
     mode         = accessor_method(.mode),
     .set_parents = stageRunner__.set_parents,
     .clear_cache = stageRunner__.clear_cache,
-    .root        = stageRunner__.root
+    .root        = stageRunner__.root,
+
+    # objectdiff intertwined functionality
+    .set_prefixes  = stageRunner__.set_prefixes,
+    .before_env    = stageRunner__.before_env,
+    .mark_finished = stageRunner__.mark_finished,
+    with_tracked_environment = function() { is(context, 'tracked_environment') }
   )
 )
 
@@ -587,19 +691,6 @@ is.stageRunner <- is.stagerunner
 #'   environment (i.e., \code{parent.frame()}).
 #' @return an environment with some additional attributes for
 #'   navigating in a tree-like structure.
-#stageRunnerNode <- function(fn, parent_obj, parent_env = parent.frame()) {
-#  env <- new.env(parent = parent_env)
-#  class(env) <- c('stageRunnerNode', class(env))
-#  env$fn <- fn
-#
-#  # Make a stageRunnerNode commensurate with treeSkeleton
-#  # parent will be set later
-#  if (!missing(parent_obj)) attr(env, 'parent') <- parent_obj
-#  attr(env, 'children') <- list()
-#
-#  env
-#}
-
 #' @name stageRunnerNode
 #' @docType class
 stageRunnerNode <- setRefClass('stageRunnerNode',
@@ -623,8 +714,8 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
         tmp <- new.env(parent = environment(.callable))
         environment(.callable) <- tmp
         environment(.callable)$cached_env <- correct_cache
+        on.exit(environment(.callable) <- parent.env(environment(.callable)))
         .callable(.context, ...)
-        environment(.callable) <- parent.env(environment(.callable))
       }
       executed <<- TRUE
     }, 
@@ -684,7 +775,14 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
     was_executed = function() { executed },
     parent   = accessor_method(.parent),
     children = function() list(),
-    show     = function() { cat("A stageRunner node containing: \n"); print(callable) }
+    show     = function() { cat("A stageRunner node containing: \n"); print(callable) },
+
+    # objectdiff intertwining functions
+    index    = function() {
+      ix <- which(vapply(.self$.parent$stages,
+        function(x) identical(.self, x$.self), logical(1)))
+      paste0(.self$.parent$.prefix, ix)
+    }
   )
 )
 
