@@ -46,6 +46,20 @@ describe('with regular environments', {
     assert(sr2$run(2))
     expect_identical(sr2$context$y, 4)
   })
+
+  test_that("it coalesces for substages", {
+    sr1 <- stageRunner$new(new.env(), remember = TRUE,
+      list(a = function(e) e$x <- 1,
+           b = list(b1 = function(e) e$y <- 2, b2 = function(e) e$z <- 3, b3 = function(e) e$w <- 4)))
+    sr2 <- stageRunner$new(new.env(), remember = TRUE,
+      list(a = function(e) e$x <- 1,
+           b = list(b1 = function(e) e$y <- 2, b2 = function(e) e$z <- 5, b3 = function(e) e$w <- 6)))
+    sr1$run('a', 'b/b2')
+    sr2$coalesce(sr1)
+    assert(sr2$run('b/b2', 'b'))
+    expect_identical(sr2$context$z, 5)
+    expect_identical(sr2$context$w, 6)
+  })
 })
 
 describe('with tracked_environments', {
