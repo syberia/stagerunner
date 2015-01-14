@@ -301,44 +301,51 @@ stageRunner__around <- function(other_runner) {
 #'
 #' @name stageRunner__coalesce
 #' @param other_runner stageRunner. Another stageRunner from which to coalesce.
+#' @note coalescing is ill-defined for stageRunner with unnamed stages,
+#'    since it is impossible to tell when a stage has changed.
 stageRunner__coalesce <- function(other_runner) {
   # TODO: Should we care about insertion of new stages causing cache wipes?
   # For now it seems like this would just be an annoyance.
   # stopifnot(remember)
   if (!isTRUE(remember)) return()
-  stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
-  lapply(seq_along(other_runner$stages), function(stage_index) {
-    # TODO: Match by name *OR* index
-    if (stagenames[[stage_index]] %in% names(stages)) {
-      # If both are stageRunners, try to coalesce our sub-stages.
-      if (is.stagerunner(stages[[names(stages)[stage_index]]]) &&
-          is.stagerunner(other_runner$stages[[stage_index]])) {
-          stages[[names(stages)[stage_index]]]$coalesce(
-            other_runner$stages[[stage_index]])
-      # If both are not stageRunners, copy the cached_env if and only if
-      # the stored function and its environment are identical
-      } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
-          !is.stagerunner(other_runner$stages[[stage_index]]) &&
-          !is.null(other_runner$stages[[stage_index]]$cached_env) #&&
-          #identical(deparse(stages[[names(stages)[stage_index]]]$fn),
-          #          deparse(other_runner$stages[[stage_index]]$fn)) # &&
-          # This is way too tricky and far beyond my abilities..
-          #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
-          #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
-          ) {
-        stages[[names(stages)[stage_index]]]$cached_env <<-
-          new.env(parent = parent.env(context))
-        if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
-            is.environment(stages[[names(stages)[stage_index]]]$cached_env)) {
-          copy_env(stages[[names(stages)[stage_index]]]$cached_env,
-                   other_runner$stages[[stage_index]]$cached_env)
-          stages[[names(stages)[stage_index]]]$executed <<- 
-            other_runner$stages[[stage_index]]$executed
+
+  if (.self$with_tracked_environment()) {
+
+  } else {
+    stagenames <- names(other_runner$stages) %||% character(length(other_runner$stages))
+    lapply(seq_along(other_runner$stages), function(stage_index) {
+      # TODO: Match by name *OR* index
+      if (stagenames[[stage_index]] %in% names(stages)) {
+        # If both are stageRunners, try to coalesce our sub-stages.
+        if (is.stagerunner(stages[[names(stages)[stage_index]]]) &&
+            is.stagerunner(other_runner$stages[[stage_index]])) {
+            stages[[names(stages)[stage_index]]]$coalesce(
+              other_runner$stages[[stage_index]])
+        # If both are not stageRunners, copy the cached_env if and only if
+        # the stored function and its environment are identical
+        } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
+            !is.stagerunner(other_runner$stages[[stage_index]]) &&
+            !is.null(other_runner$stages[[stage_index]]$cached_env) #&&
+            #identical(deparse(stages[[names(stages)[stage_index]]]$fn),
+            #          deparse(other_runner$stages[[stage_index]]$fn)) # &&
+            # This is way too tricky and far beyond my abilities..
+            #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
+            #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
+            ) {
+          stages[[names(stages)[stage_index]]]$cached_env <<-
+            ne.env(parent = parent.env(context))
+          if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
+              is.environment(stages[[names(stages)[stage_index]]]$cached_env)) {
+            copy_env(stages[[names(stages)[stage_index]]]$cached_env,
+                     other_runner$stages[[stage_index]]$cached_env)
+            stages[[names(stages)[stage_index]]]$executed <<- 
+              other_runner$stages[[stage_index]]$executed
+          }
         }
       }
-    }
-  })
-  .set_parents()
+    })
+    .set_parents()
+  }
   .self
 }
 
