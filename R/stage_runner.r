@@ -310,8 +310,17 @@ stageRunner__coalesce <- function(other_runner) {
   if (!isTRUE(remember)) return()
 
   if (.self$with_tracked_environment()) {
+    if (!other_runner$with_tracked_environment()) {
+      stop("Cannot coalesce stageRunners using tracked_environments with ",
+           "those using vanilla environments", call. = FALSE)
+    }
+
+    compare_head <- function(x, y) {
+      m <- seq_len(min(length(x), length(y)))
+      x[m] != y[m]
+    }
+
     # TODO: (RK) Compare actual names rather than indices.
-    compare_head <- function(x, y) { m <- min(length(x), length(y)); x[m] != y[m] }
     common <- sum(cumsum(compare_head(.self$stage_names(), other_runner$stage_names())) == 0)
     # Warning: Coalescing stageRunners with tracked_environments does not
     # duplicate the tracked_environment, so the other_runner becomes invalidated,
@@ -338,6 +347,11 @@ stageRunner__coalesce <- function(other_runner) {
       package_function("objectdiff", "rollback")  (.self$context, mismatch_count)
     }
   } else {
+    if (other_runner$with_tracked_environment()) {
+      stop("Cannot coalesce stageRunners using vanilla environments with ",
+           "those using tracked_environments", call. = FALSE)
+    }
+
     stagenames <- names(other_runner$stages) %||% character(length(other_runner$stages))
     lapply(seq_along(other_runner$stages), function(stage_index) {
       # TODO: Match by name *OR* index
