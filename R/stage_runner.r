@@ -320,7 +320,6 @@ stageRunner__coalesce <- function(other_runner) {
       x[m] != y[m]
     }
 
-    # TODO: (RK) Compare actual names rather than indices.
     common <- sum(cumsum(compare_head(.self$stage_names(), other_runner$stage_names())) == 0)
     # Warning: Coalescing stageRunners with tracked_environments does not
     # duplicate the tracked_environment, so the other_runner becomes invalidated,
