@@ -16,4 +16,8 @@ Coalescing a stageRunner object is taking another stageRunner object
 with similar stage names and replacing the latter's cached environments
 with the former's.
 }
+\note{
+coalescing is ill-defined for stageRunner with unnamed stages,
+   since it is impossible to tell when a stage has changed.
+}
 
