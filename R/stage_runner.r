@@ -792,7 +792,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
     children = function() list(),
     show     = function() { cat("A stageRunner node containing: \n"); print(callable) },
 
-    # objectdiff intertwining functions
+    # Functions which intertwine with the objectdiff package
     index    = function() {
       ix <- which(vapply(.self$.parent$stages,
         function(x) identical(.self, x$.self), logical(1)))
