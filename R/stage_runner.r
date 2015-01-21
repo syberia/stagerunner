@@ -310,7 +310,17 @@ stageRunner__coalesce <- function(other_runner) {
   if (!isTRUE(remember)) return()
 
   if (.self$with_tracked_environment()) {
-    common <- sum(cumsum(.self$stage_names() != other_runner$stage_names()) == 0)
+    if (!other_runner$with_tracked_environment()) {
+      stop("Cannot coalesce stageRunners using tracked_environments with ",
+           "those using vanilla environments", call. = FALSE)
+    }
+
+    compare_head <- function(x, y) {
+      m <- seq_len(min(length(x), length(y)))
+      x[m] != y[m]
+    }
+
+    common <- sum(cumsum(compare_head(.self$stage_names(), other_runner$stage_names())) == 0)
     # Warning: Coalescing stageRunners with tracked_environments does not
     # duplicate the tracked_environment, so the other_runner becomes invalidated,
     # and this is a destructive action.
@@ -336,6 +346,11 @@ stageRunner__coalesce <- function(other_runner) {
       package_function("objectdiff", "rollback")  (.self$context, mismatch_count)
     }
   } else {
+    if (other_runner$with_tracked_environment()) {
+      stop("Cannot coalesce stageRunners using vanilla environments with ",
+           "those using tracked_environments", call. = FALSE)
+    }
+
     stagenames <- names(other_runner$stages) %||% character(length(other_runner$stages))
     lapply(seq_along(other_runner$stages), function(stage_index) {
       # TODO: Match by name *OR* index
@@ -777,7 +792,7 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
     children = function() list(),
     show     = function() { cat("A stageRunner node containing: \n"); print(callable) },
 
-    # objectdiff intertwining functions
+    # Functions which intertwine with the objectdiff package
     index    = function() {
       ix <- which(vapply(.self$.parent$stages,
         function(x) identical(.self, x$.self), logical(1)))
