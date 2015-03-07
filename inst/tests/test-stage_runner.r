@@ -221,7 +221,7 @@ test_that("it correctly references a numeric stage within a character stage", {
 
 test_that("it throws an error when an invalid stage gets passed", {
   expect_that(stageRunner$new(new.env(), list(1)),
-              throws_error('legal_types.*not TRUE'))
+              throws_error('Can only turn a function'))
 })
 
 test_that("it correctly parses a nested list of functions into nested stagerunners", {
