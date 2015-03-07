@@ -58,10 +58,10 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE,
     warning("stageRunners with zero stages may cause problems.", .call = FALSE)
   }
 
-  legal_types <- function(x) is.function(x) || all(vapply(x,
-    function(s) is.function(s) || is.stagerunner(s) || is.null(s) ||
-      (is.list(s) && legal_types(s)), logical(1)))
-  stopifnot(legal_types(.stages))
+  if (!is_pre_stagerunner(.stages)) {
+    stop("Can only turn a function or list of functions into a stageRunner", call. = FALSE)
+  }
+
   if (is.function(.stages)) .stages <- list(.stages)
   stages <<- .stages
 

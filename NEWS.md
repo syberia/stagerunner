@@ -1,3 +1,8 @@
+# Version 0.4.1
+
+* Added an `is_pre_stagerunner` helper function that returns TRUE or FALSE
+  according as an object can be transformed into a stageRunner.
+
 # Version 0.4.0
 
 * Integration with the [objectdiff package](http://github.com/robertzk/objectdiff).
