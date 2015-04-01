@@ -24,3 +24,12 @@ stageRunner__.set_prefixes <- function(prefix = '') {
 `first_commit?` <- function(commit) {
   all(strsplit(commit, "/", fixed = TRUE)[[1]] == '1')
 }
+
+stageRunner_.set_prefixes <- function(prefix = '') {
+  .prefix <<- prefix
+  for (i in seq_along(stages)) {
+    if (is.stageRunner(stages[[i]])) {
+      stages[[i]]$.set_prefixes(paste0(prefix, i, '/'))
+    }
+  }
+}

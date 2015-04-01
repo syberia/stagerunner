@@ -16,7 +16,8 @@ LazyData: true
 Imports:
     testthat,
     testthatsomemore,
-    crayon
+    crayon,
+    R6
 Suggests:
     knitr,
     microbenchmark,
