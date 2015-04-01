@@ -7,10 +7,10 @@
 boolean_fill(el, forward = TRUE)
 }
 \arguments{
-\item{el}{list. A nested list of logicals with exactly one entry TRUE.}
+\item{el}{list. A nested list of logicals with exactly one entry \code{TRUE}.}
 
-\item{forward}{logical. FALSE for backwards, and TRUE for forwards.
-The default is TRUE.}
+\item{forward}{logical. \code{FALSE} for backwards, and \code{TRUE} for forwards.
+The default is \code{TRUE}.}
 }
 \value{
 the filled list

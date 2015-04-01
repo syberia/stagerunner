@@ -4,9 +4,9 @@
 #' in the \code{run} method on a stageRunner object.
 #'
 #' @name boolean_fill
-#' @param el list. A nested list of logicals with exactly one entry TRUE.
-#' @param forward logical. FALSE for backwards, and TRUE for forwards.
-#'   The default is TRUE.
+#' @param el list. A nested list of logicals with exactly one entry \code{TRUE}.
+#' @param forward logical. \code{FALSE} for backwards, and \code{TRUE} for forwards.
+#'   The default is \code{TRUE}.
 #' @return the filled list
 boolean_fill <- function(el, forward = TRUE) {
   ix <- which(vapply(el, contains_true, logical(1)))[1]
