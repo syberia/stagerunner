@@ -18,4 +18,7 @@ logical. Whether or not key1 runs a stage before key2.
 This is a helper function to implement the \code{to} parameter
 in the \code{run} method on a stageRunner object.
 }
+\seealso{
+\code{\link{stageRunner__run}}
+}
 

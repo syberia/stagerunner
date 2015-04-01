@@ -3,6 +3,7 @@
 #' This is a helper function to implement the \code{to} parameter
 #' in the \code{run} method on a stageRunner object.
 #'
+#' @seealso \code{\link{stageRunner__run}}
 #' @name boolean_fill
 #' @param el list. A nested list of logicals with exactly one entry \code{TRUE}.
 #' @param forward logical. \code{FALSE} for backwards, and \code{TRUE} for forwards.
@@ -18,7 +19,4 @@ boolean_fill <- function(el, forward = TRUE) {
   if (!is.atomic(el)) el[[ix]] <- boolean_fill(el[[ix]], forward = forward)
   el
 }
-
-
-
 
