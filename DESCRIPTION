@@ -15,7 +15,8 @@ License: MIT
 LazyData: true
 Imports:
     testthat,
-    testthatsomemore
+    testthatsomemore,
+    crayon
 Suggests:
     knitr,
     microbenchmark,

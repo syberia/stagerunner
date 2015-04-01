@@ -17,7 +17,7 @@ show_message <- function(stage_names, stage_index, begin = TRUE, nested = FALSE,
   if (is.null(stage_name) || stage_name == "")
     stage_name <- list('first', 'second', 'third')[stage_index][[1]] %||%
                   paste0(stage_index, 'th')
-  stage_name <- colourise(stage_name, if (begin) 'green' else 'blue')
+  stage_name <- if (begin) crayon::green(stage_name) else crayon::blue(stage_name)
   stage_name <- gsub("(?:Begin|Run) (.*) stage(\\.{3})?", "\\1", stage_name)
   depth <- paste(rep("  ", depth - 1), collapse = '')
   stage_name <- paste0(stage_index, ". ", stage_name)
