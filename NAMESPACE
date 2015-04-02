@@ -2,7 +2,6 @@
 
 S3method("$",stageRunnerNode_)
 S3method("$",stageRunner_)
-export(.stageRunner)
 export(is.stageRunner)
 export(is.stagerunner)
 export(is_pre_stagerunner)
