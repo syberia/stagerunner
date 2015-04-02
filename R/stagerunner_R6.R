@@ -701,6 +701,7 @@ stageRunner <- structure(
   class = "stageRunner_"
 )
 
+#' @export
 `$.stageRunner_` <- function(...) {
   stopifnot(identical(..2, "new"))
   ..1
@@ -817,6 +818,7 @@ stageRunnerNode <- structure(
   class = "stageRunnerNode_"
 )
 
+#' @export
 `$.stageRunnerNode_` <- function(...) {
   stopifnot(identical(..2, "new"))
   ..1

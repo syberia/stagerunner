@@ -4,6 +4,7 @@
 \name{stageRunnerNode}
 \alias{.stageRunnerNode}
 \alias{stageRunnerNode}
+\alias{stageRunnerNode_}
 \title{Stagerunner nodes are environment wrappers around individual stages
 (i.e. functions) in order to track meta-data (e.g., for caching).}
 \format{\preformatted{List of 8
@@ -16,34 +17,35 @@
   ..$ .parent     : NULL
   ..$ executed    : logi FALSE
   ..$ initialize  :function (.callable, .context = NULL)  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 724 18 728 5 18 5 724 728
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 729 18 732 5 18 5 729 732
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
   ..$ run         :function (..., .cached_env = NULL, .callable = callable)  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 729 11 743 5 11 5 729 743
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 733 11 747 5 11 5 733 747
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
   ..$ around      :function (other_node)  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 746 14 774 5 14 5 746 774
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 750 14 778 5 14 5 750 778
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
   ..$ overlay     :function (other_node, label = NULL, flat = FALSE)  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 776 15 792 5 15 5 776 792
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 780 15 796 5 15 5 780 796
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
   ..$ transform   :function (transformation)  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 793 17 796 5 17 5 793 796
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 797 17 800 5 17 5 797 800
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
   ..$ was_executed:function ()  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 797 20 797 42 20 42 797 797
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
-  ..$ parent      :function (`*VALUE*` = NULL)  
-  .. ..- attr(*, "srcref")= language 3L(5L, 5L, 44L, 5L, 44L, 3L, 5L)
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 801 20 801 42 20 42 801 801
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
+  ..$ parent      :function ()  
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 802 16 802 50 16 50 802 802
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
   ..$ children    :function ()  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 799 16 799 32 16 32 799 799
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 803 16 803 32 16 32 803 803
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
   ..$ show        :function ()  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 800 16 800 87 16 87 800 800
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 804 16 804 87 16 87 804 804
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
   ..$ index       :function ()  
-  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 803 16 807 5 16 5 803 807
-  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x1060c6510> 
+  .. ..- attr(*, "srcref")=Class 'srcref'  atomic [1:8] 807 16 811 5 16 5 807 811
+  .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x101c259f8> 
  $ private   : NULL
  $ active    : NULL
  $ inherit   : NULL
@@ -52,7 +54,7 @@
  - attr(*, "class")= chr "R6ClassGenerator"
 }}
 \usage{
-stageRunnerNode
+stageRunnerNode_
 }
 \arguments{
 \item{fn}{function. This will be wrapped in an environment.}
