@@ -661,6 +661,7 @@ print.stageRunnerNode <- function(x, ...) {
 }
 
 stageRunner_ <- R6::R6Class('stageRunner',
+  active = list(context = function() self$.context),                            
   public = list(
     .context = NULL,
     stages = list(),
