@@ -76,6 +76,7 @@ describe('tracked_environments', {
     })
 
     test_that('running the first two stages updates the cache for the second stage and third stage', {
+              options(a=T);on.exit(options(a=F))
       sr <- stageRunner$new(tracked_environment(),
         list(function(env) env$x <- 1, force, force), remember = TRUE)
       sr$run(c(1,2))

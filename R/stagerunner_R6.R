@@ -718,7 +718,7 @@ stageRunner <- structure(
 #'   navigating in a tree-like structure.
 #' @name stageRunnerNode
 #' @docType class
-stageRunnerNode <- R6::R6Class('stageRunnerNode',
+stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
   public = list(
     callable = NULL,
     cached_env = NULL,
@@ -726,7 +726,6 @@ stageRunnerNode <- R6::R6Class('stageRunnerNode',
     .parent = NULL,
     executed = FALSE,
     initialize = function(.callable, .context = NULL) {
-      .parent <<- structure(NULL, class = "uninitializedField")
       stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
       callable <<- .callable; .context <<- .context; executed <<- FALSE
     },
@@ -799,18 +798,29 @@ stageRunnerNode <- R6::R6Class('stageRunnerNode',
       else callable <<- transformation(callable)
     },
     was_executed = function() { executed },
-    parent   = accessor_method(.parent),
+    parent   = function() { attr(self, "parent") }, # accessor_method(.parent),
     children = function() list(),
     show     = function() { cat("A stageRunner node containing: \n"); print(callable) },
 
     # Functions which intertwine with the objectdiff package
     index    = function() {
-      ix <- which(vapply(self$.parent$stages,
-        function(x) identical(self, x$self), logical(1)))
-      paste0(self$.parent$.prefix, ix)
+      ix <- which(vapply(attr(self, "parent")$stages,
+        function(x) identical(self, x), logical(1)))
+      paste0(attr(self, "parent")$.prefix, ix)
     }
   )
 )
+
+#' @export
+stageRunnerNode <- structure(
+  function(...) { stageRunnerNode_$new(...) },
+  class = "stageRunnerNode_"
+)
+
+`$.stageRunnerNode_` <- function(...) {
+  stopifnot(identical(..2, "new"))
+  ..1
+}
 
 
 #' Check whether an R object is a stageRunner object

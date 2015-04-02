@@ -26,7 +26,7 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
   if (is.refClass(object)) {
     stopifnot(all(c(parent_caller, children_caller) %in% object$getRefClass()$methods()))
   } else if (inherits(object, "R6")) {
-    stopifnot(all(c(parent_caller, children_caller) %in% ls(sr)))
+    stopifnot(all(c(parent_caller, children_caller) %in% ls(object)))
   }
 
   parent_caller <<- parent_caller
