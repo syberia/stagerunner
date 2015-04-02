@@ -46,7 +46,7 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
 
   .parent <<- structure(NULL, class = "uninitializedField")
   .finished <<- FALSE # TODO: Remove this hack for printing
-  context <<- context
+  .context <<- context
 
   if (identical(remember, TRUE) && !(is.character(mode) &&
       any((.mode <<- tolower(mode)) == c('head', 'next')))) {
@@ -68,9 +68,9 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
   # Construct recursive stagerunners out of a list of lists.
   for (i in seq_along(stages))
     if (is.list(stages[[i]]))
-      stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
+      stages[[i]] <<- stageRunner$new(.context, stages[[i]], remember = remember)
     else if (is.function(stages[[i]]) || is.null(stages[[i]]))
-      stages[[i]] <<- stageRunnerNode$new(stages[[i]], context)
+      stages[[i]] <<- stageRunnerNode$new(stages[[i]], .context)
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
@@ -91,8 +91,8 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
     } else if (length(stages) > 0) {
       # Set the first cache environment
       first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
-      first_env$cached_env <- new.env(parent = parent.env(context))
-      copy_env(first_env$cached_env, context)
+      first_env$cached_env <- new.env(parent = parent.env(.context))
+      copy_env(first_env$cached_env, .context)
     }
   }
 }
@@ -247,7 +247,7 @@ stageRunner_run <- function(from = NULL, to = NULL,
     }
   }
 
-  if (remember && remember_flag) { list(before = before_env, after = context) }
+  if (remember && remember_flag) { list(before = before_env, after = .context) }
   else { invisible(TRUE) }
 }
 
@@ -276,7 +276,7 @@ stageRunner_run <- function(from = NULL, to = NULL,
 #'   of functions.
 stageRunner_around <- function(other_runner) {
   if (is.null(other_runner)) return(self)
-  if (!is.stagerunner(other_runner)) other_runner <- stageRunner$new(context, other_runner)
+  if (!is.stagerunner(other_runner)) other_runner <- stageRunner$new(.context, other_runner)
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
   lapply(seq_along(other_runner$stages), function(stage_index) {
     name <- stagenames[stage_index]
@@ -331,23 +331,23 @@ stageRunner_coalesce <- function(other_runner) {
     # TODO: (RK) What if the tracked_environment given initially to the stageRunner
     # already has some commits?
     commits     <- package_function("objectdiff", "commits")
-    `context<-` <- function(obj, value) {
+    `.context<-` <- function(obj, value) {
       if (is.stagerunner(obj)) {
-        obj$context <- value
+        obj$.context <- value
         for (stage in obj$stages) { Recall(stage, value) }
       } else if (is.stageRunnerNode(obj)) {
         obj$.context <- value
         if (is.stagerunner(obj$callable)) { Recall(obj$callable, value) }
       }
     }
-    self$context  <- other_runner$context
-    for (stage in self$stages) { context(stage) <- other_runner$context }
-    other_runner$context <- new.env(parent = emptyenv())
-    commit_count   <- length(commits(self$context)) 
+    self$.context  <- other_runner$.context
+    for (stage in self$stages) { .context(stage) <- other_runner$.context }
+    other_runner$.context <- new.env(parent = emptyenv())
+    commit_count   <- length(commits(self$.context)) 
     mismatch_count <- commit_count - (common + 1)
     if (mismatch_count > 0) {
-      package_function("objectdiff", "force_push")(self$context, commit_count)
-      package_function("objectdiff", "rollback")  (self$context, mismatch_count)
+      package_function("objectdiff", "force_push")(self$.context, commit_count)
+      package_function("objectdiff", "rollback")  (self$.context, mismatch_count)
     }
   } else {
     if (other_runner$with_tracked_environment()) {
@@ -376,7 +376,7 @@ stageRunner_coalesce <- function(other_runner) {
             #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
             ) {
           stages[[names(stages)[stage_index]]]$cached_env <<-
-            new.env(parent = parent.env(context))
+            new.env(parent = parent.env(.context))
           if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
               is.environment(stages[[names(stages)[stage_index]]]$cached_env)) {
             copy_env(stages[[names(stages)[stage_index]]]$cached_env,
@@ -530,7 +530,7 @@ stageRunner_show <- function(indent = 0) {
       stages[[index]]$show(indent = indent + 1)
   })
 
-  if (missing(indent)) { cat('Context '); print(context) }
+  if (missing(indent)) { cat('Context '); print(.context) }
   NULL
 }
 
@@ -598,27 +598,27 @@ stageRunner_.before_env <- function(stage_index) {
     # so we have to "roll back" to a previous commit.
     current_commit <- paste0(self$.prefix, stage_index)
 
-    if (!current_commit %in% names(package_function("objectdiff", "commits")(context))) {
+    if (!current_commit %in% names(package_function("objectdiff", "commits")(.context))) {
       if (`first_commit?`(current_commit)) {
         # TODO: (RK) Do this more robustly. This will fail if there is a 
         # first sub-stageRunner with an empty list as its stages.
-        package_function("objectdiff", "commit")(context, current_commit)
+        package_function("objectdiff", "commit")(.context, current_commit)
       } else {
         cannot_run_error()
       }
     } else {
-      package_function("objectdiff", "force_push")(context, current_commit)
+      package_function("objectdiff", "force_push")(.context, current_commit)
     }
 
-    env <- new.env(parent = package_function("objectdiff", "parent.env.tracked_environment")(context))
-    copy_env(env, package_function("objectdiff", "environment")(context))
+    env <- new.env(parent = package_function("objectdiff", "parent.env.tracked_environment")(.context))
+    copy_env(env, package_function("objectdiff", "environment")(.context))
     env
   } else {
     env <- stages[[stage_index]]$cached_env
     if (is.null(env)) { cannot_run_error() }
 
     # Restart execution from cache, so set context to the cached environment.
-    copy_env(context, env)
+    copy_env(.context, env)
     env
   }
 }
@@ -632,10 +632,10 @@ stageRunner_.mark_finished <- function(stage_index) {
   if (!is.null(node)) { # Prepare a cache for the future!
     if (self$with_tracked_environment()) {
       # We assume the head for the tracked_environment is set correctly.
-      package_function("objectdiff", "commit")(context, node$object$index())
+      package_function("objectdiff", "commit")(.context, node$object$index())
     } else {
-      node$object$cached_env <- new.env(parent = parent.env(context))
-      copy_env(node$object$cached_env, context)
+      node$object$cached_env <- new.env(parent = parent.env(.context))
+      copy_env(node$object$cached_env, .context)
     }
   } else {
     # TODO: Remove this hack used for printing
@@ -662,7 +662,7 @@ print.stageRunnerNode <- function(x, ...) {
 
 stageRunner_ <- R6::R6Class('stageRunner',
   public = list(
-    context = NULL,
+    .context = NULL,
     stages = list(),
     remember = FALSE,
     .mode = "head",
@@ -691,7 +691,7 @@ stageRunner_ <- R6::R6Class('stageRunner',
     .set_prefixes  = stageRunner_.set_prefixes,
     .before_env    = stageRunner_.before_env,
     .mark_finished = stageRunner_.mark_finished,
-    with_tracked_environment = function() { is(context, 'tracked_environment') }
+    with_tracked_environment = function() { is(.context, 'tracked_environment') }
   )
 )
 
