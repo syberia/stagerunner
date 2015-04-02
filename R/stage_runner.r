@@ -68,9 +68,9 @@ stageRunner__initialize <- function(context, .stages, remember = FALSE,
   # Construct recursive stagerunners out of a list of lists.
   for (i in seq_along(stages))
     if (is.list(stages[[i]]))
-      stages[[i]] <<- stageRunner$new(context, stages[[i]], remember = remember)
+      stages[[i]] <<- .stageRunner$new(context, stages[[i]], remember = remember)
     else if (is.function(stages[[i]]) || is.null(stages[[i]]))
-      stages[[i]] <<- stageRunnerNode$new(stages[[i]], context)
+      stages[[i]] <<- .stageRunnerNode$new(stages[[i]], context)
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
@@ -276,7 +276,7 @@ stageRunner__run <- function(from = NULL, to = NULL,
 #'   of functions.
 stageRunner__around <- function(other_runner) {
   if (is.null(other_runner)) return(.self)
-  if (!is.stagerunner(other_runner)) other_runner <- stageRunner$new(context, other_runner)
+  if (!is.stagerunner(other_runner)) other_runner <- .stageRunner$new(context, other_runner)
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
   lapply(seq_along(other_runner$stages), function(stage_index) {
     name <- stagenames[stage_index]
@@ -559,14 +559,14 @@ stageRunner__.set_parents <- function() {
   for (i in seq_along(stages)) {
     # Set convenience helper attribute "child_index" to ensure that treeSkeleton
     # can find this stage.
-    if (inherits(stages[[i]], 'refClass')) {
+    if (is.refClass(stages[[i]])) {
       # http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
       unlockBinding('.self', attr(stages[[i]], '.xData'))
       attr(attr(stages[[i]], '.xData')$.self, 'child_index') <<- i
       lockBinding('.self', attr(stages[[i]], '.xData'))
     } else attr(stages[[i]], 'child_index') <<- i
 
-    if (!inherits(stages[[i]], 'refClass')) {
+    if (!is.refClass(stages[[i]])) {
       attr(stages[[i]], 'parent') <<- .self
     } else {
       # if stages[[i]] has a .set_parents method (e.g. it is a stagerunner), run that
@@ -655,11 +655,11 @@ stageRunner__.root <- function() {
 #' Stage runner is a reference class for parametrizing and executing
 #' a linear sequence of actions.
 #' 
-#' @name stageRunner
+#' @name .stageRunner
 #' @export
 NULL
 
-stageRunner <- setRefClass('stageRunner',
+.stageRunner <- setRefClass('stageRunner',
   fields = list(context = 'ANY', stages = 'list', remember = 'logical',
                 .mode = 'character', .parent = 'ANY', .finished = 'logical',
                 .prefix = 'character'),
@@ -690,15 +690,16 @@ stageRunner <- setRefClass('stageRunner',
   )
 )
 
-#' Check whether an R object is a stageRunner object
-#'
-#' @export
-#' @param obj any object.
-#' @return \code{TRUE} if the object is of class
-#'    \code{stageRunner}, \code{FALSE} otherwise.
-is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
-#' @export
-is.stageRunner <- is.stagerunner
+# 
+# # Check whether an R object is a stageRunner object
+# #
+# # @export
+# # @param obj any object.
+# # @return \code{TRUE} if the object is of class
+# #    \code{stageRunner}, \code{FALSE} otherwise.
+# is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
+# # @export
+# is.stageRunner <- is.stagerunner
 
 #' Stagerunner nodes are environment wrappers around individual stages
 #' (i.e. functions) in order to track meta-data (e.g., for caching).
@@ -712,7 +713,7 @@ is.stageRunner <- is.stagerunner
 #'   navigating in a tree-like structure.
 #' @name stageRunnerNode
 #' @docType class
-stageRunnerNode <- setRefClass('stageRunnerNode',
+.stageRunnerNode <- setRefClass('stageRunnerNode',
   fields = list(callable = 'ANY',
                 cached_env = 'ANY',
                 .context = 'ANY',
@@ -774,12 +775,12 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
       if (is.null(other_node)) return(FALSE)
       if (!is.stagerunner(other_node)) 
-        other_node <- stageRunner$new(.context, other_node)
+        other_node <- .stageRunner$new(.context, other_node)
 
       # Coerce the current callable object to a stageRunner so that
       # we can append the other_node's stageRunner.
       if (!is.stagerunner(callable)) 
-        callable <<- stageRunner$new(.context, callable)
+        callable <<- .stageRunner$new(.context, callable)
 
       # TODO: Fancier merging here
       if (isTRUE(flat)) {
@@ -805,5 +806,5 @@ stageRunnerNode <- setRefClass('stageRunnerNode',
   )
 )
 
-is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
+# is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
 

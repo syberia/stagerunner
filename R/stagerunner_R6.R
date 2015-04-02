@@ -1,3 +1,13 @@
+accessor_method <- function(attr) {
+  fn <- eval(bquote(
+    function(`*VALUE*` = NULL)
+      if (missing(`*VALUE*`)) .(substitute(attr))
+      else .(substitute(attr)) <<- `*VALUE*`
+  ))
+  environment(fn) <- parent.frame()
+  fn
+}
+
 #' Initialize a stageRunner object.
 #'
 #' stageRunner objects are used for executing a linear sequence of
@@ -6,7 +16,7 @@
 #' \code{stages = list(function(e) e$x <- e$x + 1, function(e) e$y <- e$y - e$x)}
 #' will cause \code{x = 2, y = 0} after running the stages.
 #'
-#' @name stageRunner__initialize
+#' @name stageRunner_initialize
 #' @param context an environment. The initial environment that is getting
 #'    modified during the execution of the stages. 
 #' @param .stages a list. The functions to execute on the \code{context}.
@@ -34,6 +44,7 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
          "a stageRunner")
   }
 
+  .parent <<- structure(NULL, class = "uninitializedField")
   .finished <<- FALSE # TODO: Remove this hack for printing
   context <<- context
 
@@ -88,7 +99,7 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
 
 #' Run the stages in a stageRunner object.
 #'
-#' @name stageRunner__run
+#' @name stageRunner_run
 #' @param from an indexing parameter. Many forms are accepted, but the
 #'   easiest is the name of the stage. For example, if we have
 #'   \code{stageRunner$new(context, list(stage_one = some_fn, stage_two = some_other_fn))}
@@ -259,7 +270,7 @@ stageRunner_run <- function(from = NULL, to = NULL,
 #' keyword is used to specify when to execute the terminal node that
 #' is sandwiched in the "around" runner.
 #'
-#' @name stageRunner__around
+#' @name stageRunner_around
 #' @param other_runner stageRunner. Another stageRunner from which to create
 #'   an around procedure. Alternatively, we could give a function or a list
 #'   of functions.
@@ -292,7 +303,7 @@ stageRunner_around <- function(other_runner) {
 #' with similar stage names and replacing the latter's cached environments
 #' with the former's.
 #'
-#' @name stageRunner__coalesce
+#' @name stageRunner_coalesce
 #' @param other_runner stageRunner. Another stageRunner from which to coalesce.
 #' @note coalescing is ill-defined for stageRunner with unnamed stages,
 #'    since it is impossible to tell when a stage has changed.
@@ -385,7 +396,7 @@ stageRunner_coalesce <- function(other_runner) {
 #' with similar stage names and adding the latter's stages as terminal stages
 #' to the former (for example, to support tests).
 #'
-#' @name stageRunner__overlay
+#' @name stageRunner_overlay
 #' @param other_runner stageRunner. Another stageRunner from which to overlay.
 #' @param label character. The label for the overlayed stageRunner. This refers
 #'    to the name the former will get wrapped with when appended to the
@@ -414,7 +425,7 @@ stageRunner_overlay <- function(other_runner, label = NULL, flat = FALSE) {
 #' These each have a callable, and this method transforms those
 #' callables in the way given by the first argument.
 #'
-#' @name stageRunner__transform
+#' @name stageRunner_transform
 #' @param transformation function. The function which transforms one callable
 #'   into another.
 stageRunner_transform <- function(transformation) {
@@ -424,7 +435,7 @@ stageRunner_transform <- function(transformation) {
 
 #' Append one stageRunner to the end of another.
 #'
-#' @name stageRunner__append
+#' @name stageRunner_append
 #' @param other_runner stageRunner. Another stageRunner to append to the current one.
 #' @param label character. The label for the new stages (this will be the name of the
 #'   newly appended list element).
@@ -442,7 +453,7 @@ stageRunner_append <- function(other_runner, label = NULL) {
 #' then this method would return
 #'   \code{list('a/b', 'a/c', 'd', 'e/f', 'e/g')}
 #'
-#' @name stageRunner__stage_names
+#' @name stageRunner_stage_names
 #' @return a list of canonical stage names.
 #' @examples
 #' f <- function() {}
@@ -457,7 +468,7 @@ stageRunner_stage_names <- function() {
 
 #' For stageRunners with caching, find the next unexecuted stage.
 #'
-#' @name stageRunner__next_stage
+#' @name stageRunner_next_stage
 #' @return a character stage key giving the next unexecuted stage.
 #'   If all stages have been executed, this returns \code{FALSE}.
 #'   If the stageRunner does not have caching enabled, this will
@@ -478,7 +489,7 @@ stageRunner_next_stage <- function() {
 
 #' Generic for printing stageRunner objects.
 #' 
-#' @name stageRunner__show
+#' @name stageRunner_show
 #' @param indent integer. Internal parameter for keeping track of nested
 #'   indentation level.
 stageRunner_show <- function(indent = 0) {
@@ -533,7 +544,7 @@ stageRunner_has_key <- function(key) {
 }
 
 #' Clear all caches in this stageRunner, and recursively.
-#' @name stageRunner__.clear_cache
+#' @name stageRunner_.clear_cache
 stageRunner_.clear_cache <- function() {
   for (i in seq_along(stages)) {
     if (is.stagerunner(stages[[i]])) stages[[i]]$.clear_cache()
@@ -543,19 +554,19 @@ stageRunner_.clear_cache <- function() {
 }
 
 #' Set all parents for this stageRunner, and recursively
-#' @name stageRunner__.set_parents
+#' @name stageRunner_.set_parents
 stageRunner_.set_parents <- function() {
   for (i in seq_along(stages)) {
     # Set convenience helper attribute "child_index" to ensure that treeSkeleton
     # can find this stage.
-    if (inherits(stages[[i]], 'refClass')) {
+    if (is.refClass(stages[[i]])) {
       # http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
       unlockBinding('self', attr(stages[[i]], '.xData'))
       attr(attr(stages[[i]], '.xData')$self, 'child_index') <<- i
       lockBinding('self', attr(stages[[i]], '.xData'))
     } else attr(stages[[i]], 'child_index') <<- i
 
-    if (!inherits(stages[[i]], 'refClass')) {
+    if (!is.refClass(stages[[i]])) {
       attr(stages[[i]], 'parent') <<- self
     } else {
       # if stages[[i]] has a .set_parents method (e.g. it is a stagerunner), run that
@@ -635,17 +646,21 @@ stageRunner_.mark_finished <- function(stage_index) {
 
 #' Determine the root of the stageRunner.
 #'
-#' @name stageRunner__.root
+#' @name stageRunner_.root
 #' @return the root of the stageRunner
 stageRunner_.root <- function() {
   treeSkeleton$new(self)$root()$object
 }
 
-print.stageR6unner <- function(x, ...) {
+print.stageRunner <- function(x, ...) {
   x$show(...)
 }
 
-stageR6unner <- R6::R6Class('stageR6unner',
+print.stageRunnerNode <- function(x, ...) {
+  x$show(...)
+}
+
+stageRunner_ <- R6::R6Class('stageRunner',
   public = list(
     context = NULL,
     stages = list(),
@@ -680,6 +695,17 @@ stageR6unner <- R6::R6Class('stageR6unner',
   )
 )
 
+#' @export
+stageRunner <- structure(
+  function(...) { stageRunner_$new(...) },
+  class = "stageRunner_"
+)
+
+`$.stageRunner_` <- function(...) {
+  stopifnot(identical(..2, "new"))
+  ..1
+}
+
 #' Stagerunner nodes are environment wrappers around individual stages
 #' (i.e. functions) in order to track meta-data (e.g., for caching).
 #' 
@@ -700,6 +726,7 @@ stageRunnerNode <- R6::R6Class('stageRunnerNode',
     .parent = NULL,
     executed = FALSE,
     initialize = function(.callable, .context = NULL) {
+      .parent <<- structure(NULL, class = "uninitializedField")
       stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
       callable <<- .callable; .context <<- .context; executed <<- FALSE
     },
@@ -784,5 +811,18 @@ stageRunnerNode <- R6::R6Class('stageRunnerNode',
     }
   )
 )
+
+
+#' Check whether an R object is a stageRunner object
+#'
+#' @export
+#' @param obj any object.
+#' @return \code{TRUE} if the object is of class
+#'    \code{stageRunner}, \code{FALSE} otherwise.
+is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
+#' @export
+is.stageRunner <- is.stagerunner
+is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
+
 
 

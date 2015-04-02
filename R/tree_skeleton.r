@@ -23,8 +23,11 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
   object <<- object
 
   # Make sure parent_caller and children_caller are methods of object
-  if (inherits(object, 'refClass'))
+  if (is.refClass(object)) {
     stopifnot(all(c(parent_caller, children_caller) %in% object$getRefClass()$methods()))
+  } else if (inherits(object, "R6")) {
+    stopifnot(all(c(parent_caller, children_caller) %in% ls(sr)))
+  }
 
   parent_caller <<- parent_caller
   children_caller <<- children_caller
@@ -105,7 +108,7 @@ treeSkeleton__.parent_index <- function() {
   if (!is.null(ci <- attr(object, 'child_index'))) ci
   # Hack for accessing attribute modifications on a reference class object
   # See: http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
-  else if (inherits(object, 'refClass') &&
+  else if (is.refClass(object) &&
            !is.null(ci <- attr(attr(object, '.xData')$.self, 'child_index'))) ci
   else # look through the parent's children and compare to .self
     # Danger Will Robinson! This will lead to strange bugs if our tree
@@ -191,4 +194,8 @@ treeSkeleton <- setRefClass('treeSkeleton',
     show          = function() { cat("treeSkeleton wrapping:\n"); print(object) }
   )
 )
+
+is.refClass <- function(obj) {
+  inherits(obj, "refClass") && !inherits(obj, "R6")
+}
 

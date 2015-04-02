@@ -24,13 +24,17 @@ package_function <- function(pkg, fn) { # for when using :: breaks R CMD check
 #'    \code{method}, it will use that attribute as the method to call. Otherwise,
 #'    it will try to fetch a generic with the name \code{method} using \code{get}.
 OOP_type_independent_method <- function(object, method) {
-  if (inherits(object, 'refClass')) {
+  if (is.refClass(object)) {
     # bquote and other methods don't work here -- it's hard to dynamically
     # fetch reference class methods!
     eval(parse(text = paste0('`$`(object, "', method, '")()')))
-  } else if (method %in% names(attributes(object)))
+  } else if (method %in% names(attributes(object))) {
     attr(object, method)
-  else get(method)(object)
+  } else if (is.environment(object) && method %in% ls(object)) {
+    object[[method]]()
+  } else {
+    get(method)(object)
+  }
 }
 
 # Convert an environment to a list

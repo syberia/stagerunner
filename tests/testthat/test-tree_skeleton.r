@@ -2,7 +2,7 @@ context('treeSkeleton')
 
 test_that('it errors when not given methods of a reference class object for the callers', {
   sr <- stageRunner$new(new.env(), list())
-  expect_error(treeSkeleton$new(sr, '', ''), 'methods\\(\\)) is not TRUE')
+  expect_error(treeSkeleton$new(sr, '', ''), 'parent_caller, children_caller')
 })
 
 test_that('it does not error when given different child and parent callers on an S3 object', {
