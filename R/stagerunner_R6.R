@@ -44,12 +44,12 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
          "a stageRunner")
   }
 
-  .parent <<- structure(NULL, class = "uninitializedField")
-  .finished <<- FALSE # TODO: Remove this hack for printing
-  .context <<- context
+  self$.parent <- structure(NULL, class = "uninitializedField")
+  self$.finished <- FALSE # TODO: Remove this hack for printing
+  self$.context <- context
 
   if (identical(remember, TRUE) && !(is.character(mode) &&
-      any((.mode <<- tolower(mode)) == c('head', 'next')))) {
+      any((self$.mode <- tolower(mode)) == c('head', 'next')))) {
     stop("The mode parameter to the stageRunner constructor must be ",
          "either 'head' or 'next'.")
   }
@@ -63,36 +63,37 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
   }
 
   if (is.function(.stages)) .stages <- list(.stages)
-  stages <<- .stages
+  self$stages <- .stages
 
   # Construct recursive stagerunners out of a list of lists.
-  for (i in seq_along(stages))
-    if (is.list(stages[[i]]))
-      stages[[i]] <<- stageRunner$new(.context, stages[[i]], remember = remember)
-    else if (is.function(stages[[i]]) || is.null(stages[[i]]))
-      stages[[i]] <<- stageRunnerNode$new(stages[[i]], .context)
+  for (i in seq_along(self$stages))
+    if (is.list(self$stages[[i]]))
+      self$stages[[i]] <-
+        stageRunner$new(self$.context, self$stages[[i]], remember = remember)
+    else if (is.function(self$stages[[i]]) || is.null(self$stages[[i]]))
+      self$stages[[i]] <- stageRunnerNode$new(self$stages[[i]], self$.context)
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
-  if (any(violators <- grepl('/', names(stages), fixed = TRUE))) {
+  if (any(violators <- grepl('/', names(self$stages), fixed = TRUE))) {
     msg <- paste0("Stage names may not have a '/' character. The following do not ",
       "satisfy this constraint: '",
-      paste0(names(stages)[violators], collapse = "', '"), "'")
+      paste0(names(self$stages)[violators], collapse = "', '"), "'")
     stop(msg)
   }
 
-  remember <<- remember
-  if (isTRUE(remember)) {
+  self$remember <<- remember
+  if (isTRUE(self$remember)) {
     # Set up parents for treeSkeleton.
     self$.clear_cache()
     self$.set_parents()
     if (self$with_tracked_environment()) {
       self$.set_prefixes()
-    } else if (length(stages) > 0) {
+    } else if (length(self$stages) > 0) {
       # Set the first cache environment
-      first_env <- treeSkeleton$new(stages[[1]])$first_leaf()$object
-      first_env$cached_env <- new.env(parent = parent.env(.context))
-      copy_env(first_env$cached_env, .context)
+      first_env <- treeSkeleton$new(self$stages[[1]])$first_leaf()$object
+      first_env$cached_env <- new.env(parent = parent.env(self$.context))
+      copy_env(first_env$cached_env, sel$.context)
     }
   }
 }
