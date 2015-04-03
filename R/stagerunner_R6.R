@@ -82,7 +82,7 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
     stop(msg)
   }
 
-  self$remember <<- remember
+  self$remember <- remember
   if (isTRUE(self$remember)) {
     # Set up parents for treeSkeleton.
     self$.clear_cache()
@@ -379,13 +379,13 @@ stageRunner_coalesce <- function(other_runner) {
             #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
             #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
             ) {
-          self$stages[[names(self$stages)[stage_index]]]$cached_env <<-
+          self$stages[[names(self$stages)[stage_index]]]$cached_env <-
             new.env(parent = parent.env(self$.context))
           if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
               is.environment(self$stages[[names(stages)[stage_index]]]$cached_env)) {
             copy_env(self$stages[[names(self$stages)[stage_index]]]$cached_env,
                      other_runner$stages[[stage_index]]$cached_env)
-            self$stages[[names(self$stages)[stage_index]]]$executed <<- 
+            self$stages[[names(self$stages)[stage_index]]]$executed <- 
               other_runner$stages[[stage_index]]$executed
           }
         }
@@ -552,7 +552,7 @@ stageRunner_has_key <- function(key) {
 stageRunner_.clear_cache <- function() {
   for (i in seq_along(self$stages)) {
     if (is.stagerunner(self$stages[[i]])) self$stages[[i]]$.clear_cache()
-    else self$stages[[i]]$cached_env <<- NULL
+    else self$stages[[i]]$cached_env <- NULL
   }
   TRUE
 }
@@ -752,7 +752,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
         on.exit(environment(.callable) <- parent.env(environment(.callable)))
         .callable(self$.context, ...)
       }
-      self$executed <<- TRUE
+      self$executed <- TRUE
     }, 
 
     # This function goes hand in hand with stageRunner$around
@@ -775,11 +775,11 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
         # so we have to do something ugly
         run <- eval.parent(quote(.parent_context$run))
         args <- append(eval.parent(quote(list(...)), n = 2),
-          list(.callable = callable))
+          list(.callable = self$callable))
         do.call(run, args, envir = parent.frame())
       }
       environment(yield_env$yield) <- new.env(parent = baseenv())
-      environment(yield_env$yield)$callable <- callable
+      environment(yield_env$yield)$callable <- self$callable
 
       environment(new_callable) <- yield_env
       self$callable <- new_callable
@@ -794,7 +794,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
 
       # Coerce the current callable object to a stageRunner so that
       # we can append the other_node's stageRunner.
-      if (!is.stagerunner(callable)) 
+      if (!is.stagerunner(self$callable)) 
         self$callable <- stageRunner$new(self$.context, self$callable)
 
       # TODO: Fancier merging here
