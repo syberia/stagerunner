@@ -277,7 +277,10 @@ stageRunner_run <- function(from = NULL, to = NULL,
 #'   of functions.
 stageRunner_around <- function(other_runner) {
   if (is.null(other_runner)) return(self)
-  if (!is.stagerunner(other_runner)) other_runner <- stageRunner$new(self$.context, other_runner)
+  if (!is.stagerunner(other_runner)) {
+    other_runner <- stageRunner$new(self$.context, other_runner)
+  }
+
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
   lapply(seq_along(other_runner$stages), function(stage_index) {
     name <- stagenames[stage_index]
@@ -286,12 +289,12 @@ stageRunner_around <- function(other_runner) {
       else if (is.element(name, names(stages))) name
       else return()
 
-    if (is.stagerunner(stages[[this_index]]) &&
+    if (is.stagerunner(self$stages[[this_index]]) &&
         is.stagerunner(other_runner$stages[[stage_index]])) {
-      stages[[this_index]]$around(other_runner$stages[[stage_index]])
-    } else if (is.stageRunnerNode(stages[[this_index]]) &&
+      self$stages[[this_index]]$around(other_runner$stages[[stage_index]])
+    } else if (is.stageRunnerNode(self$stages[[this_index]]) &&
                is.stageRunnerNode(other_runner$stages[[stage_index]])) {
-      stages[[this_index]]$around(other_runner$stages[[stage_index]])
+      self$stages[[this_index]]$around(other_runner$stages[[stage_index]])
     } else {
       warning("Cannot apply around stageRunner because ",
               this_index, " is not a terminal node.")
@@ -359,15 +362,15 @@ stageRunner_coalesce <- function(other_runner) {
     stagenames <- names(other_runner$stages) %||% character(length(other_runner$stages))
     lapply(seq_along(other_runner$stages), function(stage_index) {
       # TODO: Match by name *OR* index
-      if (stagenames[[stage_index]] %in% names(stages)) {
+      if (stagenames[[stage_index]] %in% names(self$stages)) {
         # If both are stageRunners, try to coalesce our sub-stages.
-        if (is.stagerunner(stages[[names(stages)[stage_index]]]) &&
+        if (is.stagerunner(stages[[names(self$stages)[stage_index]]]) &&
             is.stagerunner(other_runner$stages[[stage_index]])) {
-            stages[[names(stages)[stage_index]]]$coalesce(
+            stages[[names(self$stages)[stage_index]]]$coalesce(
               other_runner$stages[[stage_index]])
         # If both are not stageRunners, copy the cached_env if and only if
         # the stored function and its environment are identical
-        } else if (!is.stagerunner(stages[[names(stages)[stage_index]]]) &&
+        } else if (!is.stagerunner(stages[[names(self$stages)[stage_index]]]) &&
             !is.stagerunner(other_runner$stages[[stage_index]]) &&
             !is.null(other_runner$stages[[stage_index]]$cached_env) #&&
             #identical(deparse(stages[[names(stages)[stage_index]]]$fn),
@@ -376,19 +379,19 @@ stageRunner_coalesce <- function(other_runner) {
             #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
             #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
             ) {
-          stages[[names(stages)[stage_index]]]$cached_env <<-
-            new.env(parent = parent.env(.context))
+          self$stages[[names(self$stages)[stage_index]]]$cached_env <<-
+            new.env(parent = parent.env(self$.context))
           if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
-              is.environment(stages[[names(stages)[stage_index]]]$cached_env)) {
-            copy_env(stages[[names(stages)[stage_index]]]$cached_env,
+              is.environment(self$stages[[names(stages)[stage_index]]]$cached_env)) {
+            copy_env(self$stages[[names(self$stages)[stage_index]]]$cached_env,
                      other_runner$stages[[stage_index]]$cached_env)
-            stages[[names(stages)[stage_index]]]$executed <<- 
+            self$stages[[names(self$stages)[stage_index]]]$executed <<- 
               other_runner$stages[[stage_index]]$executed
           }
         }
       }
     })
-    .set_parents()
+    self$.set_parents()
   }
   self
 }
