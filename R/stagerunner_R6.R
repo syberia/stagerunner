@@ -44,7 +44,7 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
          "a stageRunner")
   }
 
-  self$.parent <- structure(NULL, class = "uninitializedField")
+  self$.parent <- NULL
   self$.finished <- FALSE # TODO: Remove this hack for printing
   self$.context <- context
 
