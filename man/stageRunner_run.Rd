@@ -5,7 +5,8 @@
 \title{Run the stages in a stageRunner object.}
 \usage{
 stageRunner_run(from = NULL, to = NULL, normalized = FALSE,
-  verbose = FALSE, remember_flag = TRUE, mode = .mode, .depth = 1, ...)
+  verbose = FALSE, remember_flag = TRUE, mode = self$.mode, .depth = 1,
+  ...)
 }
 \arguments{
 \item{from}{an indexing parameter. Many forms are accepted, but the
