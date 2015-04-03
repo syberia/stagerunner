@@ -503,7 +503,7 @@ stageRunner_show <- function(indent = 0) {
     caching <- if (self$remember) ' caching' else ''
     cat("A", caching, " stageRunner with ", sum_stages(self$stages), " stages:\n", sep = '')
   }
-  stage_names <- names(self$stages) %||% rep("", length(stages))
+  stage_names <- names(self$stages) %||% rep("", length(self$stages))
 
   # A helper function for determining if a stage has been run yet.
   began_stage <- function(stage)
