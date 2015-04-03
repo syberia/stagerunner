@@ -165,7 +165,7 @@ stageRunner_run <- function(from = NULL, to = NULL,
       from <- self$next_stage()
       if (missing(to)) to <- TRUE
     }
-    stage_key <- normalize_stage_keys(from, stages, to = to)
+    stage_key <- normalize_stage_keys(from, self$stages, to = to)
   } else stage_key <- from
 
   # Now that we have determined which stages to run, cycle through them all.
@@ -196,13 +196,13 @@ stageRunner_run <- function(from = NULL, to = NULL,
          function(..., remember_flag = TRUE) { stage$run(...) }
         }
       } else if (is.list(stage_key[[stage_index]])) {
-        if (!is.stagerunner(stages[[stage_index]])) {
+        if (!is.stagerunner(self$stages[[stage_index]])) {
           stop("Invalid stage key: attempted to make a nested stage reference ",
                "to a non-existent stage")
         }
 
         function(...) {
-          stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE,
+          self$stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE,
                                     verbose = verbose, .depth = .depth + 1, ...)
         }
       } else next 
