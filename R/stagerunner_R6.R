@@ -315,7 +315,7 @@ stageRunner_coalesce <- function(other_runner) {
   # TODO: Should we care about insertion of new stages causing cache wipes?
   # For now it seems like this would just be an annoyance.
   # stopifnot(remember)
-  if (!isTRUE(remember)) return()
+  if (!isTRUE(self$remember)) return()
 
   if (self$with_tracked_environment()) {
     if (!other_runner$with_tracked_environment()) {
@@ -364,13 +364,13 @@ stageRunner_coalesce <- function(other_runner) {
       # TODO: Match by name *OR* index
       if (stagenames[[stage_index]] %in% names(self$stages)) {
         # If both are stageRunners, try to coalesce our sub-stages.
-        if (is.stagerunner(stages[[names(self$stages)[stage_index]]]) &&
+        if (is.stagerunner(self$stages[[names(self$stages)[stage_index]]]) &&
             is.stagerunner(other_runner$stages[[stage_index]])) {
-            stages[[names(self$stages)[stage_index]]]$coalesce(
+            self$stages[[names(self$stages)[stage_index]]]$coalesce(
               other_runner$stages[[stage_index]])
         # If both are not stageRunners, copy the cached_env if and only if
         # the stored function and its environment are identical
-        } else if (!is.stagerunner(stages[[names(self$stages)[stage_index]]]) &&
+        } else if (!is.stagerunner(self$stages[[names(self$stages)[stage_index]]]) &&
             !is.stagerunner(other_runner$stages[[stage_index]]) &&
             !is.null(other_runner$stages[[stage_index]]$cached_env) #&&
             #identical(deparse(stages[[names(stages)[stage_index]]]$fn),
@@ -744,7 +744,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
       correct_cache <- .cached_env %||% self$cached_env
       if (is.null(.callable)) FALSE
       else if (is.stagerunner(.callable))
-        .callable$run(..., .cached_env = correct_cache)
+     self$   .callable$run(..., .cached_env = correct_cache)
       else {
         tmp <- new.env(parent = environment(.callable))
         environment(.callable) <- tmp
