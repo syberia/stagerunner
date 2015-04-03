@@ -734,7 +734,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
     .parent = NULL,
     executed = FALSE,
     initialize = function(.callable, .context = NULL) {
-      stopifnot(is_any(self$.callable, c('stageRunner', 'function', 'NULL')))
+      stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
       self$callable <- .callable
       self$.context <- .context
       self$executed <- FALSE
