@@ -26,7 +26,7 @@ stageRunner__.set_prefixes <- function(prefix = '') {
 }
 
 stageRunner_.set_prefixes <- function(prefix = '') {
-  .prefix <<- prefix
+  self$.prefix <- prefix
   for (i in seq_along(stages)) {
     if (is.stageRunner(stages[[i]])) {
       stages[[i]]$.set_prefixes(paste0(prefix, i, '/'))
