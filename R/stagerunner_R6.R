@@ -1,13 +1,3 @@
-accessor_method <- function(attr) {
-  fn <- eval(bquote(
-    function(`*VALUE*` = NULL)
-      if (missing(`*VALUE*`)) .(substitute(attr))
-      else .(substitute(attr)) <<- `*VALUE*`
-  ))
-  environment(fn) <- parent.frame()
-  fn
-}
-
 #' Initialize a stageRunner object.
 #'
 #' stageRunner objects are used for executing a linear sequence of
@@ -48,8 +38,9 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
   self$.finished <- FALSE # TODO: Remove this hack for printing
   self$.context <- context
 
+  self$.mode <- tolower(mode)
   if (identical(remember, TRUE) && !(is.character(mode) &&
-      any((self$.mode <- tolower(mode)) == c('head', 'next')))) {
+      any(self$.mode == c('head', 'next')))) {
     stop("The mode parameter to the stageRunner constructor must be ",
          "either 'head' or 'next'.")
   }
@@ -159,7 +150,7 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
 #'   the stageRunner.
 stageRunner_run <- function(from = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
-                             remember_flag = TRUE, mode = .mode, .depth = 1, ...) {
+                             remember_flag = TRUE, mode = self$.mode, .depth = 1, ...) {
   if (identical(normalized, FALSE)) {
     if (missing(from) && identical(self$remember, TRUE) && identical(mode, 'next')) {
       from <- self$next_stage()
@@ -689,7 +680,7 @@ stageRunner_ <- R6::R6Class('stageRunner',
     next_stage   = stageRunner_next_stage,
     show         = stageRunner_show,
     has_key      = stageRunner_has_key,
-    mode         = accessor_method(.mode),
+    mode         = function() { self$mode },
     .set_parents = stageRunner_.set_parents,
     .clear_cache = stageRunner_.clear_cache,
     .root        = stageRunner_.root,
