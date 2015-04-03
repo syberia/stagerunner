@@ -631,15 +631,15 @@ stageRunner_.before_env <- function(stage_index) {
 #' 
 #' @param stage_index integer. The index of the substage in this stageRunner.
 stageRunner_.mark_finished <- function(stage_index) {
-  node <- treeSkeleton$new(stages[[stage_index]])$successor()
+  node <- treeSkeleton$new(self$stages[[stage_index]])$successor()
 
   if (!is.null(node)) { # Prepare a cache for the future!
     if (self$with_tracked_environment()) {
       # We assume the head for the tracked_environment is set correctly.
-      package_function("objectdiff", "commit")(.context, node$object$index())
+      package_function("objectdiff", "commit")(self$.context, node$object$index())
     } else {
-      node$object$cached_env <- new.env(parent = parent.env(.context))
-      copy_env(node$object$cached_env, .context)
+      node$object$cached_env <- new.env(parent = parent.env(self$.context))
+      copy_env(node$object$cached_env, self$.context)
     }
   } else {
     # TODO: Remove this hack used for printing
@@ -734,8 +734,10 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
     .parent = NULL,
     executed = FALSE,
     initialize = function(.callable, .context = NULL) {
-      stopifnot(is_any(.callable, c('stageRunner', 'function', 'NULL')))
-      callable <<- .callable; .context <<- .context; executed <<- FALSE
+      stopifnot(is_any(self$.callable, c('stageRunner', 'function', 'NULL')))
+      self$callable <- .callable
+      self$.context <- .context
+      self$executed <- FALSE
     },
     run = function(..., .cached_env = NULL, .callable = self$callable) {
       # TODO: Clean this up by using environment injection utility fn
@@ -780,7 +782,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
       environment(yield_env$yield)$callable <- callable
 
       environment(new_callable) <- yield_env
-      callable <<- new_callable
+      self$callable <- new_callable
       TRUE
     },
 
@@ -788,27 +790,27 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
       if (is.null(other_node)) return(FALSE)
       if (!is.stagerunner(other_node)) 
-        other_node <- stageRunner$new(.context, other_node)
+        other_node <- stageRunner$new(self$.context, other_node)
 
       # Coerce the current callable object to a stageRunner so that
       # we can append the other_node's stageRunner.
       if (!is.stagerunner(callable)) 
-        callable <<- stageRunner$new(.context, callable)
+        self$callable <- stageRunner$new(self$.context, self$callable)
 
       # TODO: Fancier merging here
       if (isTRUE(flat)) {
         if (!is.character(label)) stop("flat coalescing needs a label")
-        callable$stages[[label]] <<- other_node
-      } else callable$append(other_node, label)
+        self$callable$stages[[label]] <- other_node
+      } else self$callable$append(other_node, label)
     },
     transform = function(transformation) {
-      if (is.stagerunner(callable)) callable$transform(transformation)
-      else callable <<- transformation(callable)
+      if (is.stagerunner(self$callable)) self$callable$transform(transformation)
+      else self$callable <- transformation(self$callable)
     },
-    was_executed = function() { executed },
+    was_executed = function() { self$executed },
     parent   = function() { attr(self, "parent") }, # accessor_method(.parent),
     children = function() list(),
-    show     = function() { cat("A stageRunner node containing: \n"); print(callable) },
+    show     = function() { cat("A stageRunner node containing: \n"); print(self$callable) },
 
     # Functions which intertwine with the objectdiff package
     index    = function() {
