@@ -20,46 +20,46 @@ test_that('it should be able to run a simple double staged stageRunner', {
 test_that('the first cached environment is simply the initial context', {
   tmp <- new.env(); tmp$x <- 1; tmp$y <- function(z) z + 1; tmp$w <- list(1, iris)
   sr <- stageRunner$new(tmp, list(force), remember = TRUE)
-  expect_identical(nested_env_list(sr$stages[[1]]$cached_env), nested_env_list(tmp))
+  expect_identical(nested_env_list(sr$stages[[1]]$.cached_env), nested_env_list(tmp))
 })
 
 test_that('the first cached environment is simply the initial context in a first nested stage', {
   tmp <- new.env(); tmp$x <- 1; tmp$y <- function(z) z + 1; tmp$w <- list(1, iris)
   sr <- stageRunner$new(tmp, list(list(list(force))), remember = TRUE)
-  expect_identical(nested_env_list(sr$stages[[1]]$stages[[1]]$stages[[1]]$cached_env),
+  expect_identical(nested_env_list(sr$stages[[1]]$stages[[1]]$stages[[1]]$.cached_env),
                    nested_env_list(tmp))
 })
 
 test_that('there are no cached environments on non-first stages before anything is run', {
   sr <- stageRunner$new(new.env(), list(force, force, force), remember = TRUE)
-  expect_identical(lapply(sr$stages[-1], `[[`, "cached_env"), list(NULL, NULL))
+  expect_identical(lapply(sr$stages[-1], `[[`, ".cached_env"), list(NULL, NULL))
 })
 
 test_that('running the first two stages updates the cache for the second stage and third stage', {
   sr <- stageRunner$new(new.env(), list(function(env) env$x <- 1, force, force), remember = TRUE)
   sr$run(c(1,2))
-  expect_identical(nested_env_list(sr$stages[[2]]$cached_env), list(x = 1))
-  expect_identical(nested_env_list(sr$stages[[3]]$cached_env), list(x = 1))
+  expect_identical(nested_env_list(sr$stages[[2]]$.cached_env), list(x = 1))
+  expect_identical(nested_env_list(sr$stages[[3]]$.cached_env), list(x = 1))
 })
 
 test_that('running the first stage does not update the cache for the fourth stage', {
   sr <- stageRunner$new(new.env(), list(function(env) env$x <- 1, force, force, force), remember = TRUE)
   sr$run(c(1,2))
-  expect_identical(sr$stages[[4]]$cached_env, NULL)
+  expect_identical(sr$stages[[4]]$.cached_env, NULL)
 })
 
 test_that('running the first nested stage updates the cache for the second non-nested stage', {
   sr <- stageRunner$new(new.env(), list(list(function(env) env$x <- 1, force), force), remember = TRUE)
-  expect_identical(sr$stages[[2]]$cached_env, NULL)
+  expect_identical(sr$stages[[2]]$.cached_env, NULL)
   sr$run(1)
-  expect_identical(nested_env_list(sr$stages[[2]]$cached_env), list(x = 1))
+  expect_identical(nested_env_list(sr$stages[[2]]$.cached_env), list(x = 1))
 })
 
 test_that('running the first nested stage updates the cache for the second nested stage', {
   sr <- stageRunner$new(new.env(), list(list(function(env) env$x <- 1, force), list(function(env) env$y <- 1, force)), remember = TRUE)
-  expect_identical(sr$stages[[2]]$stages[[1]]$cached_env, NULL)
+  expect_identical(sr$stages[[2]]$stages[[1]]$.cached_env, NULL)
   sr$run(1)
-  expect_identical(nested_env_list(sr$stages[[1]]$stages[[2]]$cached_env), list(x = 1))
+  expect_identical(nested_env_list(sr$stages[[1]]$stages[[2]]$.cached_env), list(x = 1))
 })
 
 test_that('we cannot run stages out of order due to caching issues', {

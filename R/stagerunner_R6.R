@@ -92,8 +92,8 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
     } else if (length(self$stages) > 0) {
       # Set the first cache environment
       first_env <- treeSkeleton$new(self$stages[[1]])$first_leaf()$object
-      first_env$cached_env <- new.env(parent = parent.env(self$.context))
-      copy_env(first_env$cached_env, self$.context)
+      first_env$.cached_env <- new.env(parent = parent.env(self$.context))
+      copy_env(first_env$.cached_env, self$.context)
     }
   }
 }
@@ -372,19 +372,19 @@ stageRunner_coalesce <- function(other_runner) {
         # the stored function and its environment are identical
         } else if (!is.stagerunner(self$stages[[names(self$stages)[stage_index]]]) &&
             !is.stagerunner(other_runner$stages[[stage_index]]) &&
-            !is.null(other_runner$stages[[stage_index]]$cached_env) #&&
+            !is.null(other_runner$stages[[stage_index]]$.cached_env) #&&
             #identical(deparse(stages[[names(stages)[stage_index]]]$fn),
             #          deparse(other_runner$stages[[stage_index]]$fn)) # &&
             # This is way too tricky and far beyond my abilities..
             #identical(stagerunner:::as.list.environment(environment(stages[[names(stages)[stage_index]]]$fn)),
             #          stagerunner:::as.list.environment(environment(other_runner$stages[[stage_index]]$fn)))
             ) {
-          self$stages[[names(self$stages)[stage_index]]]$cached_env <-
+          self$stages[[names(self$stages)[stage_index]]]$.cached_env <-
             new.env(parent = parent.env(self$.context))
-          if (is.environment(other_runner$stages[[stage_index]]$cached_env) &&
-              is.environment(self$stages[[names(self$stages)[stage_index]]]$cached_env)) {
-            copy_env(self$stages[[names(self$stages)[stage_index]]]$cached_env,
-                     other_runner$stages[[stage_index]]$cached_env)
+          if (is.environment(other_runner$stages[[stage_index]]$.cached_env) &&
+              is.environment(self$stages[[names(self$stages)[stage_index]]]$.cached_env)) {
+            copy_env(self$stages[[names(self$stages)[stage_index]]]$.cached_env,
+                     other_runner$stages[[stage_index]]$.cached_env)
             self$stages[[names(self$stages)[stage_index]]]$executed <- 
               other_runner$stages[[stage_index]]$executed
           }
@@ -508,7 +508,7 @@ stageRunner_show <- function(indent = 0) {
   # A helper function for determining if a stage has been run yet.
   began_stage <- function(stage)
     if (is.stagerunner(stage)) any(vapply(stage$stages, began_stage, logical(1)))
-    else if (is.stageRunnerNode(stage)) !is.null(stage$cached_env)
+    else if (is.stageRunnerNode(stage)) !is.null(stage$.cached_env)
     else FALSE
 
   lapply(seq_along(stage_names), function(index) {
@@ -552,7 +552,7 @@ stageRunner_has_key <- function(key) {
 stageRunner_.clear_cache <- function() {
   for (i in seq_along(self$stages)) {
     if (is.stagerunner(self$stages[[i]])) self$stages[[i]]$.clear_cache()
-    else self$stages[[i]]$cached_env <- NULL
+    else self$stages[[i]]$.cached_env <- NULL
   }
   TRUE
 }
@@ -618,7 +618,7 @@ stageRunner_.before_env <- function(stage_index) {
     copy_env(env, package_function("objectdiff", "environment")(self$.context))
     env
   } else {
-    env <- self$stages[[stage_index]]$cached_env
+    env <- self$stages[[stage_index]]$.cached_env
     if (is.null(env)) { cannot_run_error() }
 
     # Restart execution from cache, so set context to the cached environment.
@@ -638,8 +638,8 @@ stageRunner_.mark_finished <- function(stage_index) {
       # We assume the head for the tracked_environment is set correctly.
       package_function("objectdiff", "commit")(self$.context, node$object$index())
     } else {
-      node$object$cached_env <- new.env(parent = parent.env(self$.context))
-      copy_env(node$object$cached_env, self$.context)
+      node$object$.cached_env <- new.env(parent = parent.env(self$.context))
+      copy_env(node$object$.cached_env, self$.context)
     }
   } else {
     # TODO: Remove this hack used for printing
@@ -729,7 +729,7 @@ stageRunner <- structure(
 stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
   public = list(
     callable = NULL,
-    cached_env = NULL,
+    .cached_env = NULL,
     .context = NULL,
     .parent = NULL,
     executed = FALSE,
@@ -741,7 +741,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
     },
     run = function(..., .cached_env = NULL, .callable = self$callable) {
       # TODO: Clean this up by using environment injection utility fn
-      correct_cache <- .cached_env %||% self$cached_env
+      correct_cache <- .cached_env %||% self$.cached_env
       if (is.null(.callable)) FALSE
       else if (is.stagerunner(.callable)) {
         .callable$run(..., .cached_env = correct_cache)
