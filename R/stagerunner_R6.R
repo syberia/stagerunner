@@ -416,9 +416,9 @@ stageRunner_overlay <- function(other_runner, label = NULL, flat = FALSE) {
     name <- names(other_runner$stages)[[stage_index]]
     index <-
       if (identical(name, '') || identical(name, NULL)) stage_index
-      else if (name %in% names(stages)) name
+      else if (name %in% names(self$stages)) name
       else stop('Cannot overlay because keys do not match')
-    stages[[index]]$overlay(other_runner$stages[[stage_index]], label, flat)
+    self$stages[[index]]$overlay(other_runner$stages[[stage_index]], label, flat)
   }
   TRUE
 }
@@ -433,8 +433,8 @@ stageRunner_overlay <- function(other_runner, label = NULL, flat = FALSE) {
 #' @param transformation function. The function which transforms one callable
 #'   into another.
 stageRunner_transform <- function(transformation) {
-  for (stage_index in seq_along(stages))
-    stages[[stage_index]]$transform(transformation)
+  for (stage_index in seq_along(self$stages))
+    self$stages[[stage_index]]$transform(transformation)
 }
 
 #' Append one stageRunner to the end of another.
@@ -446,7 +446,7 @@ stageRunner_transform <- function(transformation) {
 stageRunner_append <- function(other_runner, label = NULL) {
   stopifnot(is.stagerunner(other_runner))
   new_stage <- structure(list(other_runner), names = label)
-  stages <<- base::append(stages, new_stage)
+  self$stages <- base::append(self$stages, new_stage)
   TRUE
 }
 
@@ -467,7 +467,7 @@ stageRunner_append <- function(other_runner, label = NULL) {
 ## sr$stage_names()
 stageRunner_stage_names <- function() {
   nested_stages <- function(x) if (is.stagerunner(x)) nested_stages(x$stages) else x
-  nested_names(lapply(stages, nested_stages))
+  nested_names(lapply(self$stages, nested_stages))
 }
 
 #' For stageRunners with caching, find the next unexecuted stage.
@@ -500,10 +500,10 @@ stageRunner_show <- function(indent = 0) {
   if (missing(indent)) {
     sum_stages <- function(x) sum(vapply(x,
       function(x) if (is.stagerunner(x)) sum_stages(x$stages) else 1L, integer(1)))
-    caching <- if (remember) ' caching' else ''
+    caching <- if (self$remember) ' caching' else ''
     cat("A", caching, " stageRunner with ", sum_stages(self$stages), " stages:\n", sep = '')
   }
-  stage_names <- names(stages) %||% rep("", length(stages))
+  stage_names <- names(self$stages) %||% rep("", length(stages))
 
   # A helper function for determining if a stage has been run yet.
   began_stage <- function(stage)
@@ -514,7 +514,7 @@ stageRunner_show <- function(indent = 0) {
   lapply(seq_along(stage_names), function(index) {
     prefix <- paste0(rep('  ', (if (is.numeric(indent)) indent else 0) + 1), collapse = '')
     marker <-
-      if (remember && began_stage(stages[[index]])) {
+      if (self$remember && began_stage(self$stages[[index]])) {
         next_stage <- treeSkeleton$new(stages[[index]])$last_leaf()$successor()$object
         if (( is.null(next_stage) && !self$.root()$.finished) ||
             (!is.null(next_stage) && !began_stage(next_stage))) 
@@ -530,11 +530,11 @@ stageRunner_show <- function(indent = 0) {
         paste0("< Unnamed (stage ", index, ") >")
       else stage_names[[index]]
     cat(prefix, stage_name, "\n")
-    if (is.stagerunner(stages[[index]]))
-      stages[[index]]$show(indent = indent + 1)
+    if (is.stagerunner(self$stages[[index]]))
+      self$stages[[index]]$show(indent = indent + 1)
   })
 
-  if (missing(indent)) { cat('Context '); print(.context) }
+  if (missing(indent)) { cat('Context '); print(self$.context) }
   NULL
 }
 
