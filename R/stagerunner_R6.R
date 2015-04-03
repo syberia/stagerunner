@@ -750,7 +750,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
         environment(.callable) <- tmp
         environment(.callable)$cached_env <- correct_cache
         on.exit(environment(.callable) <- parent.env(environment(.callable)))
-        .callable(.context, ...)
+        .callable(self$.context, ...)
       }
       self$executed <<- TRUE
     }, 
