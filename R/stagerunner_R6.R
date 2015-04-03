@@ -743,9 +743,9 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
       # TODO: Clean this up by using environment injection utility fn
       correct_cache <- .cached_env %||% self$cached_env
       if (is.null(.callable)) FALSE
-      else if (is.stagerunner(.callable))
-     self$   .callable$run(..., .cached_env = correct_cache)
-      else {
+      else if (is.stagerunner(.callable)) {
+        .callable$run(..., .cached_env = correct_cache)
+      } else {
         tmp <- new.env(parent = environment(.callable))
         environment(.callable) <- tmp
         environment(.callable)$cached_env <- correct_cache
