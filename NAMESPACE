@@ -2,6 +2,8 @@
 
 S3method("$",stageRunnerNode_)
 S3method("$",stageRunner_)
+S3method(print,stageRunner)
+S3method(print,stageRunnerNode)
 export(is.stageRunner)
 export(is.stagerunner)
 export(is_pre_stagerunner)
