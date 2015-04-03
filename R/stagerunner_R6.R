@@ -286,7 +286,7 @@ stageRunner_around <- function(other_runner) {
     name <- stagenames[stage_index]
     this_index <- 
       if (identical(name, "")) stage_index
-      else if (is.element(name, names(stages))) name
+      else if (is.element(name, names(self$stages))) name
       else return()
 
     if (is.stagerunner(self$stages[[this_index]]) &&
