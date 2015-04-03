@@ -230,10 +230,10 @@ stageRunner_run <- function(from = NULL, to = NULL,
       # executed in order to recursively fetch the before_env).
       if (!nested_run) { run_stage(...) }
     }
-    else if (remember) { run_stage(..., remember_flag = FALSE) }
+    else if (self$remember) { run_stage(..., remember_flag = FALSE) }
     else { run_stage(...) }
 
-    if (remember && !nested_run) {
+    if (self$remember && !nested_run) {
       # When we're done running a stage (i.e., processing a terminal node),
       # set the cache on the successor node to be the current context
       # (since that node will execute starting with what's in the context now --
@@ -248,7 +248,7 @@ stageRunner_run <- function(from = NULL, to = NULL,
     }
   }
 
-  if (remember && remember_flag) { list(before = before_env, after = self$.context) }
+  if (self$remember && remember_flag) { list(before = before_env, after = self$.context) }
   else { invisible(TRUE) }
 }
 
@@ -739,6 +739,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
       self$.context <- .context
       self$executed <- FALSE
     },
+
     run = function(..., .cached_env = NULL, .callable = self$callable) {
       # TODO: Clean this up by using environment injection utility fn
       correct_cache <- .cached_env %||% self$.cached_env
