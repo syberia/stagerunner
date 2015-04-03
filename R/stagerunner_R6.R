@@ -93,7 +93,7 @@ stageRunner_initialize <- function(context, .stages, remember = FALSE,
       # Set the first cache environment
       first_env <- treeSkeleton$new(self$stages[[1]])$first_leaf()$object
       first_env$cached_env <- new.env(parent = parent.env(self$.context))
-      copy_env(first_env$cached_env, sel$.context)
+      copy_env(first_env$cached_env, self$.context)
     }
   }
 }
@@ -161,8 +161,8 @@ stageRunner_run <- function(from = NULL, to = NULL,
                              normalized = FALSE, verbose = FALSE,
                              remember_flag = TRUE, mode = .mode, .depth = 1, ...) {
   if (identical(normalized, FALSE)) {
-    if (missing(from) && identical(remember, TRUE) && identical(mode, 'next')) {
-      from <- next_stage()
+    if (missing(from) && identical(self$remember, TRUE) && identical(mode, 'next')) {
+      from <- self$next_stage()
       if (missing(to)) to <- TRUE
     }
     stage_key <- normalize_stage_keys(from, stages, to = to)
@@ -186,7 +186,7 @@ stageRunner_run <- function(from = NULL, to = NULL,
     # stage does not exist).
     run_stage <-
       if (identical(stage_key[[stage_index]], TRUE)) {
-        stage <- stages[[stage_index]]
+        stage <- self$stages[[stage_index]]
         if (is.stagerunner(stage)) { 
           function(...) { stage$run(verbose = verbose, .depth = .depth + 1, ...) }
         } else {
@@ -209,14 +209,14 @@ stageRunner_run <- function(from = NULL, to = NULL,
 
     display_message <- verbose && contains_true(stage_key[[stage_index]])
     if (display_message) {
-      show_message(names(stages), stage_index, begin = TRUE,
+      show_message(names(self$stages), stage_index, begin = TRUE,
                    nested = nested_run, depth = .depth)
     }
 
     # Now handle when remember = TRUE, i.e., we have to cache the
     # progress along each stage.
 
-    if (remember && remember_flag && is.null(before_env)) {
+    if (self$remember && remember_flag && is.null(before_env)) {
       # If remember = remember_flag = TRUE and before_env has not been set
       # this is the first stage of a $run() call, so use the cached
       # environment.
@@ -243,12 +243,12 @@ stageRunner_run <- function(from = NULL, to = NULL,
     }
 
     if (display_message) {
-      show_message(names(stages), stage_index, begin = FALSE,
+      show_message(names(self$stages), stage_index, begin = FALSE,
                    nested = nested_run, depth = .depth)
     }
   }
 
-  if (remember && remember_flag) { list(before = before_env, after = .context) }
+  if (remember && remember_flag) { list(before = before_env, after = self$.context) }
   else { invisible(TRUE) }
 }
 
@@ -277,7 +277,7 @@ stageRunner_run <- function(from = NULL, to = NULL,
 #'   of functions.
 stageRunner_around <- function(other_runner) {
   if (is.null(other_runner)) return(self)
-  if (!is.stagerunner(other_runner)) other_runner <- stageRunner$new(.context, other_runner)
+  if (!is.stagerunner(other_runner)) other_runner <- stageRunner$new(self$.context, other_runner)
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
   lapply(seq_along(other_runner$stages), function(stage_index) {
     name <- stagenames[stage_index]
@@ -475,11 +475,11 @@ stageRunner_stage_names <- function() {
 #'   If the stageRunner does not have caching enabled, this will
 #'   always return the first stage key (`'1'`).
 stageRunner_next_stage <- function() {
-  for (stage_index in seq_along(stages)) {
-    is_unexecuted_terminal_node <- is.stageRunnerNode(stages[[stage_index]]) &&
-      !stages[[stage_index]]$was_executed()
-    has_unexecuted_terminal_node <- is.stagerunner(stages[[stage_index]]) &&
-      is.character(tmp <- stages[[stage_index]]$next_stage())
+  for (stage_index in seq_along(self$stages)) {
+    is_unexecuted_terminal_node <- is.stageRunnerNode(self$stages[[stage_index]]) &&
+      !self$stages[[stage_index]]$was_executed()
+    has_unexecuted_terminal_node <- is.stagerunner(self$stages[[stage_index]]) &&
+      is.character(tmp <- self$stages[[stage_index]]$next_stage())
 
     if (is_unexecuted_terminal_node) return(as.character(stage_index))
     else if (has_unexecuted_terminal_node)
