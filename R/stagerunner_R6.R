@@ -515,7 +515,7 @@ stageRunner_show <- function(indent = 0) {
     prefix <- paste0(rep('  ', (if (is.numeric(indent)) indent else 0) + 1), collapse = '')
     marker <-
       if (self$remember && began_stage(self$stages[[index]])) {
-        next_stage <- treeSkeleton$new(stages[[index]])$last_leaf()$successor()$object
+        next_stage <- treeSkeleton$new(self$stages[[index]])$last_leaf()$successor()$object
         if (( is.null(next_stage) && !self$.root()$.finished) ||
             (!is.null(next_stage) && !began_stage(next_stage))) 
           '*' # Use a * if this is the next stage to be executed
