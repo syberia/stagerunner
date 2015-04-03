@@ -775,7 +775,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
         # so we have to do something ugly
         run <- eval.parent(quote(.parent_context$run))
         args <- append(eval.parent(quote(list(...)), n = 2),
-          list(.callable = self$callable))
+          list(.callable = callable))
         do.call(run, args, envir = parent.frame())
       }
       environment(yield_env$yield) <- new.env(parent = baseenv())
