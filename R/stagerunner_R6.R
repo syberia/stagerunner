@@ -543,16 +543,16 @@ stageRunner_show <- function(indent = 0) {
 #' @param key ANY. The potential key.
 #' @return \code{TRUE} or \code{FALSE} accordingly.
 stageRunner_has_key <- function(key) {
-  has <- tryCatch(normalize_stage_keys(key, stages), error = function(.) FALSE)
+  has <- tryCatch(normalize_stage_keys(key, self$stages), error = function(.) FALSE)
   any(c(has, recursive = TRUE))
 }
 
 #' Clear all caches in this stageRunner, and recursively.
 #' @name stageRunner_.clear_cache
 stageRunner_.clear_cache <- function() {
-  for (i in seq_along(stages)) {
-    if (is.stagerunner(stages[[i]])) stages[[i]]$.clear_cache()
-    else stages[[i]]$cached_env <<- NULL
+  for (i in seq_along(self$stages)) {
+    if (is.stagerunner(self$stages[[i]])) self$stages[[i]]$.clear_cache()
+    else self$stages[[i]]$cached_env <<- NULL
   }
   TRUE
 }
@@ -560,26 +560,26 @@ stageRunner_.clear_cache <- function() {
 #' Set all parents for this stageRunner, and recursively
 #' @name stageRunner_.set_parents
 stageRunner_.set_parents <- function() {
-  for (i in seq_along(stages)) {
+  for (i in seq_along(self$stages)) {
     # Set convenience helper attribute "child_index" to ensure that treeSkeleton
     # can find this stage.
-    if (is.refClass(stages[[i]])) {
+    if (is.refClass(self$stages[[i]])) {
       # http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
-      unlockBinding('self', attr(stages[[i]], '.xData'))
-      attr(attr(stages[[i]], '.xData')$self, 'child_index') <<- i
-      lockBinding('self', attr(stages[[i]], '.xData'))
-    } else attr(stages[[i]], 'child_index') <<- i
+      unlockBinding('self', attr(self$stages[[i]], '.xData'))
+      attr(attr(self$stages[[i]], '.xData')$self, 'child_index') <<- i
+      lockBinding('self', attr(self$stages[[i]], '.xData'))
+    } else attr(self$stages[[i]], 'child_index') <<- i
 
-    if (!is.refClass(stages[[i]])) {
-      attr(stages[[i]], 'parent') <<- self
+    if (!is.refClass(self$stages[[i]])) {
+      attr(self$stages[[i]], 'parent') <<- self
     } else {
       # if stages[[i]] has a .set_parents method (e.g. it is a stagerunner), run that
-      if ('.set_parents' %in% ls(stages[[i]]$.refClassDef@refMethods, all.names = TRUE))
-        stages[[i]]$.set_parents()
-      stages[[i]]$parent(self)
+      if ('.set_parents' %in% ls(slef$stages[[i]]$.refClassDef@refMethods, all.names = TRUE))
+        self$stages[[i]]$.set_parents()
+      self$stages[[i]]$parent(self)
     }
   }
-  .parent <<- NULL
+  self$.parent <- NULL
 }
 
 #' Get an environment representing the context directly before executing a given stage.
@@ -602,27 +602,27 @@ stageRunner_.before_env <- function(stage_index) {
     # so we have to "roll back" to a previous commit.
     current_commit <- paste0(self$.prefix, stage_index)
 
-    if (!current_commit %in% names(package_function("objectdiff", "commits")(.context))) {
+    if (!current_commit %in% names(package_function("objectdiff", "commits")(self$.context))) {
       if (`first_commit?`(current_commit)) {
         # TODO: (RK) Do this more robustly. This will fail if there is a 
         # first sub-stageRunner with an empty list as its stages.
-        package_function("objectdiff", "commit")(.context, current_commit)
+        package_function("objectdiff", "commit")(self$.context, current_commit)
       } else {
         cannot_run_error()
       }
     } else {
-      package_function("objectdiff", "force_push")(.context, current_commit)
+      package_function("objectdiff", "force_push")(self$.context, current_commit)
     }
 
-    env <- new.env(parent = package_function("objectdiff", "parent.env.tracked_environment")(.context))
-    copy_env(env, package_function("objectdiff", "environment")(.context))
+    env <- new.env(parent = package_function("objectdiff", "parent.env.tracked_environment")(self$.context))
+    copy_env(env, package_function("objectdiff", "environment")(self$.context))
     env
   } else {
-    env <- stages[[stage_index]]$cached_env
+    env <- self$stages[[stage_index]]$cached_env
     if (is.null(env)) { cannot_run_error() }
 
     # Restart execution from cache, so set context to the cached environment.
-    copy_env(.context, env)
+    copy_env(self$.context, env)
     env
   }
 }
