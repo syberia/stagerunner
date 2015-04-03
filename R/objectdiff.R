@@ -11,9 +11,9 @@
 #' correct remembering functionality.
 #'
 #' @param prefix character. The prefix to assign to this stageRunner.
-#' @name stageRunner__.set_prefixes
-stageRunner__.set_prefixes <- function(prefix = '') {
-  .prefix <<- prefix
+#' @name stageRunner_.set_prefixes
+stageRunner_.set_prefixes <- function(prefix = '') {
+  self$.prefix <- prefix
   for (i in seq_along(self$stages)) {
     if (is.stageRunner(self$stages[[i]])) {
       self$stages[[i]]$.set_prefixes(paste0(prefix, i, '/'))
@@ -25,12 +25,4 @@ stageRunner__.set_prefixes <- function(prefix = '') {
   all(strsplit(commit, "/", fixed = TRUE)[[1]] == '1')
 }
 
-stageRunner_.set_prefixes <- function(prefix = '') {
-  self$.prefix <- prefix
-  for (i in seq_along(self$stages)) {
-    if (is.stageRunner(self$stages[[i]])) {
-      self$stages[[i]]$.set_prefixes(paste0(prefix, i, '/'))
-    }
-  }
-}
 
