@@ -685,7 +685,7 @@ stageRunner_ <- R6::R6Class('stageRunner',
     append       = stageRunner_append,
     stage_names  = stageRunner_stage_names,
     parent       = accessor_method(.parent),
-    children     = function() { stages },
+    children     = function() { self$stages },
     next_stage   = stageRunner_next_stage,
     show         = stageRunner_show,
     has_key      = stageRunner_has_key,
@@ -698,7 +698,7 @@ stageRunner_ <- R6::R6Class('stageRunner',
     .set_prefixes  = stageRunner_.set_prefixes,
     .before_env    = stageRunner_.before_env,
     .mark_finished = stageRunner_.mark_finished,
-    with_tracked_environment = function() { is(.context, 'tracked_environment') }
+    with_tracked_environment = function() { is(self$.context, 'tracked_environment') }
   )
 )
 
