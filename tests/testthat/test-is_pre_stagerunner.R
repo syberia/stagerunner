@@ -20,3 +20,8 @@ test_that("a stageRunner list can be turned into a stageRunner", {
   sr <- stageRunner(new.env(), force)
   expect_true(is_pre_stagerunner(list(sr, force)))
 })
+
+test_that("a stageRunner list with a NULL can be turned into a stageRunner", {
+  sr <- stageRunner(new.env(), force)
+  expect_true(is_pre_stagerunner(list(sr, NULL, force)))
+})
