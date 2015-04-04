@@ -716,6 +716,7 @@ stageRunner <- structure(
 #' @return an environment with some additional attributes for
 #'   navigating in a tree-like structure.
 #' @name stageRunnerNode
+#' @format NULL
 #' @docType class
 stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
   public = list(

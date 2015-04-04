@@ -176,6 +176,7 @@ treeSkeleton__find <- function(key) {
 #' successor, predecessor, ancestor, etc.
 #'
 #' @name treeSkeleton
+#' @format NULL
 treeSkeleton_ <- R6::R6Class('treeSkeleton',
   public = list(
     object = 'ANY',
