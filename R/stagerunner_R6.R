@@ -554,21 +554,8 @@ stageRunner_.set_parents <- function() {
   for (i in seq_along(self$stages)) {
     # Set convenience helper attribute "child_index" to ensure that treeSkeleton
     # can find this stage.
-    if (is.refClass(self$stages[[i]])) {
-      # http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
-      unlockBinding('self', attr(self$stages[[i]], '.xData'))
-      attr(attr(self$stages[[i]], '.xData')$self, 'child_index') <<- i
-      lockBinding('self', attr(self$stages[[i]], '.xData'))
-    } else attr(self$stages[[i]], 'child_index') <<- i
-
-    if (!is.refClass(self$stages[[i]])) {
-      attr(self$stages[[i]], 'parent') <<- self
-    } else {
-      # if stages[[i]] has a .set_parents method (e.g. it is a stagerunner), run that
-      if ('.set_parents' %in% ls(slef$stages[[i]]$.refClassDef@refMethods, all.names = TRUE))
-        self$stages[[i]]$.set_parents()
-      self$stages[[i]]$parent(self)
-    }
+    attr(self$stages[[i]], 'child_index') <<- i
+    attr(self$stages[[i]], 'parent') <<- self
   }
   self$.parent <- NULL
 }
