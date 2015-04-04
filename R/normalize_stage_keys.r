@@ -79,6 +79,10 @@ normalize_stage_keys <- function(keys, stages, parent_key = "", to = NULL) {
         if (length(key) == 0) stop("Stage key of length zero")
         key <- strsplit(key, '/')[[1]]
 
+        if (is.stageRunnerNode(stages)) {
+          stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
+        }
+
         key_index <- grepl(key[[1]], names(stages), ignore.case = TRUE)
         if (is.finite(suppressWarnings(tmp <- as.numeric(key[[1]]))) &&
             tmp > 0 && tmp <= length(stages)) key_index <- tmp
