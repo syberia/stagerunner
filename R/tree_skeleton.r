@@ -139,21 +139,21 @@ treeSkeleton__.parent_index <- function() {
 #' stagerunner:::treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
 #' }
 treeSkeleton__find <- function(key) {
-  stopifnot(is.character(key))
-  if (length(key) == 0 || identical(key, '')) return(self$object)
-  # Extract "foo" from "foo/bar/baz"
-  subkey <- regmatches(key, regexec('^[^/]+', key))[[1]]
-  key_remainder <- substr(key, nchar(subkey) + 2, nchar(key))
-  if (grepl('^[0-9]+', subkey)) {
-    subkey <- as.integer(subkey)
-    key_falls_within_children <- length(self$children()) >= subkey
-    stopifnot(key_falls_within_children)
-  } else {
-    matches <- grepl(subkey, names(self$children()))
-    stopifnot(length(matches) == 1)
-    key <- which(matches)
-  }
-  self$children()[[key]]$find(key_remainder)
+#  stopifnot(is.character(key))
+#  if (length(key) == 0 || identical(key, '')) return(self$object)
+#  # Extract "foo" from "foo/bar/baz"
+#  subkey <- regmatches(key, regexec('^[^/]+', key))[[1]]
+#  key_remainder <- substr(key, nchar(subkey) + 2, nchar(key))
+#  if (grepl('^[0-9]+', subkey)) {
+#    subkey <- as.integer(subkey)
+#    key_falls_within_children <- length(self$children()) >= subkey
+#    stopifnot(key_falls_within_children)
+#  } else {
+#    matches <- grepl(subkey, names(self$children()))
+#    stopifnot(length(matches) == 1)
+#    key <- which(matches)
+#  }
+#  self$children()[[key]]$find(key_remainder)
 }
 
 #' This class implements iterators for a tree-based structure
