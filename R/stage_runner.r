@@ -686,7 +686,11 @@ stageRunner <- setRefClass('stageRunner',
     .set_prefixes  = stageRunner__.set_prefixes,
     .before_env    = stageRunner__.before_env,
     .mark_finished = stageRunner__.mark_finished,
-    with_tracked_environment = function() { is(context, 'tracked_environment') }
+    with_tracked_environment = function() {
+      out <- is(context, 'tracked_environment')
+      if (out) { requireNamespace("objectdiff", quietly = TRUE) }
+      out
+    }
   )
 )
 
