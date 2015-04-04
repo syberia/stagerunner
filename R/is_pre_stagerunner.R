@@ -18,7 +18,7 @@
 #' stopifnot(!is_pre_stagerunner(iris))
 is_pre_stagerunner <- function(x) {
   if (is.function(x) || is.stagerunner(x)) { return(TRUE) }
-  if (!is.recursive(x)) { return(FALSE) }
+  if (!is.recursive(x) || is.environment(x)) { return(FALSE) }
 
   for (i in seq_along(x)) {
     if (!(is.function(x[[i]]) || is.stagerunner(x[[i]]) || is.null(x[[i]]) ||

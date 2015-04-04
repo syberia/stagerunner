@@ -1,0 +1,12 @@
+context("is_pre_stagerunner")
+
+test_that("Non listy stuff can't be turned into stageRunners", {
+  expect_false(is_pre_stagerunner(5))
+  expect_false(is_pre_stagerunner(new.env()))
+  expect_false(is_pre_stagerunner(list(TRUE, force)))
+})
+
+test_that("a function can be turned into a stageRunner", {
+  expect_true(is_pre_stagerunner(force))
+  expect_true(is_pre_stagerunner(function(x) x$x <- 1))
+})
