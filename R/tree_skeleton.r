@@ -25,9 +25,7 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
   self$.children <- uninitialized_field()
 
   # Make sure parent_caller and children_caller are methods of object
-  if (is.refClass(object)) {
-    stopifnot(all(c(parent_caller, children_caller) %in% object$getRefClass()$methods()))
-  } else if (inherits(object, "R6")) {
+  if (inherits(object, "R6")) {
     stopifnot(all(c(parent_caller, children_caller) %in% ls(object)))
   }
 
@@ -219,9 +217,5 @@ uninitialized_field <- function() {
 
 is.unitialized_field <- function(x) {
   is(x, "uninitialized_field")
-}
-
-is.refClass <- function(obj) {
-  inherits(obj, "refClass") && !inherits(obj, "R6")
 }
 
