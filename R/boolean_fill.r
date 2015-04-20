@@ -33,6 +33,10 @@ boolean_fill <- function(el, forward = TRUE) {
   }
   el[fills] <- TRUE
   
+  ## If the sequence of slots before or after the index which contains a TRUE
+  ## (according to the value of `forward`) have been flattened to a TRUE value,
+  ## the only remaining TRUE flattening has to occur recursively in any
+  ## remaining list elements.
   if (!is.atomic(el[[ix]])) {
     el[[ix]] <- boolean_fill(el[[ix]], forward = forward)
   }
