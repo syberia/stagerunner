@@ -1,8 +1,9 @@
 #' Copy one environment into another recursively.
 #' 
-#' @name copy_env
 #' @param to environment. The new environment.
 #' @param from environment. The old environment.
+#' @note Both \code{to} and \code{from} must be pre-existing environments
+#'   or this function will error.
 copy_env <- function(to, from) {
   stopifnot(is.environment(to) && is.environment(from))
   rm(list = ls(to, all.names = TRUE), envir = to)

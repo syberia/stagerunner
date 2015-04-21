@@ -14,4 +14,8 @@ copy_env(to, from)
 \description{
 Copy one environment into another recursively.
 }
+\note{
+Both \code{to} and \code{from} must be pre-existing environments
+  or this function will error.
+}
 
