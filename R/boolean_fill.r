@@ -1,4 +1,4 @@
-## A stagerunner described a *linear* sequence of execution: import data,
+## A stagerunner describes a *linear* sequence of execution: import data,
 ## perform this munging step, then that munging, then do some modeling, etc.
 ## However, it is structured hierarchically as a nested list for easier
 ## usability. This function will created a nested list with the exact same
