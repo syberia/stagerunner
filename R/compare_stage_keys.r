@@ -46,7 +46,7 @@ compare_stage_keys <- function(key1, key2) {
     } else {
       compare_stage_keys(key1[[ix[1]]], key2[[ix[2]]])
     }
-  ## We now come across a special careful special case. Imagine we have
+  ## We now come across a special case. Imagine we have
   ## a stagerunner with stages "import", "munge/impute" and
   ## "munge/replace vals". If we call `runner$run("munge/replace", "munge")`
   ## this should mean to run "from 'munge/replace vals' until the end of
