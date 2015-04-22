@@ -23,3 +23,20 @@ Suggests:
     microbenchmark,
     objectdiff
 Roxygen: list(wrap = FALSE)
+Collate:
+    'boolean_fill.r'
+    'compare_stage_keys.r'
+    'copy_env.r'
+    'is_pre_stagerunner.R'
+    'nested_names.r'
+    'normalize_stage_keys.r'
+    'show_message.r'
+    'special_and_lists.r'
+    'special_or_lists.r'
+    'stage_runner-package.R'
+    'stage_runner.r'
+    'stagerunner-initialize.R'
+    'stagerunner-objectdiff.R'
+    'stagerunner_R6.R'
+    'tree_skeleton.r'
+    'utils.r'

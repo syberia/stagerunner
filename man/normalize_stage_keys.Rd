@@ -4,33 +4,34 @@
 \alias{normalize_stage_keys}
 \title{Normalize a reference to stage keys}
 \usage{
-normalize_stage_keys(keys, stages, parent_key = "", to = NULL)
+normalize_stage_keys(keys, stages, to = NULL, parent_key = "")
 }
 \arguments{
 \item{keys}{a list. The keys to normalize.}
 
 \item{stages}{a list. The stages we're normalizing with respect to.}
 
+\item{to}{an indexing parameter. If \code{keys} refers to a single stage,
+attempt to find all stages from that stage to this stage (or, if this one
+comes first, this stage to that stage). For example, if we have
+   \code{stages = list(a = list(b = 1, c = 2), d = 3, e = list(f = 4, g = 5))}
+where the numbers are some functions, and we call \code{normalize_stage_keys}
+with \code{keys = 'a/c'} and \code{to = 'e/f'}, then we would obtain a nested
+list of logicals referencing \code{"a/c", "d", "e/f"}.}
+
 \item{parent_key}{character. A helper for sane recursive error handling.
 For example, if we try to reference key \code{foo/bar}, but a recursive
 call to \code{normalize_stage_keys} errors when \code{bar} isn't found,
 we would still like the error to display the full name (\code{foo/bar}).}
-
-\item{to}{an indexing parameter. If \code{keys} refers to a single stage,
-attempt to find all stages from that stage to this stage (or, if this one comes first,
-this stage to that stage). For example, if we have
-   \code{stages = list(a = list(b = 1, c = 2), d = 3, e = list(f = 4, g = 5))}
-where the numbers are some functions, and we call \code{normalize_stage_keys} with
-\code{keys = 'a/c'} and \code{to = 'e/f'}, then we would obtain a nested list
-of logicals referencing \code{"a/c", "d", "e/f"}.}
 }
 \value{
-a list. The format is nested logicals. For example, if \code{stages}
-  is
-\code{list(one = stageRunner$new(new.env(), list(subone = function(cx) 1)),
-           two = function(cx) 1)} then
-\code{normalize_stage_keys('one/subone')} would return
-\code{list(one = list(subone = TRUE), two = FALSE)}.
+a list. The format is nested logicals. For example, if \code{stages} is
+  \code{list(one = stageRunner$new(new.env(), list(subone = function(cx) 1)),
+             two = function(cx) 1)}
+then
+  \code{normalize_stage_keys('one/subone')}
+would return
+  \code{list(one = list(subone = TRUE), two = FALSE)}.
 }
 \description{
 For example, \code{list('data/one', 2)} would be converted to
@@ -38,7 +39,9 @@ For example, \code{list('data/one', 2)} would be converted to
 }
 \examples{
 \dontrun{
-   # TODO: Fill in
+  stopifnot(identical(normalize_stage_keys("foo/bar",
+    list(foo = list(bar = NULL, baz = NULL))),
+    list(list(TRUE, FALSE))))
 }
 }
 \seealso{
