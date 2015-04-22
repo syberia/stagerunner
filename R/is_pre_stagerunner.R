@@ -37,9 +37,9 @@ is_pre_stagerunner <- function(x) {
   ## Using a for loop is a tiny bit faster than an apply-family operation
   ## because we can exit the function early.
   for (i in seq_along(x)) {
+    if (!(is.function(x[[i]]) || is.stagerunner(x[[i]]) || is.null(x[[i]]) ||
     ## We use the base function [`Recall`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Recall.html)
     ## for its recursive effect.
-    if (!(is.function(x[[i]]) || is.stagerunner(x[[i]]) || is.null(x[[i]]) ||
           (is.recursive(x[[i]]) && Recall(x[[i]])))) {
       return(FALSE)
     }
