@@ -126,7 +126,7 @@ normalize_stage_keys_bidirectional <- function(from, to, stages) {
   from <- normalize_stage_keys(from, stages)
   to   <- normalize_stage_keys(to, stages)
   ## Recall our helper `compare_stage_keys`, which returns `FALSE` if 
-  ## the first argument occur before the second. In this situation, we
+  ## the first argument occurs before the second. In this situation, we
   ## need to swap the keys.
   if (!compare_stage_keys(from, to)) {
     ## A convenient swapping mechanism without introducing temporary variables.
