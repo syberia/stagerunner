@@ -34,7 +34,7 @@ is_pre_stagerunner <- function(x) {
   if (is.function(x) || is.stagerunner(x)) { return(TRUE) }
   if (!is.recursive(x) || is.environment(x)) { return(FALSE) }
 
-  ## Using a for loop is a tiny bit faster than a apply-family operation
+  ## Using a for loop is a tiny bit faster than an apply-family operation
   ## because we can exit the function early.
   for (i in seq_along(x)) {
     ## We use the base function [`Recall`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Recall.html)

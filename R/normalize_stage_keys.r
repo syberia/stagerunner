@@ -1,3 +1,24 @@
+## To determine what stages of a stagerunner to execute, we will use a nested
+## list format that is equivalent in structure to the runner. For example,
+## imagine we have a stagerunner with the following stages:
+##
+##   * import data
+##   * clean data
+##      * impute variable 1
+##      * discretize variable 2
+##   * train model
+## 
+## We would like to be able to execute swaths of this runner at will:
+## `runner$run("clean")`, `runner$run("clean/1", "clean/2")` and 
+## `runner$run(2)` should all execute the data cleaning sub-stages.
+##
+## The `normalize_stage_keys` function will convert human-readable
+## descriptions of what to execute, like `"clean"` or `2`, to a
+## nested list format that will be easier to use later during stage
+## execution.
+##
+## For example, `"clean/1"` will be converted to
+## `list(F, list(T, F), F)` and mimic the structure of the stagerunner.
 #' Normalize a reference to stage keys 
 #'
 #' For example, \code{list('data/one', 2)} would be converted to
