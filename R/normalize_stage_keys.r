@@ -32,40 +32,35 @@
 #'    call to \code{normalize_stage_keys} errors when \code{bar} isn't found,
 #'    we would still like the error to display the full name (\code{foo/bar}).
 #' @param to an indexing parameter. If \code{keys} refers to a single stage,
-#'   attempt to find all stages from that stage to this stage (or, if this one comes first,
-#'   this stage to that stage). For example, if we have
+#'   attempt to find all stages from that stage to this stage (or, if this one
+#'   comes first, this stage to that stage). For example, if we have
 #'      \code{stages = list(a = list(b = 1, c = 2), d = 3, e = list(f = 4, g = 5))}
-#'   where the numbers are some functions, and we call \code{normalize_stage_keys} with
-#'   \code{keys = 'a/c'} and \code{to = 'e/f'}, then we would obtain a nested list
-#'   of logicals referencing \code{"a/c", "d", "e/f"}.
-#' @return a list. The format is nested logicals. For example, if \code{stages}
-#'   is
-#' \code{list(one = stageRunner$new(new.env(), list(subone = function(cx) 1)),
-#'            two = function(cx) 1)} then
-#' \code{normalize_stage_keys('one/subone')} would return
-#' \code{list(one = list(subone = TRUE), two = FALSE)}.
+#'   where the numbers are some functions, and we call \code{normalize_stage_keys}
+#'   with \code{keys = 'a/c'} and \code{to = 'e/f'}, then we would obtain a nested
+#'   list of logicals referencing \code{"a/c", "d", "e/f"}.
+#' @return a list. The format is nested logicals. For example, if \code{stages} is
+#'   \code{list(one = stageRunner$new(new.env(), list(subone = function(cx) 1)),
+#'              two = function(cx) 1)}
+#' then
+#'   \code{normalize_stage_keys('one/subone')}
+#' would return
+#'   \code{list(one = list(subone = TRUE), two = FALSE)}.
 #' @seealso stageRunner__run
 #' @examples
 #' \dontrun{
-#'    # TODO: Fill in
+#'   stopifnot(identical(normalize_stage_keys("foo/bar",
+#'     list(foo = list(bar = NULL, baz = NULL))),
+#'     list(list(TRUE, FALSE))))
 #' }
-normalize_stage_keys <- function(keys, stages, parent_key = "", to = NULL) {
-  if (!is.null(to)) {
-    stage_key <- normalize_stage_keys(keys, stages)
-    to_key <- normalize_stage_keys(to, stages)
-    if (!compare_stage_keys(stage_key, to_key)) {
-      # stage_key occurs after to_key
-      tmp <- stage_key; stage_key <- to_key; to_key <- tmp
-    }
-    # to go from the first key to the last, populate all the entries
-    # after the first TRUE w/ TRUE in stage_key, and all the entries
-    # before the first TRUE w/ TRUE in to_key, and then intersect.
-    return(special_and_lists(
-      boolean_fill(stage_key, forward = TRUE),
-      boolean_fill(to_key, forward = FALSE)
-    ))
+normalize_stage_keys <- function(keys, stages, to = NULL, parent_key = "") {
+  if (is.null(to)) {
+    normalize_stage_keys_unidirectional(keys, stages)
+  } else {
+    normalize_stage_keys_bidirectional(keys, to, stages)
   }
+}
 
+normalize_stage_keys_unidirectional <- function(keys, stages) {
   if (is.null(keys) || length(keys) == 0 || identical(keys, "")) {
     return(if (!is.list(stages) || length(stages) == 1) TRUE
            else rep(list(TRUE), length(stages)))
@@ -117,11 +112,40 @@ normalize_stage_keys <- function(keys, stages, parent_key = "", to = NULL) {
         normalized_keys[[key_index]] <<- special_or_lists(
           normalized_keys[[key_index]],
           normalize_stage_keys(append(paste0(key[-1], collapse = '/'), rest_keys), 
-            stages[[key_index]], paste0(parent_key, key[[1]], '/')))
+            stages[[key_index]], parent_key = paste0(parent_key, key[[1]], '/')))
       } else stop("Invalid stage key")
     })
   }
 
   normalized_keys
+}
+
+normalize_stage_keys_bidirectional <- function(from, to, stages) {
+  ## First, we turn our human-readable keys like "clean/impute variable 1"
+  ## into a more convenient list structure like `list(F, list(T, F, F), F)`.
+  from <- normalize_stage_keys(from, stages)
+  to   <- normalize_stage_keys(to, stages)
+  ## Recall our helper `compare_stage_keys`, which returns `FALSE` if 
+  ## the first argument occur before the second. In this situation, we
+  ## need to swap the keys.
+  if (compare_stage_keys(to, from)) {
+    ## A convenient swapping mechanism without introducing temporary variables.
+    ## In R, the [`list2env`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/list2env.html) utility
+    ## can funnel named values in a list directly into an environment.
+    ## Try it yourself:
+    ## ```r
+    ## x <- 1
+    ## y <- 2
+    ## list2env(list(x = y, y = x), environment())
+    ## cat(x, ",", y)
+    ## ```
+    list2env(list(from = to, to = from), environment())
+  }
+  ## And finally the magic trick that pulls it all together. See the more
+  ## thorough explanation below beside the `special_and_lists` helper.
+  special_and_lists(
+    boolean_fill(from, forward = TRUE),
+    boolean_fill(to,   forward = FALSE)
+  )
 }
 
