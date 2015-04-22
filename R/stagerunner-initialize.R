@@ -18,6 +18,18 @@
 #'    \code{run} method will be a list of two environments: one of what
 #'    the context looked like before the \code{run} call, and another
 #'    of the aftermath.
+## When a stagerunner object is initialized, it needs to convert a
+## pre-stagerunner, like
+##
+## ```r
+## list(first = some_function, second = list(
+##   sub1 = another_function, sub2 = a_third_function
+## )
+## ```
+## 
+## into a stagerunner object. This class constructor will turn the above
+## into a hierarchy of stagerunners to make it easier to recursively
+## re-use functionality.
 #' @param mode character. Controls the default behavior of calling the
 #'    \code{run} method for this stageRunner. The two supported options are
 #'    "head" and "next". The former gives a stageRunner which always begins
@@ -25,8 +37,8 @@
 #'    method is blank. Otherwise, it will begin from the previous unexecuted
 #'    stage.  The default is "head". This argument has no effect if
 #'    \code{remember = FALSE}.
-stageRunner_initialize <- function(context, .stages, remember = FALSE,
-                                    mode = getOption("stagerunner.mode") %||% 'head') {
+initialize <- function(context, .stages, remember = FALSE,
+                       mode = getOption("stagerunner.mode") %||% 'head') {
   # We must do our own type checking on context for compatibility with
   # objectdiff::tracked_environment.
   if (!is.environment(context)) {
