@@ -681,7 +681,6 @@ stageRunner_ <- R6::R6Class('stageRunner',
       if (out) { requireNamespace("objectdiff", quietly = TRUE) }
       out
     }
-requireNamespace when using objectdiff
   )
 )
 
