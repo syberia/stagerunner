@@ -690,29 +690,29 @@
 #  )
 #)
 #
-## 
-## # Check whether an R object is a stageRunner object
-## #
-## # @export
-## # @param obj any object.
-## # @return \code{TRUE} if the object is of class
-## #    \code{stageRunner}, \code{FALSE} otherwise.
-## is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
-## # @export
-## is.stageRunner <- is.stagerunner
-#
-##" Stagerunner nodes are environment wrappers around individual stages
-##" (i.e. functions) in order to track meta-data (e.g., for caching).
-##" 
-##" @param fn function. This will be wrapped in an environment.
-##" @param parent_obj stageRunner. The enclosing stageRunner object.
-##" @param parent_env environment. The parent environment of the created
-##"   \code{stageRunnerNode} object. The default is the calling
-##"   environment (i.e., \code{parent.frame()}).
-##" @return an environment with some additional attributes for
-##"   navigating in a tree-like structure.
-##" @name stageRunnerNode
-##" @docType class
+# 
+# # Check whether an R object is a stageRunner object
+# #
+# # @export
+# # @param obj any object.
+# # @return \code{TRUE} if the object is of class
+# #    \code{stageRunner}, \code{FALSE} otherwise.
+# is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
+# # @export
+# is.stageRunner <- is.stagerunner
+
+#" Stagerunner nodes are environment wrappers around individual stages
+#" (i.e. functions) in order to track meta-data (e.g., for caching).
+#" 
+#" @param fn function. This will be wrapped in an environment.
+#" @param parent_obj stageRunner. The enclosing stageRunner object.
+#" @param parent_env environment. The parent environment of the created
+#"   \code{stageRunnerNode} object. The default is the calling
+#"   environment (i.e., \code{parent.frame()}).
+#" @return an environment with some additional attributes for
+#"   navigating in a tree-like structure.
+#" @name stageRunnerNode
+#" @docType class
 #.stageRunnerNode <- setRefClass('stageRunnerNode',
 #  fields = list(callable = 'ANY',
 #                cached_env = 'ANY',
@@ -806,5 +806,5 @@
 #  )
 #)
 #
-## is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
+# is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
 #
