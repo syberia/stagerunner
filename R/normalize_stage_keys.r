@@ -54,13 +54,13 @@
 #' }
 normalize_stage_keys <- function(keys, stages, to = NULL, parent_key = "") {
   if (is.null(to)) {
-    normalize_stage_keys_unidirectional(keys, stages)
+    normalize_stage_keys_unidirectional(keys, stages, parent_key)
   } else {
     normalize_stage_keys_bidirectional(keys, to, stages)
   }
 }
 
-normalize_stage_keys_unidirectional <- function(keys, stages) {
+normalize_stage_keys_unidirectional <- function(keys, stages, parent_key) {
   if (is.null(keys) || length(keys) == 0 || identical(keys, "")) {
     return(if (!is.list(stages) || length(stages) == 1) TRUE
            else rep(list(TRUE), length(stages)))
@@ -128,7 +128,7 @@ normalize_stage_keys_bidirectional <- function(from, to, stages) {
   ## Recall our helper `compare_stage_keys`, which returns `FALSE` if 
   ## the first argument occur before the second. In this situation, we
   ## need to swap the keys.
-  if (compare_stage_keys(to, from)) {
+  if (!compare_stage_keys(from, to)) {
     ## A convenient swapping mechanism without introducing temporary variables.
     ## In R, the [`list2env`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/list2env.html) utility
     ## can funnel named values in a list directly into an environment.
