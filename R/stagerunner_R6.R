@@ -676,7 +676,12 @@ stageRunner_ <- R6::R6Class('stageRunner',
     .set_prefixes  = stageRunner_.set_prefixes,
     .before_env    = stageRunner_.before_env,
     .mark_finished = stageRunner_.mark_finished,
-    with_tracked_environment = function() { is(self$.context, 'tracked_environment') }
+    with_tracked_environment = function() {
+      out <- is(context, 'tracked_environment')
+      if (out) { requireNamespace("objectdiff", quietly = TRUE) }
+      out
+    }
+requireNamespace when using objectdiff
   )
 )
 
