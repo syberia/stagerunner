@@ -40,17 +40,17 @@
 stagerunner_initialize <- function(context, stages, remember = FALSE,
                                    mode = getOption("stagerunner.mode") %||% "head") {
   
-  # As a convenient shortcut, if a stagerunner is initialized without a second
-  # argument but with a first argument that can be turned into stages, we 
-  # create a new environment for the context.
+  ## As a convenient shortcut, if a stagerunner is initialized without a second
+  ## argument but with a first argument that can be turned into stages, we 
+  ## create a new environment for the context.
   if (missing(stages) && !missing(context) && is_pre_stagerunner(context)) {
     stages  <- context
-    # The only parent environment that makes sense is the calling environment.
+    ## The only parent environment that makes sense is the calling environment.
     context <- new.env(parent = parent.frame())
   }
 
   ## The `enforce_type` helper in utils.R will print a nice and colorful error
-  ## message if we have initialized our stageRunner with the wrong argument
+  ## message if we have initialized our stagerunner with the wrong argument
   ## types.
   enforce_type(context,  "environment", "stagerunner", "context")
   enforce_type(remember, "logical",     "stagerunner", "remember")
@@ -68,7 +68,34 @@ stagerunner_initialize <- function(context, stages, remember = FALSE,
   self$.finished <- FALSE 
   self$.context  <- context
   self$.mode     <- tolower(mode)
+  self$remember  <- remember
 
+  ## A stagerunner will recursively be represented using more stagerunners.
+  ## This way, we can re-use methods defined on a stagerunner on local 
+  ## subsections.
+  self$stages <- initialize_stages(stages, context, remember)
+
+  ## We will be using the `/` character in a special way for running 
+  ## stages. For example, if we had a runner such as 
+  ##
+  ##   * import data
+  ##   * clean data
+  ##      * impute variable 1
+  ##      * discretize variable 2
+  ##
+  ## we would run the first substage using `runner$run("clean data/impute variable 1")`.
+  ## To avoid complications, we prevent the use of slashes in the stage names.
+  ## 
+  ## We wrap up with some messy initialization in case our stagerunner
+  ## intends to remember progress.
+  prevent_stage_name_violators(self$stages)
+
+  if (isTRUE(self$remember)) {
+    initialize_remembrance(self)
+  }
+}
+
+initialize_stages <- function(stages, context, remember) {
   if (length(stages) == 0) {
     warning("stagerunners with zero stages may cause problems.")
   }
@@ -77,42 +104,11 @@ stagerunner_initialize <- function(context, stages, remember = FALSE,
     stop("Can only turn a function or list of functions into a stagerunner.")
   }
 
-  ## A stagerunner will recursively be represented using more stagerunners.
-  ## This way, we can re-use methods defined on a stagerunner on local 
-  ## subsections.
-  self$stages <- initialize_stages(stages, context, remember)
-
-  # Do not allow the '/' character in stage names, as it's reserved for
-  # referencing nested stages.
-  if (any(violators <- grepl('/', names(self$stages), fixed = TRUE))) {
-    msg <- paste0("Stage names may not have a '/' character. The following do not ",
-      "satisfy this constraint: '",
-      paste0(names(self$stages)[violators], collapse = "', '"), "'")
-    stop(msg)
-  }
-
-  self$remember <- remember
-  if (isTRUE(self$remember)) {
-    # Set up parents for treeSkeleton.
-    self$.clear_cache()
-    self$.set_parents()
-    if (self$with_tracked_environment()) {
-      self$.set_prefixes()
-    } else if (length(self$stages) > 0) {
-      # Set the first cache environment
-      first_env <- treeSkeleton$new(self$stages[[1]])$first_leaf()$object
-      first_env$.cached_env <- new.env(parent = parent.env(self$.context))
-      copy_env(first_env$.cached_env, self$.context)
-    }
-  }
-}
-
-initialize_stages <- function(stages, context, remember) {
   if (is.function(stages)) {
     stages <- list(stages)
   }
 
-  # A loop is slightly faster than an `lapply` here.
+  ## A loop is slightly faster than an `lapply` here.
   for (i in seq_along(stages)) {
     if (is.list(stages[[i]])) {
       stages[[i]] <- stagerunner(context, stages[[i]], remember = remember)
@@ -122,5 +118,32 @@ initialize_stages <- function(stages, context, remember) {
   }
 
   stages
+}
+
+prevent_stage_name_violators <- function(stages) {
+  if (any(violators <- grepl("/", names(stages), fixed = TRUE))) {
+    stop(paste0("Stage names may not have a '/' character. The following do not ",
+      "satisfy this constraint: '",
+      paste0(names(stages)[violators], collapse = "', '"), "'"))
+  }
+}
+
+initialize_remembrance <- function(stagerunner) {
+  stagerunner$.clear_cache()
+  ## We set up some meta-data that will be used to track the 
+  ## changes occuring in the stagerunner. See the `treeSkeleton` class
+  ## later for more details.
+  stagerunner$.set_parents()
+  if (stagerunner$with_tracked_environment()) {
+    stagerunner$.set_prefixes()
+  } else if (length(stagerunner$stages) > 0) {
+    ## The very first stage should remember what the context looked like
+    ## upon initialization. After all, if a user messed with the context
+    ## and later re-runs the stagerunner from scratch, it should remember
+    ## what the context looked like *at the time of initialization*.
+    first_env <- treeSkeleton$new(stagerunner$stages[[1]])$first_leaf()$object
+    first_env$.cached_env <- new.env(parent = parent.env(stagerunner$.context))
+    copy_env(first_env$.cached_env, stagerunner$.context)
+  }
 }
 
