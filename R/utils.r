@@ -7,7 +7,7 @@ contains_true <- function(x) {
 
 enforce_type <- function(value, expected, klass, name = deparse(substitute(value))) {
   check <- utils::getFromNamespace(paste0("is.", expected), "base")
-  if (!check(context)) {
+  if (!check(value)) {
     stop(sprintf(
       "Please pass %s as the %s%s; instead I got a %s.",
       articleize(sQuote(crayon::yellow(expected))), dQuote(name),

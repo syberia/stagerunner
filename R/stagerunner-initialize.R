@@ -40,9 +40,10 @@
 stagerunner_initialize <- function(context, stages, remember = FALSE,
                                    mode = getOption("stagerunner.mode") %||% 'head') {
   
-  # As a convenient shortcut, if a stagerunner is initialized with only a list
-  # and no second argument, we create a new environment for the context.
-  if (is.list(context) && missing(stages)) {
+  # As a convenient shortcut, if a stagerunner is initialized without a second
+  # argument but with a first argument that can be turned into stages, we 
+  # create a new environment for the context.
+  if (missing(stages) && is_pre_stagerunner(context)) {
     stages  <- context
     # The only parent environment that makes sense is the calling environment.
     context <- new.env(parent = parent.frame())
