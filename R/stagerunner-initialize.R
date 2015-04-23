@@ -73,23 +73,10 @@ stagerunner_initialize <- function(context, stages, remember = FALSE,
   ## A stagerunner will recursively be represented using more stagerunners.
   ## This way, we can re-use methods defined on a stagerunner on local 
   ## subsections.
-  self$stages <- initialize_stages(stages, context, remember)
-
-  ## We will be using the `/` character in a special way for running 
-  ## stages. For example, if we had a runner such as 
-  ##
-  ##   * import data
-  ##   * clean data
-  ##      * impute variable 1
-  ##      * discretize variable 2
-  ##
-  ## we would run the first substage using `runner$run("clean data/impute variable 1")`.
-  ## To avoid complications, we prevent the use of slashes in the stage names.
-  ## 
+  self$stages    <- initialize_stages(stages, context, remember)
+  
   ## We wrap up with some messy initialization in case our stagerunner
   ## intends to remember progress.
-  prevent_stage_name_violators(self$stages)
-
   if (isTRUE(self$remember)) {
     initialize_remembrance(self)
   }
@@ -116,6 +103,18 @@ initialize_stages <- function(stages, context, remember) {
       stages[[i]] <- stageRunnerNode(stages[[i]], context)
     }
   }
+
+  ## We will be using the `/` character in a special way for running 
+  ## stages. For example, if we had a runner such as 
+  ##
+  ##   * import data
+  ##   * clean data
+  ##      * impute variable 1
+  ##      * discretize variable 2
+  ##
+  ## we would run the first substage using `runner$run("clean data/impute variable 1")`.
+  ## To avoid complications, we prevent the use of slashes in the stage names.
+  prevent_stage_name_violators(stages)
 
   stages
 }
