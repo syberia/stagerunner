@@ -48,10 +48,7 @@ stagerunner_initialize <- function(context, stages, remember = FALSE,
     context <- new.env(parent = parent.frame())
   }
 
-  if (!is.environment(context)) {
-    stop("Please pass an ", sQuote("environment"), " as the context for ",
-         "a stagerunner; instead I got a ")
-  }
+  enforce_type(context, "environment", "stagerunner")
 
   self$.parent   <- NULL
   # The .finished flag is used for certain features when printing a stagerunner.

@@ -601,6 +601,9 @@ stageRunner <- structure(
 )
 
 #' @export
+stagerunner <- stageRunner
+
+#' @export
 `$.stageRunner_` <- function(...) {
   stopifnot(identical(..2, "new"))
   ..1

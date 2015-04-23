@@ -2,9 +2,10 @@
 % Please edit documentation in R/stagerunner-initialize.R
 \name{stageRunner_initialize}
 \alias{stageRunner_initialize}
+\alias{stagerunner_initialize}
 \title{Initialize a stageRunner object.}
 \usage{
-stageRunner_initialize(context, stages, remember = FALSE,
+stagerunner_initialize(context, stages, remember = FALSE,
   mode = getOption("stagerunner.mode") \%||\% "head")
 }
 \arguments{
@@ -27,7 +28,7 @@ modified during the execution of the stages.}
 "head" and "next". The former gives a stageRunner which always begins
 from the first stage if the \code{from} parameter to the \code{run}
 method is blank. Otherwise, it will begin from the previous unexecuted
-stage.  The default is "head". This argument has no effect if
+stage. The default is "head". This argument has no effect if
 \code{remember = FALSE}.}
 }
 \description{
