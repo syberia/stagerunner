@@ -38,49 +38,49 @@
 #'    stage. The default is "head". This argument has no effect if
 #'    \code{remember = FALSE}.
 stagerunner_initialize <- function(context, stages, remember = FALSE,
-                                   mode = getOption("stagerunner.mode") %||% 'head') {
+                                   mode = getOption("stagerunner.mode") %||% "head") {
   
   # As a convenient shortcut, if a stagerunner is initialized without a second
   # argument but with a first argument that can be turned into stages, we 
   # create a new environment for the context.
-  if (missing(stages) && is_pre_stagerunner(context)) {
+  if (missing(stages) && !missing(context) && is_pre_stagerunner(context)) {
     stages  <- context
     # The only parent environment that makes sense is the calling environment.
     context <- new.env(parent = parent.frame())
   }
 
-  enforce_type(context, "environment", "stagerunner")
+  ## The `enforce_type` helper in utils.R will print a nice and colorful error
+  ## message if we have initialized our stageRunner with the wrong argument
+  ## types.
+  enforce_type(context,  "environment", "stagerunner", "context")
+  enforce_type(remember, "logical",     "stagerunner", "remember")
+  enforce_type(mode,     "character",   "stagerunner", "mode")
+
+  ## [`match.arg`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/match.arg.html)
+  ## is a convenient base R helper that will error unless one of a given set of
+  ## options is chosen.
+  match.arg(mode, c("head", "next"))
+
+  stopifnot(length(remember) == 1)
 
   self$.parent   <- NULL
   # The .finished flag is used for certain features when printing a stagerunner.
   self$.finished <- FALSE 
   self$.context  <- context
-
-  self$.mode <- tolower(mode)
-  if (identical(remember, TRUE) && !(is.character(mode) &&
-      any(self$.mode == c('head', 'next')))) {
-    stop("The mode parameter to the stageRunner constructor must be ",
-         "either 'head' or 'next'.")
-  }
+  self$.mode     <- tolower(mode)
 
   if (length(stages) == 0) {
-    warning("stageRunners with zero stages may cause problems.", .call = FALSE)
+    warning("stagerunners with zero stages may cause problems.")
   }
 
   if (!is_pre_stagerunner(stages)) {
-    stop("Can only turn a function or list of functions into a stageRunner", call. = FALSE)
+    stop("Can only turn a function or list of functions into a stagerunner.")
   }
 
-  if (is.function(stages)) stages <- list(stages)
-  self$stages <- stages
-
-  # Construct recursive stagerunners out of a list of lists.
-  for (i in seq_along(self$stages))
-    if (is.list(self$stages[[i]]))
-      self$stages[[i]] <-
-        stageRunner$new(self$.context, self$stages[[i]], remember = remember)
-    else if (is.function(self$stages[[i]]) || is.null(self$stages[[i]]))
-      self$stages[[i]] <- stageRunnerNode$new(self$stages[[i]], self$.context)
+  ## A stagerunner will recursively be represented using more stagerunners.
+  ## This way, we can re-use methods defined on a stagerunner on local 
+  ## subsections.
+  self$stages <- initialize_stages(stages, context, remember)
 
   # Do not allow the '/' character in stage names, as it's reserved for
   # referencing nested stages.
@@ -105,5 +105,22 @@ stagerunner_initialize <- function(context, stages, remember = FALSE,
       copy_env(first_env$.cached_env, self$.context)
     }
   }
+}
+
+initialize_stages <- function(stages, context, remember) {
+  if (is.function(stages)) {
+    stages <- list(stages)
+  }
+
+  # A loop is slightly faster than an `lapply` here.
+  for (i in seq_along(stages)) {
+    if (is.list(stages[[i]])) {
+      stages[[i]] <- stagerunner(context, stages[[i]], remember = remember)
+    } else if (is.function(stages[[i]]) || is.null(stages[[i]])) {
+      stages[[i]] <- stageRunnerNode(stages[[i]], context)
+    }
+  }
+
+  stages
 }
 

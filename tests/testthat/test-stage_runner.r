@@ -14,9 +14,9 @@ example1 <- function() {
 
 describe("Invalid inputs", {
   test_that("it cannot accept anything except an environment as the first argument", {
-    expect_error(stageRunner$new(1, force), "as the context")
-    expect_error(stageRunner$new(force, force), "as the context")
-    expect_error(stageRunner$new(NULL, force), "as the context")
+    expect_error(stageRunner$new(1, force), "Please pass")
+    expect_error(stageRunner$new(force, force), "Please pass")
+    expect_error(stageRunner$new(NULL, force), "Please pass")
   })
 
   test_that("it cannot run a nested stage that does not exist", {

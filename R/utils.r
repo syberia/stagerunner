@@ -6,6 +6,14 @@ contains_true <- function(x) {
 }
 
 enforce_type <- function(value, expected, klass, name = deparse(substitute(value))) {
+  if (missing(value)) {
+    stop(sprintf(
+      "Please provide %s%s.",
+      articleize(sQuote(crayon::red(name))),
+      if (missing(klass)) "" else paste( " to a", klass)
+    ))
+  }
+
   check <- utils::getFromNamespace(paste0("is.", expected), "base")
   if (!check(value)) {
     stop(sprintf(
@@ -28,7 +36,7 @@ is_vowel <- function(char) {
 }
 
 first_letter <- function(word) {
-  substring(gsub("[^a-zA-Z]|\\[33m", "", word), 1, 1)
+  substring(gsub("[^a-zA-Z]|\\[3[0-9]m", "", word), 1, 1)
 }
 
 # Whether obj is of any of the given types.
