@@ -12,10 +12,10 @@
 #' @param stages list. The functions to execute on the \code{context}.
 #' @param remember logical. Whether to keep a copy of the context and its
 #'    contents throughout each stage for debugging purposes--this makes it
-#'    easy to go back and investigate a stage. This could be optimized by
-#'    developing a package for "diffing" two environments. The default is
-#'    \code{FALSE}. When set to \code{TRUE}, the return value of the
-#'    \code{run} method will be a list of two environments: one of what
+#'    easy to go back and investigate a stage.
+#'    
+#'    The default is \code{FALSE}. When set to \code{TRUE}, the return value
+#'    of the \code{run} method will be a list of two environments: one of what
 #'    the context looked like before the \code{run} call, and another
 #'    of the aftermath.
 ## When a stagerunner object is initialized, it needs to convert a
