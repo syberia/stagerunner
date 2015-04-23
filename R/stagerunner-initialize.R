@@ -35,20 +35,28 @@
 #'    "head" and "next". The former gives a stageRunner which always begins
 #'    from the first stage if the \code{from} parameter to the \code{run}
 #'    method is blank. Otherwise, it will begin from the previous unexecuted
-#'    stage.  The default is "head". This argument has no effect if
+#'    stage. The default is "head". This argument has no effect if
 #'    \code{remember = FALSE}.
-stageRunner_initialize <- function(context, stages, remember = FALSE,
-                       mode = getOption("stagerunner.mode") %||% 'head') {
-  # We must do our own type checking on context for compatibility with
-  # objectdiff::tracked_environment.
-  if (!is.environment(context)) {
-    stop("Please pass an ", sQuote("environment"), " as the context for ",
-         "a stageRunner")
+stagerunner_initialize <- function(context, stages, remember = FALSE,
+                                   mode = getOption("stagerunner.mode") %||% 'head') {
+  
+  # As a convenient shortcut, if a stagerunner is initialized with only a list
+  # and no second argument, we create a new environment for the context.
+  if (is.list(context) && missing(stages)) {
+    stages  <- context
+    # The only parent environment that makes sense is the calling environment.
+    context <- new.env(parent = parent.frame())
   }
 
-  self$.parent <- NULL
-  self$.finished <- FALSE # TODO: Remove this hack for printing
-  self$.context <- context
+  if (!is.environment(context)) {
+    stop("Please pass an ", sQuote("environment"), " as the context for ",
+         "a stagerunner; instead I got a ")
+  }
+
+  self$.parent   <- NULL
+  # The .finished flag is used for certain features when printing a stagerunner.
+  self$.finished <- FALSE 
+  self$.context  <- context
 
   self$.mode <- tolower(mode)
   if (identical(remember, TRUE) && !(is.character(mode) &&

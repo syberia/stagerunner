@@ -5,6 +5,32 @@ contains_true <- function(x) {
   else any(x)
 }
 
+enforce_type <- function(value, expected, klass, name = deparse(substitute(value))) {
+  check <- utils::getFromNamespace(paste0("is.", expected), "base")
+  if (!check(context)) {
+    stop(sprintf(
+      "Please pass %s as the %s%s; instead I got a %s.",
+      articleize(sQuote(crayon::yellow(expected))), dQuote(name),
+      if (missing(klass)) "" else paste(" for a", klass),
+      crayon::red(sclass(value))
+    ))
+  }
+}
+
+sclass <- function(obj) { class(obj)[1L] }
+
+articleize <- function(word) {
+  sprintf("a%s %s", if (is_vowel(first_letter(word))) "n" else "", word)
+}
+
+is_vowel <- function(char) {
+  is.element(char, c("a", "e", "i", "o", "u", "A", "E", "I", "O", "U"))
+}
+
+first_letter <- function(word) {
+  substring(gsub("[^a-zA-Z]|\\[33m", "", word), 1, 1)
+}
+
 # Whether obj is of any of the given types.
 is_any <- function(obj, klasses) {
   any(vapply(klasses, inherits, logical(1), x = obj))
