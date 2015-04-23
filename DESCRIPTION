@@ -21,5 +21,5 @@ Imports:
 Suggests:
     knitr,
     microbenchmark,
-    objectdiff
+    objectdiff 
 Roxygen: list(wrap = FALSE)
