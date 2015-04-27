@@ -80,10 +80,21 @@ normalize_stage_keys_unidirectional <- function(keys, stages, parent_key) {
   ## for the "clean data" stage.
   if (is.stagerunner(stages)) stages <- stages$stages
 
+  ## The output of `normalize_stage_keys` is a (possibly nested) list whose
+  ## terminal nodes are all logical. If `keys` is already of this format, we
+  ## are done.
   if (all_logical(keys)) return(keys) # Already normalized
 
-  normalized_keys <- rep(list(FALSE), if (is.list(stages)) length(stages) else 1)
-  if (is.numeric(keys) && any(keys < 0)) { # Allow negative indexing
+  ## Our strategy to determine which stages to run, and thus translate `keys`
+  ## from a form like "munge/impute variable 5" to a nested list, will be to
+  ## start with a list of consisting entirely of `FALSE` and filling in the
+  ## sub-stages the user requested in the `keys` with `TRUE`s.
+  key_length      <- if (is.list(stages)) length(stages) else 1
+  normalized_keys <- rep(list(FALSE), key_length)
+
+  ## Negative indexing, like `-c(2:3)`, is easy: set everything *except* 
+  ## those keys to `TRUE`.
+  if (is.numeric(keys) && any(keys < 0)) { 
     normalized_keys[keys] <- rep(list(TRUE), length(normalized_keys[keys]))
   } else {
     seqs <- seq_along(if (is.list(stages)) stages else 1)
@@ -110,7 +121,7 @@ normalize_stage_keys_unidirectional <- function(keys, stages, parent_key) {
           stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
         }
 
-        key_index <- grepl(key[[1]], names(stages), ignore.case = TRUE)
+        key_index <- grepl(key[[1]], names(stages), ignore.case = TRUE, fixed = TRUE)
         if (is.finite(suppressWarnings(tmp <- as.numeric(key[[1]]))) &&
             tmp > 0 && tmp <= length(stages)) key_index <- tmp
         else if (length(key_index) == 0 || sum(key_index) == 0) {
