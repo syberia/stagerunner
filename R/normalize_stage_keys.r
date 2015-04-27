@@ -85,6 +85,12 @@ normalize_stage_keys_unidirectional <- function(keys, stages, parent_key) {
   ## are done.
   if (all_logical(keys)) return(keys) # Already normalized
 
+  ## We performed checks for special cases, so now we call a function that
+  ## assumes all those cases have been taken care of. 
+  normalize_stage_keys_unidirectional_(keys, stages, parent_key)
+}
+
+normalize_stage_keys_unidirectional_ <- function(keys, stages, parent_key) {
   ## Our strategy to determine which stages to run, and thus translate `keys`
   ## from a form like "munge/impute variable 5" to a nested list, will be to
   ## start with a list of consisting entirely of `FALSE` and filling in the
@@ -95,7 +101,7 @@ normalize_stage_keys_unidirectional <- function(keys, stages, parent_key) {
   ## Negative indexing, like `-c(2:3)`, is easy: set everything *except* 
   ## those keys to `TRUE`.
   if (is.numeric(keys) && any(keys < 0)) { 
-    normalized_keys[keys] <- rep(list(TRUE), length(normalized_keys[keys]))
+    as.list(!is.element(seq_len(stage_length(stages)), -keys))
   } else {
     seqs <- seq_along(if (is.list(stages)) stages else 1)
     lapply(seq_along(keys), function(key_index) {
@@ -137,9 +143,8 @@ normalize_stage_keys_unidirectional <- function(keys, stages, parent_key) {
             stages[[key_index]], parent_key = paste0(parent_key, key[[1]], '/')))
       } else stop("Invalid stage key")
     })
+    normalized_keys
   }
-
-  normalized_keys
 }
 
 normalize_stage_keys_bidirectional <- function(from, to, stages) {
@@ -169,5 +174,12 @@ normalize_stage_keys_bidirectional <- function(from, to, stages) {
     boolean_fill(from, forward = TRUE),
     boolean_fill(to,   forward = FALSE)
   )
+}
+
+## Terminal stages in a stagerunner are `stageRunnerNode` objects, so we treat
+## those as stages of length 1.
+stage_length <- function(obj) {
+  if (is.list(obj)) length(obj)
+  else 1
 }
 
