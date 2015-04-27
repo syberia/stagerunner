@@ -62,13 +62,24 @@ normalize_stage_keys <- function(keys, stages, to = NULL, parent_key = "") {
 
 normalize_stage_keys_unidirectional <- function(keys, stages, parent_key) {
   if (is.null(keys) || length(keys) == 0 || identical(keys, "")) {
+    ## By default, no key provided means to execute everything in this stage.
+    ## For single stages, that means `TRUE`. For multiple stages, a
+    ## list of `TRUE`s equal to the number of stages.
     return(if (!is.list(stages) || length(stages) == 1) TRUE
            else rep(list(TRUE), length(stages)))
   }
+  ## Stagerunners are set up recursively, so we need to extract the `list` of
+  ## stages out of the stagerunner object. For example, 
+  ##
+  ##   * import data
+  ##   * clean data
+  ##      * impute variable 1
+  ##      * discretize variable 2
+  ##
+  ## actually consists of *two* stagerunners, one for the whole list and one
+  ## for the "clean data" stage.
   if (is.stagerunner(stages)) stages <- stages$stages
 
-  all_logical <- function(x) length(x) > 0 && all(vapply(x,
-    function(y) if (is.atomic(y)) is.logical(y) else all_logical(y), logical(1)))
   if (all_logical(keys)) return(keys) # Already normalized
 
   normalized_keys <- rep(list(FALSE), if (is.list(stages)) length(stages) else 1)

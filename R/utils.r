@@ -5,6 +5,12 @@ contains_true <- function(x) {
   else any(x)
 }
 
+all_logical <- function(x) {
+  is.logical(x) || all(vapply(x,
+    function(y) if (is.atomic(y)) is.logical(y) else all_logical(y),
+  logical(1)))
+}
+
 enforce_type <- function(value, expected, klass, name = deparse(substitute(value))) {
   if (missing(value)) {
     stop(sprintf(

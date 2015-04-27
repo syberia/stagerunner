@@ -21,10 +21,6 @@ test_that('it allows numeric indexing', {
   expect_identical(normalize_stage_keys(3, vector('list', 3)), list(FALSE, FALSE, TRUE))
 })
 
-test_that('it errors on empty keys', {
-  expect_error(normalize_stage_keys(list(list()), list()), 'cannot be of length 0')
-})
-
 test_that('it can nest using logicals', {
   # expect_identical(normalize_stage_keys(list(2, list(FALSE, TRUE)), list(1, list(2, 3))), list(FALSE, list(FALSE, TRUE)))
   # What was I doing here..?
