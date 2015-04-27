@@ -95,10 +95,10 @@ normalize_stage_keys_unidirectional <- function(keys, stages, parent_key) {
 ## start with a list of consisting entirely of `FALSE` and filling in the
 ## sub-stages the user requested in the `keys` with `TRUE`s.
 normalize_stage_keys_unidirectional_ <- function(keys, stages, parent_key) {
-  ## Negative indexing, like `-c(2:3)`, is easy: set everything *except* 
-  ## those keys to `TRUE`.
   if (is.numeric(keys) && any(keys < 0)) { 
     as.list(!is.element(seq_len(stage_length(stages)), -keys))
+    ## Negative indexing, like `-c(2:3)`, is easy: set everything *except* 
+    ## those keys to `TRUE`.
   } else {
     key_length      <- if (is.list(stages)) length(stages) else 1
     normalized_keys <- rep(list(FALSE), key_length)
@@ -106,24 +106,34 @@ normalize_stage_keys_unidirectional_ <- function(keys, stages, parent_key) {
     ## Each element of the provided keys has a chance to modify
     ## `normalized_keys`. We achieve this using [Reduce](https://stat.ethz.ch/R-manual/R-devel/library/base/html/funprog.html).
     Reduce(function(normalized_keys, index) {
-      normalize_stage_key(keys, stages, parent_key, index, normalized_keys)
+      normalize_stage_keys_by_index(keys, stages, parent_key, index, normalized_keys)
     }, seq_along(keys), normalized_keys)
   }
 }
 
-normalize_stage_key <- function(keys, stages, parent_key, key_index, normalized_keys) {
-  seqs <- seq_along(if (is.list(stages)) stages else 1)
+normalize_stage_keys_by_index <- function(keys, stages, parent_key,
+                                          key_index, normalized_keys) {
   key  <- keys[[key_index]]
-  if (length(key) == 0) stop("Invalid stage key (cannot be of length 0)")
+
+  if (length(key) == 0) {
+    stop("Invalid stage key (cannot be of length 0)")
+  }
+
   rest_keys <- key[-1]
-  key <- key[[1]]
+  key       <- key[[1]]
+  
+  normalize_stage_key(key, rest_keys, stages, parent_key, key_index, normalized_keys)
+}
+
+normalize_stage_key <- function(key, keys, stages, parent_key,
+                                key_index, normalized_keys) {
   if (is.logical(key)) {
     normalized_keys[[key_index]] <- key
-  } else if (is.numeric(key) && key %in% seqs) {
+  } else if (is.numeric(key) && key <= stage_length(stages)) {
     # Recursively process any potential extra keys
     normalized_keys[[as.integer(key)]] <-
-      if (length(rest_keys) == 0) TRUE
-      else normalize_stage_keys(rest_keys, stages[[as.integer(key)]],
+      if (length(keys) == 0) TRUE
+      else normalize_stage_keys(keys, stages[[as.integer(key)]],
                                 parent_key = paste0(parent_key, key, '/'))
   } else if (is.character(key)) {
     # The hard part! Allow things like one/subone/subsubone/etc
@@ -147,7 +157,7 @@ normalize_stage_key <- function(keys, stages, parent_key, key_index, normalized_
 
     normalized_keys[[key_index]] <- special_or_lists(
       normalized_keys[[key_index]],
-      normalize_stage_keys(append(paste0(key[-1], collapse = '/'), rest_keys), 
+      normalize_stage_keys(append(paste0(key[-1], collapse = '/'), keys), 
         stages[[key_index]], parent_key = paste0(parent_key, key[[1]], '/')))
   } else stop("Invalid stage key")
 
