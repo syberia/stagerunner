@@ -166,9 +166,11 @@ normalize_stage_key.character <- function(key, keys, stages, parent_key,
   }
 
   key_index <- grepl(key[[1]], names(stages), ignore.case = TRUE, fixed = TRUE)
+
   if (is.finite(suppressWarnings(tmp <- as.numeric(key[[1]]))) &&
-      tmp > 0 && tmp <= length(stages)) key_index <- tmp
-  else if (length(key_index) == 0 || sum(key_index) == 0) {
+      tmp > 0 && tmp <= length(stages)) {
+    key_index <- tmp
+  } else if (length(key_index) == 0 || sum(key_index) == 0) {
     stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
   } else if (sum(key_index) > 1) {
     stop("Multiple stages with key '", paste0(parent_key, key[[1]]),
@@ -178,7 +180,8 @@ normalize_stage_key.character <- function(key, keys, stages, parent_key,
   normalized_keys[[key_index]] <- special_or_lists(
     normalized_keys[[key_index]],
     normalize_stage_keys(append(paste0(key[-1], collapse = '/'), keys), 
-      stages[[key_index]], parent_key = paste0(parent_key, key[[1]], '/')))
+      stages[[key_index]], parent_key = paste0(parent_key, key[[1]], '/'))
+  )
 
   normalized_keys
 }
