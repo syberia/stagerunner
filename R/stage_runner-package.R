@@ -22,4 +22,11 @@
 #' @docType package
 #' @name stagerunner
 #' @import crayon R6
+#' @author Robert Krzyzanowski <\url{http://syberia.io}>
+#' @seealso The core function in this package: \code{\link{stagerunner}}. It
+#'   defines the constructor creating stagerunner objects that allow you to
+#'   wrap a complicated modeling procedure into an organized hierarchy.
+#' @references Full documentation and demos: \url{http://robertzk.github.io/stagerunner/};
+#'   FAQ's: \url{http://robertzk.github.io/stagerunner/faq/}
 NULL
+

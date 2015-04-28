@@ -26,4 +26,16 @@ Although originally intended for clarifying the modeling process,
 stagerunners have much more general applicability. To learn more,
 begin with the vignettes: \code{browseVignettes(package = "stagerunner")}.
 }
+\author{
+Robert Krzyzanowski <\url{http://syberia.io}>
+}
+\references{
+Full documentation and demos: \url{http://robertzk.github.io/stagerunner/};
+  FAQ's: \url{http://robertzk.github.io/stagerunner/faq/}
+}
+\seealso{
+The core function in this package: \code{\link{stagerunner}}. It
+  defines the constructor creating stagerunner objects that allow you to
+  wrap a complicated modeling procedure into an organized hierarchy.
+}
 
