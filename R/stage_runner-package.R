@@ -18,7 +18,7 @@
 #' stagerunners have much more general applicability. To learn more,
 #' begin with the vignettes: \code{browseVignettes(package = "stagerunner")}.
 #'
-#' @name stagerunner
-#' @import testthat testthatsomemore crayon R6
 #' @docType package
+#' @name stagerunner
+#' @import crayon R6
 NULL
