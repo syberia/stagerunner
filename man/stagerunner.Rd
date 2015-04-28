@@ -8,7 +8,7 @@
 \description{
 stagerunner is an attempt to define a notion of data munging that includes
 \emph{history}. By writing your code as a stagerunner instead of a
-collecton of functions, three key advantages should become clear:
+collection of functions, three key advantages should become clear:
 }
 \details{
 \itemize{
