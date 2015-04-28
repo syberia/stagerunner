@@ -24,7 +24,8 @@
 #' \dontrun{
 #'   show_message(c('one', 'two'), 2) # Will print "Beginning one stage..."
 #' }
-show_message <- function(stage_names, stage_index, begin = TRUE, nested = FALSE, depth = 1) {
+show_message <- function(stage_names, stage_index, begin = TRUE,
+                         nested = FALSE, depth = 1) {
   stage_name <- stage_names[stage_index]
 
   ## If the stage was not named (i.e., only a function was given), we "impute"
