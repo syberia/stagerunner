@@ -13,12 +13,13 @@ collection of functions, three key advantages should become clear:
 \details{
 \itemize{
 \item Clarity will emerge in code that is intended to execute a sequence
-  of operations to obtain a final result.
+  of operations that aims to produce a final result.
 \item Reproducibility of interactive munging steps is possible without
   re-executing your analysis from scratch.
 \item Modularity and extensibility becomes free of charge: methods like
   \code{around} and \code{transform} allow you to apply the same operation
-  to your entire modeling procedure.
+  to your entire modeling procedure, simplifying progress monitoring and
+  debugging.
 }
 
 Although originally intended for clarifying the modeling process,
