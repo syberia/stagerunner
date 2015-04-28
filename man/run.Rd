@@ -4,8 +4,8 @@
 \alias{run}
 \title{Run the stages in a stageRunner object.}
 \usage{
-run(from = NULL, to = NULL, normalized = FALSE, verbose = FALSE,
-  remember_flag = TRUE, mode = self$.mode, .depth = 1, ...)
+run(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
+  mode = self$.mode, normalized = FALSE, .depth = 1, ...)
 }
 \arguments{
 \item{from}{an indexing parameter. Many forms are accepted, but the
@@ -26,19 +26,16 @@ Here, the following all execute only substage_two:
 \code{run('one/two')},
 \code{run(list(list('one', 'two')))},
 \code{run(list(list('one', 2)))}
-Notice that regular expressions are allowed for characters.
+Notice that substrings are allowed for characters.
 The default is \code{NULL}, which runs the whole sequences of stages.}
 
-\item{to}{an indexing parameter. If \code{stage_key} refers to a single stage,
+\item{to}{an indexing parameter. If \code{from} refers to a single stage,
 attempt to run from that stage to this stage (or, if this one comes first,
 this stage to that stage). For example, if we have
    \code{stages = list(a = list(b = 1, c = 2), d = 3, e = list(f = 4, g = 5))}
 where the numbers are some functions, and we call \code{run} with
-\code{stage_key = 'a/c'} and \code{to = 'e/f'}, then we would execute
+\code{from = 'a/c'} and \code{to = 'e/f'}, then we would execute
 stages \code{"a/c", "d", "e/f"}.}
-
-\item{normalized}{logical. A convenience recursion performance helper. If
-\code{TRUE}, stageRunner will assume the \code{stage_key} argument is a}
 
 \item{verbose}{logical. Whether or not to display pretty colored text
 informing about stage progress.
@@ -60,7 +57,12 @@ from the last successfully executed stage to the stage given by
 \code{from}. If \code{from} occurs before the last successfully
 executed stage (say S), the stages will be run from \code{from} to S.}
 
-\item{.depth}{integer. Internal parameter for keeping track of nested running level.}
+\item{normalized}{logical. A convenience recursion performance helper. If
+\code{TRUE}, stageRunner will assume the \code{from} argument is a
+nested list of logicals.}
+
+\item{.depth}{integer. Internal parameter for keeping track of nested
+execution depth.}
 
 \item{...}{Any additional arguments to delegate to the \code{stageRunnerNode}
 object that will execute its own \code{run} method.
@@ -68,11 +70,11 @@ object that will execute its own \code{run} method.
 }
 \value{
 TRUE or FALSE according as running the stages specified by the
-  \code{stage_key} succeeded or failed.  If \code{remember = TRUE},
-  this will instead be a list of the environment before and after
-  executing the aforementioned stages. (This allows comparing what
-  changes were made to the \code{context} during the execution of
-  the stageRunner.
+  \code{from} and \code{to} keys succeeded or failed. If
+  \code{remember = TRUE}, this will instead be a list of the environment
+  before and after executing the aforementioned stages. (This allows
+  comparing what changes were made to the \code{context} during the
+  execution of the stageRunner.)
 }
 \description{
 Run the stages in a stageRunner object.
