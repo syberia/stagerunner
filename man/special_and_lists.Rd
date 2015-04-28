@@ -33,6 +33,21 @@ be ambiguous), so make sure the two lists have the same comparable key orders.
 For example, \code{special_and_lists(list(a = TRUE, b = FALSE), list(b = FALSE, a = TRUE))}
 would mistakenly return \code{list(a = TRUE, b = TRUE)}.
 }
+\examples{
+\dontrun{
+  stopifnot(identical(
+    special_and_lists(list(a = FALSE, b = list(b = TRUE, c = FALSE)),
+                      list(a = FALSE, b = list(b = FALSE, c = TRUE))),
+    list(a = FALSE, b = list(b = FALSE, c = TRUE))
+ ))
+
+  stopifnot(identical(
+    special_and_lists(list(a = FALSE, b = list(b = TRUE, c = FALSE)),
+                      list(a = list(b = FALSE, c = TRUE), b = FALSE)),
+    list(a = list(b = FALSE, c = TRUE), b = list(b = TRUE, c = FALSE))
+ ))
+}
+}
 \seealso{
 \code{\link{special_or_lists}}
 }

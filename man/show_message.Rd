@@ -2,7 +2,7 @@
 % Please edit documentation in R/show_message.r
 \name{show_message}
 \alias{show_message}
-\title{Show a progress message.}
+\title{Show a progress message when executing a stagerunner.}
 \usage{
 show_message(stage_names, stage_index, begin = TRUE, nested = FALSE,
   depth = 1)
@@ -20,14 +20,14 @@ contains another stageRunner).}
 \item{depth}{integer. How many tabs to space by (for nested stages).}
 }
 \value{
-the message to standard output
+Nothing, but print the message to standard output.
 }
 \description{
-Show a progress message.
+Show a progress message when executing a stagerunner.
 }
 \examples{
 \dontrun{
-show_message(c('one', 'two'), 2) # Will print "Beginning one stage..."
+  show_message(c('one', 'two'), 2) # Will print "Beginning one stage..."
 }
 }
 
