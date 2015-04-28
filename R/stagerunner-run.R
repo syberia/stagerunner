@@ -53,14 +53,15 @@
 ## this means we can re-run previous stages at will.
 ##
 ## ```r
-## runner$run()         # Run all stages
+## runner$run()        # Run all stages
 ## runner$data <- NULL # Clear the data
 ## runner$run(2)       # Re-run just the second stage.
 ## ```
 ##
 ## In this scenario, the `data` gets restored from a cached environment--
 ## what the context looked like after the first stage finished--
-## and we have a `dep_var` column (although no `diff` column).
+## and we have a `dep_var` column (although no `diff` column since
+## the third stage was now "rolled back").
 ##
 ## This kind of approach also allows us to debug what happens during execution:
 ##
