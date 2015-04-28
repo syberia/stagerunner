@@ -1,3 +1,31 @@
+## This function is equivalent to `special_and_lists` but instead we apply 
+## "OR" to each pair of logical values:
+## 
+##  * `FALSE`
+##  * __`TRUE`__
+##    * __`TRUE`__
+##    * __`TRUE`__
+##    * `FALSE`
+##  * `FALSE`
+##
+## and
+## 
+##  * `FALSE`
+##  * `FALSE`
+##    * `FALSE`
+##    * __`TRUE`__
+##    * __`TRUE`__
+##  * `FALSE`
+##
+## would become
+##
+##  * `FALSE`
+##  * __`TRUE`__
+##    * __`TRUE`__
+##    * __`TRUE`__
+##    * __`TRUE`__
+##  * `FALSE`
+## 
 #' OR two lists together with some regards for nesting
 #'
 #' The structure of the lists should be the same. That is,
@@ -23,17 +51,22 @@
 #' @seealso \code{\link{special_and_lists}}
 #' @return the or'ed list.
 special_or_lists <- function(list1, list2) {
-  if (identical(list1, TRUE) || identical(list2, TRUE)) TRUE
-  else if (identical(list1, FALSE)) list2
-  else if (identical(list2, FALSE)) list1
-  else if (!(is.list(list1) && is.list(list2)))
+  if (identical(list1, TRUE) || identical(list2, TRUE)) {
+    TRUE
+  } else if (identical(list1, FALSE)) {
+    list2
+  } else if (identical(list2, FALSE)) {
+    list1
+  } else if (!(is.list(list1) && is.list(list2))) {
     stop("special_or_lists only accepts lists or atomic logicals of length 1")
-  else if (length(list1) != length(list2)) {
+  } else if (length(list1) != length(list2)) {
     stop("special_or_lists only accepts lists of the same length")
   } else {
-    if (!identical(names(list1), names(list2))) 
+    if (!identical(names(list1), names(list2))) {
       warning("special_or_lists matches lists by order, not name, ",
               "but the names of the two lists do not match!")
+    }
+     
     Map(special_or_lists, list1, list2)
   }
 }

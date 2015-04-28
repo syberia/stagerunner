@@ -99,6 +99,9 @@ special_and_lists <- function(list1, list2) {
       warning("special_and_lists matches lists by order, not name, ",
               "but the names of the two lists do not match!")
     }
+
+    ## We use [Map](https://stat.ethz.ch/R-manual/R-devel/library/base/html/funprog.html)
+    ## to recursively apply the operation to the remaining elements.
     Map(special_and_lists, list1, list2)
   }
 }
