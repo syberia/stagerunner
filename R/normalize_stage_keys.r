@@ -165,7 +165,7 @@ normalize_stage_key.character <- function(key, keys, stages, parent_key,
     stop("No stage with key '", paste0(parent_key, key[[1]]), "' found")
   }
 
-  key_index <- grepl(key[[1]], names(stages), ignore.case = TRUE, fixed = TRUE)
+  key_index <- grepl(tolower(key[[1]]), tolower(names(stages)), fixed = TRUE)
 
   if (is.finite(suppressWarnings(tmp <- as.numeric(key[[1]]))) &&
       tmp > 0 && tmp <= length(stages)) {

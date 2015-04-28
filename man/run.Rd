@@ -24,8 +24,6 @@ Here, the following all execute only substage_two:
 \code{run(list(list(1, 2)))},
 \code{run('stage_one/substage_two')},
 \code{run('one/two')},
-\code{run(list(list('one', 'two')))},
-\code{run(list(list('one', 2)))}
 Notice that substrings are allowed for characters.
 The default is \code{NULL}, which runs the whole sequences of stages.}
 
@@ -78,5 +76,26 @@ TRUE or FALSE according as running the stages specified by the
 }
 \description{
 Run the stages in a stageRunner object.
+}
+\examples{
+env <- new.env()
+some_fn    <- function(e) e$x <- 1
+other_fn   <- function(e) e$y <- 1
+another_fn <- function(e) e$z <- 1
+sr <- stagerunner(env, list(stage_one =
+ stagerunner(env, list(substage_one = some_fn, substage_two = other_fn)),
+ stage_two = another_fn))
+
+# Here, the following all execute only substage_two:
+
+sr$run(list(list(FALSE, TRUE), FALSE))
+sr$run(list(list(1, 2)))
+sr$run('stage_one/substage_two')
+sr$run('one/two')
+stopifnot(is.null(env$z), is.null(env$x), identical(env$y, 1))
+
+# This will execute all but "stage_one" (i.e., only "stage_two")
+sr$run(-1)
+stopifnot(identical(env$z, 1))
 }
 
