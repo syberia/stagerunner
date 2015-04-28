@@ -1,4 +1,16 @@
-#' Show a progress message.
+## Consider our example stagerunner from before:
+##
+##   * import data
+##   * clean data
+##      * impute variable 1
+##      * discretize variable 2
+##   * train model
+##
+## Our goal is to display progress when executing the stagerunner:
+##
+## ![runner](http://i.imgur.com/NKN3hnk.png)
+##
+#' Show a progress message when executing a stagerunner.
 #'
 #' @name show_message
 #' @param stage_names character.
