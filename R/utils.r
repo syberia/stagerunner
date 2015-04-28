@@ -11,6 +11,17 @@ all_logical <- function(x) {
   logical(1)))
 }
 
+as.ordinal <- function(number) {
+  ordinals <- list('first', 'second', 'third', 'fourth', 'fifth',
+    'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh',
+    'twelfth', 'thirteenth', 'fourteenth', 'fifteenth',
+    'sixteenth', 'seventeenth', 'eighteenth', 'nineteenth',
+    'twentieth')
+  ext <- c("th", "st", "nd", "rd", rep("th", 6))
+  ordinals[number][[1]] %||%
+  paste0(number, ext[[(number %% 10) + 1]])
+}
+
 enforce_type <- function(value, expected, klass, name = deparse(substitute(value))) {
   if (missing(value)) {
     stop(sprintf(
