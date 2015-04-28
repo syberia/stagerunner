@@ -1,3 +1,80 @@
+## The heart of a stagerunner object is its `run` method, depicted on the
+## right. A stagerunner consists of two things:
+##
+##  * __a context__: This is an [environment](http://adv-r.had.co.nz/Environments.html) object
+##    that allows the user to persistently store information between stages.
+##    The usual way to build a data pipeline is to provide functions with
+##    various inputs and hook them up to functions with various outputs.
+##    
+##    This is nice because it is clear what the inputs and outputs will be.
+##    However, the disadvantage is that hooking up all the functions can
+##    become pretty messy.
+##
+##    In this approach, we let the user set their own
+##    conventions for what to place in the context. The advantage is that
+##    *all stages have the same form*, a function taking one argument (the 
+##    context), and so they become easy to manipulate.
+##
+##  * __stages__: A list of functions or, recursively, other stagerunners. Each function
+##    should take precisely one argument: the *context* described above.
+##    If you have some familiarity with pure mathematics, you will know the
+##    [original inspiration](http://en.wikipedia.org/wiki/Group_action) for stagerunners:
+##    a stagerunner is a sequence of actions on an environment.
+## 
+## *Running* a portion of a stagerunner means to execute some of its stages on 
+## its context. For example, suppose we start with an empty environment
+## `context = new.env()` and the following stages:
+##
+## ```r
+## context <- new.env()
+## runner  <- stagerunner(context, list(
+##  "Set x"    = function(e) { e$x <- 1 },
+##  "Double x" = function(e) { e$x <- 2 * e$x }
+## ))
+## ```
+##
+## If we write `runner$run("Set x")`, then `context$x` will become `1`.
+## If we write `runner$run(2)` (a syntactical shortcut), then `context$x`
+## becomes `2`. If we write `runner$run(2)` again, it will become `4`.
+##
+## The real advantage of this approach becomes clear when we enable the `remember`
+## flag:
+##
+## ```r
+## context <- new.env()
+## runner  <- stagerunner(remember = TRUE, context, list(
+##   "Import data"               = function(e) e$data <- iris,
+##   "Create dependent variable" = function(e) e$dep_var <- e$data[[1]] > 5,
+##   "Create derived variable"   = function(e) e$diff <- e$data[[1]] - e$data[[2]]
+## ))
+## ```
+## 
+## Now, the stagerunner holds a copy of the full environment in each stage:
+## this means we can re-run previous stages at will.
+##
+## ```r
+## runner$run()         # Run all stages
+## runner$data <- NULL # Clear the data
+## runner$run(2)       # Re-run just the second stage.
+## ```
+##
+## In this scenario, the `data` gets restored from a cached environment--
+## what the context looked like after the first stage finished--
+## and we have a `dep_var` column (although no `diff` column).
+##
+## This kind of approach also allows us to debug what happens during execution:
+##
+## ```r
+## envs <- runner$run(2)
+## ls(envs$before$data) # The iris attributes
+## ls(envs$after$data)  # The iris attributes *and* dep_var
+## ```
+##
+## When a stagerunner is set to remember its progress the output of the `run`
+## function consists of a list with keys `before` and `after` representing
+## two environments: what the stagerunner's context looked like before
+## and after executing that stage.
+##
 #' Run the stages in a stageRunner object.
 #'
 #' @param from an indexing parameter. Many forms are accepted, but the
