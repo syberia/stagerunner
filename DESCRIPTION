@@ -37,6 +37,7 @@ Collate:
     'stage_runner.r'
     'stagerunner-initialize.R'
     'stagerunner-objectdiff.R'
+    'stagerunner-run.R'
     'stagerunner_R6.R'
     'tree_skeleton.r'
     'utils.r'
