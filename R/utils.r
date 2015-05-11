@@ -68,7 +68,7 @@ package_function <- function(pkg, fn) { # for when using :: breaks R CMD check
 #' Call a method on an object regardless of its OOP type.
 #'
 #' @name OOP_type_independent_method 
-#' @param object any. An R object of variable OOP type (S3, S4, RC).
+#' @param object any. An R object of variable OOP type (S3, S4, RC, R6).
 #' @param method character. The method to call on the \code{object}. If the
 #'    latter is a reference class, it use the \code{$} operator to access the method.
 #'    (For example, \code{object$some_method}). If it has an attribute with the name
