@@ -487,6 +487,26 @@ stageRunner__next_stage <- function() {
   FALSE
 }
 
+#' For stageRunners with caching, find the last executed stage.
+#'
+#' @name stageRunner__current_stage
+#' @return a character stage key giving the last executed stage.
+stageRunner__current_stage <- function() {
+  # Notes: this has similar recursive structure to stageRunner__next_stage, except the tree has been turned upside down - DLN
+  for (stage_index in rev(seq_along(stages))) {
+    is_executed_terminal_node <- is.stageRunnerNode(stages[[stage_index]]) && 
+      stages[[stage_index]]$was_executed()
+    has_executed_terminal_node <- is.stagerunner(stages[[stage_index]]) && 
+      is.character(tmp<-stages[[stage_index]]$current_stage())
+    
+    if (is_executed_terminal_node) 
+      return(as.character(stage_index))
+    else if (has_executed_terminal_node) 
+      return(paste(c(stage_index, tmp), collapse = '/'))
+  }
+  FALSE
+}
+
 #' Generic for printing stageRunner objects.
 #' 
 #' @name stageRunner__show
@@ -674,6 +694,7 @@ stageRunner <- setRefClass('stageRunner',
     stage_names  = stageRunner__stage_names,
     parent       = accessor_method(.parent),
     children     = function() { stages },
+    current_stage = stageRunner__current_stage,
     next_stage   = stageRunner__next_stage,
     show         = stageRunner__show,
     has_key      = stageRunner__has_key,
