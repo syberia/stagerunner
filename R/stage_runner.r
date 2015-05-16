@@ -491,11 +491,8 @@ stageRunner__next_stage <- function() {
 #'
 #' @name stageRunner__current_stage
 #' @return a character stage key giving the last executed stage.
-#'   If all stages have been executed, this returns \code{FALSE}.
-#'   If the stageRunner does not have caching enabled, this will
-#'   always return the first stage key (`'1'`).
 stageRunner__current_stage <- function() {
-  # Notes: similar recursive structure to stageRunner__next_stage, except the tree has been turned upside down - DLN
+  # Notes: this has similar recursive structure to stageRunner__next_stage, except the tree has been turned upside down - DLN
   for (stage_index in rev(seq_along(stages))) {
     is_executed_terminal_node <- is.stageRunnerNode(stages[[stage_index]]) && 
       stages[[stage_index]]$was_executed()
