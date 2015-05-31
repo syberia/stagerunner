@@ -35,6 +35,7 @@ Collate:
     'special_or_lists.r'
     'stage_runner-package.R'
     'stage_runner.r'
+    'stagerunner-append.R'
     'stagerunner-around.R'
     'stagerunner-coalesce.R'
     'stagerunner-initialize.R'

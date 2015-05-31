@@ -1,19 +1,7 @@
 #' @include stagerunner-initialize.R stagerunner-run.R stagerunner-around.R
 #'   stagerunner-coalesce.R stagerunner-overlay.R stagerunner-transform.R
+#'   stagerunner-append.R
 NULL
-
-#' Append one stageRunner to the end of another.
-#'
-#' @name stageRunner_append
-#' @param other_runner stageRunner. Another stageRunner to append to the current one.
-#' @param label character. The label for the new stages (this will be the name of the
-#'   newly appended list element).
-stageRunner_append <- function(other_runner, label = NULL) {
-  stopifnot(is.stagerunner(other_runner))
-  new_stage <- structure(list(other_runner), names = label)
-  self$stages <- base::append(self$stages, new_stage)
-  TRUE
-}
 
 #' Retrieve a flattened list of canonical stage names for a stageRunner object
 #'
