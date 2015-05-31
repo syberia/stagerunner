@@ -7,7 +7,7 @@
 OOP_type_independent_method(object, method)
 }
 \arguments{
-\item{object}{any. An R object of variable OOP type (S3, S4, RC).}
+\item{object}{any. An R object of variable OOP type (S3, S4, RC, R6).}
 
 \item{method}{character. The method to call on the \code{object}. If the
 latter is a reference class, it use the \code{$} operator to access the method.

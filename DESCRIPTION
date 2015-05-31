@@ -36,6 +36,7 @@ Collate:
     'stage_runner-package.R'
     'stage_runner.r'
     'stagerunner-around.R'
+    'stagerunner-coalesce.R'
     'stagerunner-initialize.R'
     'stagerunner-objectdiff.R'
     'stagerunner-run.R'
