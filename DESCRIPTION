@@ -43,6 +43,7 @@ Collate:
     'stagerunner-objectdiff.R'
     'stagerunner-overlay.R'
     'stagerunner-run.R'
+    'stagerunner-show.R'
     'stagerunner-stage_names.R'
     'stagerunner-transform.R'
     'stagerunner_R6.R'
