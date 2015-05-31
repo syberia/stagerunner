@@ -123,6 +123,8 @@
 #' @param normalized logical. A convenience recursion performance helper. If
 #'   \code{TRUE}, stageRunner will assume the \code{from} argument is a
 #'   nested list of logicals.
+## Do not worry about this parameter. It is used internally to keep track of
+## how "deep" the current stage execution is.
 #' @param .depth integer. Internal parameter for keeping track of nested
 #'   execution depth.
 #' @param ... Any additional arguments to delegate to the \code{stageRunnerNode}
