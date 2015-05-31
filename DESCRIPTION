@@ -39,6 +39,7 @@ Collate:
     'stagerunner-around.R'
     'stagerunner-coalesce.R'
     'stagerunner-initialize.R'
+    'stagerunner-internal.R'
     'stagerunner-next_stage.R'
     'stagerunner-objectdiff.R'
     'stagerunner-overlay.R'
