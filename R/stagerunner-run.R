@@ -195,60 +195,84 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
   for (stage_index in seq_along(stage_key)) {
     nested_run <- TRUE
     
-    # Determine how to run this stage, depending on whether it is an
-    # terminal node or nested stagerunner. We compute this first
-    # in case we run into referencing errors (e.g., the requested
-    # stage does not exist).
-    run_stage <- determine_run_stage(stage_key, stage_index, self$stages, verbose, .depth)
+    ## In a stagerunner, recursively nested stages (i.e., stages with substages)
+    ## are themselves represented as stagerunners, while final stages
+    ## (i.e., the functions to execute) are represented as [R6](http://cran.r-project.org/web/packages/R6/index.html)
+    ## objects called `stageRunnerNode`s. In each scenario, a different
+    ## recursive call to `$run` will be necessary, so we compute a 
+    ## closure that gives the correct call for later use.
+    run_stage <- determine_run_stage(stage_key, stage_index,
+                                     self$stages, verbose, .depth)
 
+    ## We keep track of whether this is a nested run so that the verbose
+    ## display knows whether to say "*Beginning* stage X" or "*Running* stage X".
     if (isTRUE(stage_key[[stage_index]]) &&
         !is.stagerunner(self$stages[[stage_index]])) {
       nested_run <- FALSE
     }
 
+    ## The above helper `run_stage` will return an object of class `next_stage`
+    ## if we should skip this stage (i.e., because `stage_key[[stage_index]]`
+    ## is `FALSE`).
     if (is(run_stage, "next_stage")) next
 
-    display_message <- verbose && contains_true(stage_key[[stage_index]])
+    ## Display a nice message telling us which stage we are currently
+    ## executing.
+    display_message <- isTRUE(verbose) && contains_true(stage_key[[stage_index]])
     if (display_message) {
       show_message(names(self$stages), stage_index, begin = TRUE,
                    nested = nested_run, depth = .depth)
     }
 
-    # Now handle when remember = TRUE, i.e., we have to cache the
-    # progress along each stage.
-
+    ## If `remember = TRUE`, we have to cache the progress along each stage.
     if (self$remember && isTRUE(remember_flag) && is.null(before_env)) {
-      # If remember = remember_flag = TRUE and before_env has not been set
-      # this is the first stage of a $run() call, so use the cached
-      # environment.
+      ## If we have not determined what the environment on the stagerunner
+      ## was like prior to running any stages, we do so now. This will
+      ## eventually be returned by this function, so that the user
+      ## can inspect what happened before and after all the desired
+      ## stages were executed.
       if (nested_run) {
+        ## If this is a nested stage, we grab the "initial environment"
+        ## recursively.
         before_env <- run_stage(..., remember_flag = TRUE)$before
-      } else { # a leaf / terminal node
+      } else { 
+        ## Otherwise, if it is a terminal node, we just make a copy of
+        ## the current context.
         before_env <- self$.before_env(stage_index)
       }
       
-      # If terminal node, execute the stage (if it was nested, it's already been
-      # executed in order to recursively fetch the before_env).
+      ## If the current stage is a terminal node,
+      ## execute the stage (if it was nested, it's already been
+      ## executed in order to recursively fetch the initial environment,
+      ## `before_env`).
       if (!nested_run) { run_stage(...) }
     }
     else if (self$remember) { run_stage(..., remember_flag = FALSE) }
     else { run_stage(...) }
 
+    ## When we're done running a stage (i.e., processing a terminal node),
+    ## set the cache on the successor node to be the current context
+    ## (since that node will execute starting with what's in the context now --
+    ## this also ensures that running that node with a separate call to
+    ## `$run` will not bump into a "you haven't executed this stage yet" error).
     if (self$remember && !nested_run) {
-      # When we're done running a stage (i.e., processing a terminal node),
-      # set the cache on the successor node to be the current context
-      # (since that node will execute starting with what's in the context now --
-      # this also ensures that running that node with a separate call to
-      # $run will not bump into a "you haven't executed this stage yet" error).
       self$.mark_finished(stage_index)
     }
 
+    ## Finally, display our progress by indicating we are ending this stage.
     if (display_message) {
       show_message(names(self$stages), stage_index, begin = FALSE,
                    nested = nested_run, depth = .depth)
     }
   }
 
+  ## If the stagerunner is a *remembering* stagerunner, i.e., the field
+  ## `remember = TRUE`, we will return a list with keys `before` and `after`
+  ## indicating what the stagerunner's context looked like before and after
+  ## executing the stages indicated by the `from` and `to` parameters.
+  ## This allows the user to perform their own analysis about what happened.
+  ##
+  ## Otherwise, we simply return `TRUE` ([invisibly](http://stackoverflow.com/questions/11653127/what-does-the-function-invisible-do)).
   if (self$remember && remember_flag) {
     list(before = before_env, after = self$.context)
   } else {
@@ -256,6 +280,13 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
   }
 }
 
+## This is a helper function to call `$run` correctly if we are recursively
+## executing substages:
+##
+##   * If the substage is a stagerunner, pass along information about how
+##     deep we currently are in the stagerunner for verbose printing.
+##   * Otherwise, simply call the `stageRunnerNode$run` method directly.
+##
 determine_run_stage <- function(stage_key, stage_index, stages, verbose, .depth) {
   if (isTRUE(stage_key[[stage_index]])) {
     stage <- stages[[stage_index]]
@@ -263,8 +294,8 @@ determine_run_stage <- function(stage_key, stage_index, stages, verbose, .depth)
       function(...) { stage$run(verbose = verbose, .depth = .depth + 1, ...) }
     } else {
      nested_run <- FALSE
-     # Intercept the remember_flag argument to calls to the stageRunnerNode
-     # (since it doesn't know how to use it).
+     ## Intercept the `remember_flag` argument to calls to the `stageRunnerNode`
+     ## (since it doesn't know how to use it).
      function(..., remember_flag = TRUE) { stage$run(...) }
     }
   } else if (is.list(stage_key[[stage_index]])) {
