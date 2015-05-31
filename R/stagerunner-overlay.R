@@ -24,3 +24,4 @@ stageRunner_overlay <- function(other_runner, label = NULL, flat = FALSE) {
   }
   TRUE
 }
+
