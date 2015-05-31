@@ -217,7 +217,7 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
     # Now handle when remember = TRUE, i.e., we have to cache the
     # progress along each stage.
 
-    if (self$remember && remember_flag && is.null(before_env)) {
+    if (self$remember && isTRUE(remember_flag) && is.null(before_env)) {
       # If remember = remember_flag = TRUE and before_env has not been set
       # this is the first stage of a $run() call, so use the cached
       # environment.
@@ -227,7 +227,7 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
         before_env <- self$.before_env(stage_index)
       }
       
-      # If terminal node, execute the stage (if it was nested,  it's already been
+      # If terminal node, execute the stage (if it was nested, it's already been
       # executed in order to recursively fetch the before_env).
       if (!nested_run) { run_stage(...) }
     }
@@ -249,8 +249,11 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
     }
   }
 
-  if (self$remember && remember_flag) { list(before = before_env, after = self$.context) }
-  else { invisible(TRUE) }
+  if (self$remember && remember_flag) {
+    list(before = before_env, after = self$.context)
+  } else {
+    invisible(TRUE)
+  }
 }
 
 determine_run_stage <- function(stage_key, stage_index, stages, verbose, .depth) {
