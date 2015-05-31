@@ -13,16 +13,6 @@ stageRunner_has_key <- function(key) {
   any(c(has, recursive = TRUE))
 }
 
-#' @export
-print.stageRunner <- function(x, ...) {
-  x$show(...)
-}
-
-#' @export
-print.stageRunnerNode <- function(x, ...) {
-  x$show(...)
-}
-
 stageRunner_ <- R6::R6Class('stageRunner',
   active = list(context = function() self$.context),                            
   public = list(

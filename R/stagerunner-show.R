@@ -45,3 +45,13 @@ stageRunner_show <- function(indent = 0) {
   NULL
 }
 
+#' @export
+print.stageRunner <- function(x, ...) {
+  x$show(...)
+}
+
+#' @export
+print.stageRunnerNode <- function(x, ...) {
+  x$show(...)
+}
+
