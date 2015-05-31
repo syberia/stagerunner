@@ -158,13 +158,28 @@
 #' stopifnot(identical(env$z, 1))
 run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
                 mode = self$.mode, normalized = FALSE, .depth = 1, ...) {
+  ## The parameter `normalized` refers to whether the input (that is, the `from`
+  ## and `to` parameters) are in the canonical nested list format. For example,
+  ## if we have a runner with stage "Import", "Data/impute", and
+  ## "Data/discretize", the canonical representation for the first substage
+  ## of the second stage would be `list(FALSE, list(TRUE, FALSE))`. This allows
+  ## the stagerunner package to easily tell what is being executed.
+  ##
+  ## If the `from` and `to` parameters are not in normal form, or the `from`
+  ## parameter is missing and the `to` parameter is present (so that we
+  ## are asking to run from the beginning to the stage denoted by `to`),
+  ## we must first normalize the keys to use this nested list format.
   if (identical(normalized, FALSE)) {
     if (missing(from) && identical(self$remember, TRUE) && identical(mode, 'next')) {
       from <- self$next_stage()
       if (missing(to)) to <- TRUE
     }
     stage_key <- normalize_stage_keys(from, self$stages, to = to)
-  } else stage_key <- from
+  } else {
+    ## We will use the `stage_key` local variable to track what substages
+    ## to execute during this `run` call.
+    stage_key <- from
+  }
 
   # Now that we have determined which stages to run, cycle through them all.
   # It is up to the user to determine that context changes make sense.
