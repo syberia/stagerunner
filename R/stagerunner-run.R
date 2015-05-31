@@ -123,8 +123,8 @@
 #' @param normalized logical. A convenience recursion performance helper. If
 #'   \code{TRUE}, stageRunner will assume the \code{from} argument is a
 #'   nested list of logicals.
-## Do not worry about this parameter. It is used internally to keep track of
-## how "deep" the current stage execution is.
+## Do not worry about this parameter, `.depth`.
+## It is used internally to keep track of how "deep" the current stage execution is.
 #' @param .depth integer. Internal parameter for keeping track of nested
 #'   execution depth.
 #' @param ... Any additional arguments to delegate to the \code{stageRunnerNode}
@@ -181,13 +181,14 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
     stage_key <- from
   }
 
-  # Now that we have determined which stages to run, cycle through them all.
-  # It is up to the user to determine that context changes make sense.
-  # We also implicitly sort the stages to ensure linearity is preserved.
-  # Stagerunner enforces the linearity and directionality set in the stage definitions.
+  ## Now that we have determined which stages to run, we cycle through them all.
+  ## It is up to the user to determine that context changes make sense.
+  ## We also implicitly sort the stages to ensure linearity is preserved.
+  ## Stagerunner enforces the linearity and directionality set in the stage
+  ## definitions.
   
-  # If we are remembering changes, recall what the environment looked like
-  # *before* we ran anything.
+  ## If we are remembering changes, we must recall what the environment looked
+  ## like *before* we ran anything.
   before_env <- NULL
 
   for (stage_index in seq_along(stage_key)) {
