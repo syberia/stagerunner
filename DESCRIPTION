@@ -35,6 +35,7 @@ Collate:
     'special_or_lists.r'
     'stage_runner-package.R'
     'stage_runner.r'
+    'stagerunner-around.R'
     'stagerunner-initialize.R'
     'stagerunner-objectdiff.R'
     'stagerunner-run.R'
