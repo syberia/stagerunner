@@ -160,7 +160,7 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
                 mode = self$.mode, normalized = FALSE, .depth = 1, ...) {
   ## The parameter `normalized` refers to whether the input (that is, the `from`
   ## and `to` parameters) are in the canonical nested list format. For example,
-  ## if we have a runner with stage "Import", "Data/impute", and
+  ## if we have a runner with stages "Import", "Data/impute", and
   ## "Data/discretize", the canonical representation for the first substage
   ## of the second stage would be `list(FALSE, list(TRUE, FALSE))`. This allows
   ## the stagerunner package to easily tell what is being executed.
@@ -169,6 +169,9 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
   ## parameter is missing and the `to` parameter is present (so that we
   ## are asking to run from the beginning to the stage denoted by `to`),
   ## we must first normalize the keys to use this nested list format.
+  ##
+  ## We will use the `stage_key` local variable to track what substages
+  ## to execute during this `run` call.
   if (identical(normalized, FALSE)) {
     if (missing(from) && identical(self$remember, TRUE) && identical(mode, 'next')) {
       from <- self$next_stage()
@@ -176,8 +179,6 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
     }
     stage_key <- normalize_stage_keys(from, self$stages, to = to)
   } else {
-    ## We will use the `stage_key` local variable to track what substages
-    ## to execute during this `run` call.
     stage_key <- from
   }
 
@@ -198,28 +199,14 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
     # terminal node or nested stagerunner. We compute this first
     # in case we run into referencing errors (e.g., the requested
     # stage does not exist).
-    run_stage <-
-      if (identical(stage_key[[stage_index]], TRUE)) {
-        stage <- self$stages[[stage_index]]
-        if (is.stagerunner(stage)) { 
-          function(...) { stage$run(verbose = verbose, .depth = .depth + 1, ...) }
-        } else {
-         nested_run <- FALSE
-         # Intercept the remember_flag argument to calls to the stageRunnerNode
-         # (since it doesn't know how to use it).
-         function(..., remember_flag = TRUE) { stage$run(...) }
-        }
-      } else if (is.list(stage_key[[stage_index]])) {
-        if (!is.stagerunner(self$stages[[stage_index]])) {
-          stop("Invalid stage key: attempted to make a nested stage reference ",
-               "to a non-existent stage")
-        }
+    run_stage <- determine_run_stage(stage_key, stage_index, self$stages, verbose, .depth)
 
-        function(...) {
-          self$stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE,
-                                    verbose = verbose, .depth = .depth + 1, ...)
-        }
-      } else next 
+    if (isTRUE(stage_key[[stage_index]]) &&
+        !is.stagerunner(self$stages[[stage_index]])) {
+      nested_run <- FALSE
+    }
+
+    if (is(run_stage, "next_stage")) next
 
     display_message <- verbose && contains_true(stage_key[[stage_index]])
     if (display_message) {
@@ -265,3 +252,30 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
   if (self$remember && remember_flag) { list(before = before_env, after = self$.context) }
   else { invisible(TRUE) }
 }
+
+determine_run_stage <- function(stage_key, stage_index, stages, verbose, .depth) {
+  if (isTRUE(stage_key[[stage_index]])) {
+    stage <- stages[[stage_index]]
+    if (is.stagerunner(stage)) { 
+      function(...) { stage$run(verbose = verbose, .depth = .depth + 1, ...) }
+    } else {
+     nested_run <- FALSE
+     # Intercept the remember_flag argument to calls to the stageRunnerNode
+     # (since it doesn't know how to use it).
+     function(..., remember_flag = TRUE) { stage$run(...) }
+    }
+  } else if (is.list(stage_key[[stage_index]])) {
+    if (!is.stagerunner(stages[[stage_index]])) {
+      stop("Invalid stage key: attempted to make a nested stage reference ",
+           "to a non-existent stage")
+    }
+
+    function(...) {
+      stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE,
+                                verbose = verbose, .depth = .depth + 1, ...)
+    }
+  } else {
+    structure(list(), class = "next_stage")
+  }
+}
+
