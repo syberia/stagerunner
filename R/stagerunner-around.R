@@ -1,3 +1,45 @@
+## The `around` method on a stagerunner is used as sort of [setup and teardown](http://stackoverflow.com/questions/6854658/explain-the-setup-and-teardown-methods-used-in-test-cases)
+## hooks on arbitrary stages.
+## 
+## For example, imagine we have a stagerunner that looks like the following.
+##
+##   * import data
+##   * clean data
+##      * impute variable 1
+##      * discretize variable 2
+##
+## Imagine we want to write test functions that ensure the correct behavior
+## is happening during the data cleaning. We can write a stagerunner with
+## an identical tree structure that performs additional testing to ensure
+## our work is correct:
+##
+## ```r
+## new_runner <- stageRunner$new(new.env(), list(
+##   "import data" = function(e) { yield(); stopifnot(!is.null(e$data)) },
+##   "clean data"  = list(
+##     "impute variable 1" = function(e) {
+##       yield()
+##       stopifnot(!any(is.na(e$data$variable1)))
+##     }, "discretize variable 2" = function(e) {
+##       yield()
+##       stopifnot(is.factor(e$data$variable2))
+##    })
+## ))
+## ```
+##
+## The keyword `yield` is injected into a stagerunner that is used with the
+## `around` method, and means "execute the stage of the stagerunner that is
+## being wrapped that would normally occur at this point." Code before
+## and after the `yield` keyword can be used to perform additional assertions
+## about what happened during the execution of the stage.
+##
+## ```r
+## runner$around(new_runner)
+## runner$run()
+## ```
+##
+## If any of the above assertions fail, we will now get an error.
+##
 #' Wrap a function around a stageRunner's terminal nodes
 #'
 #' If we want to execute some behavior just before and just after executing
@@ -48,3 +90,4 @@ stageRunner_around <- function(other_runner) {
   })
   self
 }
+
