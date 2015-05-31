@@ -1,17 +1,8 @@
 #' @include stagerunner-initialize.R stagerunner-run.R stagerunner-around.R
 #'   stagerunner-coalesce.R stagerunner-overlay.R stagerunner-transform.R
 #'   stagerunner-append.R stagerunner-stage_names.R stagerunner-next_stage.R
-#'   stagerunner-show.R stagerunner-internal.R
+#'   stagerunner-show.R stagerunner-has_key.R stagerunner-internal.R
 NULL
-
-#' Whether or not the stageRunner has a key matching this input.
-#'
-#' @param key ANY. The potential key.
-#' @return \code{TRUE} or \code{FALSE} accordingly.
-stageRunner_has_key <- function(key) {
-  has <- tryCatch(normalize_stage_keys(key, self$stages), error = function(.) FALSE)
-  any(c(has, recursive = TRUE))
-}
 
 stageRunner_ <- R6::R6Class('stageRunner',
   active = list(context = function() self$.context),                            
@@ -200,6 +191,4 @@ is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
 #' @export
 is.stageRunner <- is.stagerunner
 is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
-
-
 
