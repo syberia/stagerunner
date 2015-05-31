@@ -67,6 +67,7 @@ stagerunner <- stageRunner
 #' @return \code{TRUE} if the object is of class
 #'    \code{stageRunner}, \code{FALSE} otherwise.
 is.stagerunner <- function(obj) inherits(obj, 'stageRunner')
+#' @rdname is.stagerunner
 #' @export
 is.stageRunner <- is.stagerunner
 
