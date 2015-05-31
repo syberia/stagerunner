@@ -120,5 +120,6 @@ stageRunnerNode <- structure(
 }
 
 #' @export
+#' @rdname stageRunnerNode
 is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
 

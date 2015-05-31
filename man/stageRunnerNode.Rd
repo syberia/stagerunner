@@ -2,12 +2,15 @@
 % Please edit documentation in R/stageRunnerNode.R
 \docType{class}
 \name{stageRunnerNode}
+\alias{is.stageRunnerNode}
 \alias{stageRunnerNode}
 \alias{stageRunnerNode_}
 \title{Stagerunner nodes are environment wrappers around individual stages
 (i.e. functions) in order to track meta-data (e.g., for caching).}
 \usage{
 stageRunnerNode_
+
+is.stageRunnerNode(obj)
 }
 \arguments{
 \item{fn}{function. This will be wrapped in an environment.}
