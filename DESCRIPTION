@@ -33,6 +33,7 @@ Collate:
     'show_message.r'
     'special_and_lists.r'
     'special_or_lists.r'
+    'stageRunnerNode.R'
     'stage_runner-package.R'
     'stage_runner.r'
     'stagerunner-append.R'
