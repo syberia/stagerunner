@@ -1,3 +1,30 @@
+## Coalescing two stagerunners is a critical operation for modifying a 
+## runner that is "in flight" and is currently being executed.
+##
+## Imagine we have our usual example runner:
+##
+##   * __import data__
+##   * __clean data__
+##      * __impute variable 1__
+##      * discretize variable 2
+##   * train model
+## 
+## It has `remember = TRUE`, which means it is keeping a copy of the 
+## current context in each stage. As in the example, we have executed it
+## to the imputation substage. We now realize there is a mistake in the
+## imputation code. We can re-create a new fresh stagerunner with the
+## same structure, but it will not have the history of context changes!
+##
+## Instead, we must *coalesce* the old runner onto the new runner, so that it
+## carries over the environment changes. That way, when we continue execution
+## from the imputation substage in our fixed runner, it will resume as before
+## without having to re-import the data.
+##
+## This can be inefficient for large datasets, but using the
+## [objectdiff](http://github.com/robertzk/objectdiff) package we can avoid
+## the memory problems that may arise. For even larger datasets, we may need
+## database-backed storage, but this is beyond the scope of stagerunners for
+## now.
 #' Coalescing a stageRunner object is taking another stageRunner object
 #' with similar stage names and replacing the latter's cached environments
 #' with the former's.
@@ -12,6 +39,9 @@ stageRunner_coalesce <- function(other_runner) {
   # stopifnot(remember)
   if (!isTRUE(self$remember)) return()
 
+  ## We must handle this cases: (1) integration with 
+  ## [objectdiff](http://github.com/robertzk/objectdiff), and (2) vanilla
+  ## R environment objects. Both are tricky.
   if (self$with_tracked_environment()) {
     if (!other_runner$with_tracked_environment()) {
       stop("Cannot coalesce stageRunners using tracked_environments with ",
