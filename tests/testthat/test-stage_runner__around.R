@@ -66,6 +66,6 @@ test_that('it can nest $around calls, like Rack Middleware!', {
 test_that('it throws a warning when an invalid $around operation is performed', {
   sr <- stageRunner$new(new.env(), list(a = function(e) cat('2')))
   expect_warning(sr$around(list(a = list(b = function(e) {} ))),
-                           'Cannot apply around')
+                           'Cannot apply stageRunner$around')
 })
 
