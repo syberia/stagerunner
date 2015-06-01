@@ -66,17 +66,27 @@
 stageRunner_around <- function(other_runner) {
   if (is.null(other_runner)) return(self)
   if (!is.stagerunner(other_runner)) {
+    # Create a new stagerunner if `other_runner` is not already a runner.
     other_runner <- stageRunner$new(self$.context, other_runner)
   }
 
+  ## If no names are given `names(other_runner$stages)` may be `NULL`.
+  ## We would like a character vector of empty strings instead so may we
+  ## obtain the correct names in the loop below.
   stagenames <- names(other_runner$stages) %||% rep("", length(other_runner$stages))
   lapply(seq_along(other_runner$stages), function(stage_index) {
     name <- stagenames[stage_index]
+    ## We assume each named stage has a unique name.
+    # TODO: (RK) It may be possible to avoid this assumption by counting  
+    # duplicately named stages.
     this_index <- 
       if (identical(name, "")) stage_index
       else if (is.element(name, names(self$stages))) name
       else return()
 
+    ## If both this stage and the corresponding stage on the other runner are
+    ## stagerunners, we recursively use the `around` method. Otherwise, we use
+    ## the `stageRunnerNode$around` method.
     if (is.stagerunner(self$stages[[this_index]]) &&
         is.stagerunner(other_runner$stages[[stage_index]])) {
       self$stages[[this_index]]$around(other_runner$stages[[stage_index]])
@@ -84,7 +94,7 @@ stageRunner_around <- function(other_runner) {
                is.stageRunnerNode(other_runner$stages[[stage_index]])) {
       self$stages[[this_index]]$around(other_runner$stages[[stage_index]])
     } else {
-      warning("Cannot apply around stageRunner because ",
+      warning("Cannot apply stageRunner$around because ",
               this_index, " is not a terminal node.")
     }
   })
