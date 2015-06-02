@@ -1,3 +1,37 @@
+## Overlaying a stagerunner means replacing the terminal nodes with
+## terminal nodes that do some extra behavior, and can themselves
+## be full stagerunners. This is subtly different than the `around`
+## method, which transforms the terminal node function itself, rather
+## than turning it from a function to a stagerunner.
+## 
+## For example, if we have a stagerunner like
+##
+##   * import data
+##   * clean data
+##      * impute variable 1
+##      * discretize variable 2
+##   * train model
+## 
+## we may wish to replace each function with a "hidden" mini-runner
+## that runs some tests after each stage.
+##
+##   * import data
+##     * vanilla function
+##     * some testing function that checks data got imported
+##   * clean data
+##     * impute variable 1
+##        * vanilla function
+##        * some testing function that checks variables were imputed
+##     * discretize variable 2
+##        * vanilla function
+##        * some testing function that checks variables were discretized
+##   * train model
+##     * vanilla function
+##     * some testing function that checks the model got trained successfully
+## 
+## We can achieve this by passing the stagerunner with the same tree structure
+## but containing tests in the terminal node as the argument to the main
+## stagerunner's `overlay` method.
 #' Overlaying a stageRunner object is taking another stageRunner object
 #' with similar stage names and adding the latter's stages as terminal stages
 #' to the former (for example, to support tests).
