@@ -1,19 +1,29 @@
+## This file contains some messy internal methods that are necessary
+## for correct interoperation with the `treeSkeleton` class and
+## the [objectdiff](http://github.com/robertzk/objectdiff) package.
 #' Clear all caches in this stageRunner, and recursively.
 #' @name stageRunner_.clear_cache
 stageRunner_.clear_cache <- function() {
   for (i in seq_along(self$stages)) {
+    ## The stagerunner context just prior to stage execution is stored
+    ## in an environment cache. We clear this cache recursively.
     if (is.stagerunner(self$stages[[i]])) self$stages[[i]]$.clear_cache()
     else self$stages[[i]]$.cached_env <- NULL
   }
   TRUE
 }
 
+## The `treeSkeleton` requires a recursive structure to be annotated with
+## "parent metadata" so it can be traversed like a tree structure. This is
+## what allows us to go from stage "2/2" to stage "3", for example: we
+## are finding the successor node in the tree structure and "running" it.
 #' Set all parents for this stageRunner, and recursively
 #' @name stageRunner_.set_parents
 stageRunner_.set_parents <- function() {
   for (i in seq_along(self$stages)) {
     # Set convenience helper attribute "child_index" to ensure that treeSkeleton
     # can find this stage.
+    ## The metadata required by the `treeSkeleton` class.
     attr(self$stages[[i]], 'child_index') <<- i
     attr(self$stages[[i]], 'parent') <<- self
   }
