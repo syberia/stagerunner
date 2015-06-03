@@ -1,4 +1,5 @@
 #' @include treeSkeleton-initialize.R treeSkeleton-predecessor.R
+#'    treeSkeleton-successor.R treeSkeleton-parent_index.R
 NULL
 
 #' Find the root node of the tree (the only one with no parent).
