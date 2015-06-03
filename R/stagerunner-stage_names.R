@@ -14,7 +14,14 @@
 # #   e = stageRunner$new(new.env(), list(f = f, g = f))))
 # # sr$stage_names()
 stageRunner_stage_names <- function() {
-  nested_stages <- function(x) if (is.stagerunner(x)) nested_stages(x$stages) else x
+  nested_stages <- function(x) {
+    if (is.stagerunner(x)) {
+      nested_stages(x$stages)
+    } else {
+      x
+    }
+  }
+
   nested_names(lapply(self$stages, nested_stages))
 }
 
