@@ -33,3 +33,4 @@ treeSkeleton__initialize <- function(object, parent_caller = 'parent',
   self$children_caller <- children_caller
   NULL
 }
+

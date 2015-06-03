@@ -51,5 +51,6 @@ Collate:
     'stagerunner-transform.R'
     'stagerunner_R6.R'
     'treeSkeleton-initialize.R'
+    'treeSkeleton-predecessor.R'
     'tree_skeleton.r'
     'utils.r'
