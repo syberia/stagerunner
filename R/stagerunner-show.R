@@ -39,17 +39,23 @@ stageRunner_show <- function(indent = 0) {
 
   for (index in seq_along(stage_names)) {
     prefix <- paste0(rep('  ', (if (is.numeric(indent)) indent else 0) + 1), collapse = '')
-    marker <-
-      if (self$remember && began_stage(self$stages[[index]])) {
-        next_stage <- treeSkeleton$new(self$stages[[index]])$last_leaf()$successor()$object
-        if (( is.null(next_stage) && !self$.root()$.finished) ||
-            (!is.null(next_stage) && !began_stage(next_stage)))
-          '*' # Use a * if this is the next stage to be executed
-          # TODO: Fix the bug where we are unable to tell if the last stage
-          # finished without a .finished internal field.
-          # We need to look at and set predecessors, not successors.
-        else '+' # Other use a + for completely executed stage
-      } else '-'
+    currently_executing_this_stage <- self$remember && began_stage(self$stages[[index]])
+
+    if (currently_executing_this_stage) {
+      next_stage <- treeSkeleton$new(self$stages[[index]])$last_leaf()$successor()$object
+      if (( is.null(next_stage) && !self$.root()$.finished) ||
+          (!is.null(next_stage) && !began_stage(next_stage)))
+        marker <- '*' # Use a * if this is the next stage to be executed
+        # TODO: Fix the bug where we are unable to tell if the last stage
+        # finished without a .finished internal field.
+        # We need to look at and set predecessors, not successors.
+      else {
+       marker <- '+' # Other use a + for completely executed stage
+      }
+    } else {
+      marker <- '-'
+    }
+
     prefix <- gsub('.$', marker, prefix)
     stage_name <- 
       if (is.na(stage_names[[index]]) || stage_names[[index]] == "")
