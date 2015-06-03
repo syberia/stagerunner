@@ -57,17 +57,24 @@ stageRunner_show <- function(indent = 0) {
     }
 
     prefix <- gsub('.$', marker, prefix)
-    stage_name <- 
-      if (is.na(stage_names[[index]]) || stage_names[[index]] == "")
-        paste0("< Unnamed (stage ", index, ") >")
-      else stage_names[[index]]
+    if (is.na(stage_names[[index]]) || stage_names[[index]] == "") {
+      stage_name <- paste0("< Unnamed (stage ", index, ") >")
+    } else {
+      stage_name <- stage_names[[index]]
+    }
+
     cat(prefix, stage_name, "\n")
+
     if (is.stagerunner(self$stages[[index]])) {
       self$stages[[index]]$show(indent = indent + 1)
     }
   }
 
-  if (missing(indent)) { cat('Context '); print(self$.context) }
+  if (missing(indent)) {
+    cat('Context ')
+    print(self$.context)
+  }
+
   NULL
 }
 
