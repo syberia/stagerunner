@@ -23,10 +23,10 @@ NULL
 ## [tracked_environment](https://github.com/robertzk/objectdiff/blob/master/R/tracked_environment.R))
 ## that holds the current state of the stagerunner.
 ##
-## A stagerunner's stages are a nested list of either functions or
-## more stagerunners, the latter if we wish to group together logically
-## bound collections of functions (like a data preparation procedure or
-## a sequence of modeling steps).
+## A stagerunner's stages are a nested list of either `stageRunnerNode`s
+## (wrappers for functions) or more stagerunners, the latter if we wish to
+## group together logically bound collections of functions (like a data
+## preparation procedure or a sequence of modeling steps).
 stageRunner_ <- R6::R6Class('stageRunner',
   active = list(context = function() self$.context),                            
   public = list(

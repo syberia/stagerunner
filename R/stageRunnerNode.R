@@ -1,13 +1,6 @@
 #' Stagerunner nodes are environment wrappers around individual stages
 #' (i.e. functions) in order to track meta-data (e.g., for caching).
 #' 
-#' @param fn function. This will be wrapped in an environment.
-#' @param parent_obj stageRunner. The enclosing stageRunner object.
-#' @param parent_env environment. The parent environment of the created
-#'   \code{stageRunnerNode} object. The default is the calling
-#'   environment (i.e., \code{parent.frame()}).
-#' @return an environment with some additional attributes for
-#'   navigating in a tree-like structure.
 #' @name stageRunnerNode
 #' @format NULL
 #' @docType class
