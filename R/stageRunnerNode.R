@@ -42,37 +42,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
     },
 
     run = stageRunnerNode_run,
-
-    # This function goes hand in hand with stageRunner$around
-    around = function(other_node) {
-      if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
-      if (is.null(other_node)) return(FALSE)
-      if (!is.function(other_node)) {
-        warning("Cannot apply stageRunner$around in a terminal ",
-                "node except with a function. Instead, I got a ",
-                class(other_node)[1])
-        return(FALSE)
-      }
-
-      new_callable <- other_node
-      # Inject yield() keyword
-      yield_env <- new.env(parent = environment(new_callable))
-      yield_env$.parent_context <- self
-      yield_env$yield <- function() {
-        # ... lives up two frames, but the run function lives up 1,
-        # so we have to do something ugly
-        run <- eval.parent(quote(.parent_context$run))
-        args <- append(eval.parent(quote(list(...)), n = 2),
-          list(.callable = callable))
-        do.call(run, args, envir = parent.frame())
-      }
-      environment(yield_env$yield) <- new.env(parent = baseenv())
-      environment(yield_env$yield)$callable <- self$callable
-
-      environment(new_callable) <- yield_env
-      self$callable <- new_callable
-      TRUE
-    },
+    around = stageRunnerNode_around,
 
     overlay = function(other_node, label = NULL, flat = FALSE) {
       if (is.stageRunnerNode(other_node)) other_node <- other_node$callable

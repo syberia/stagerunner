@@ -19,7 +19,7 @@ so this function is intended to replace this approach with just one function.
 }
 \details{
 Consider the runner
-  \code{sr <- stageRunner$new(some_env, list(a = function(e) print('2'))}
+  \code{sr1 <- stageRunner$new(some_env, list(a = function(e) print('2')))}
 If we run
   \code{sr2 <- stageRunner$new(some_env, list(a = function(e) {
     print('1'); yield(); print('3') }))
