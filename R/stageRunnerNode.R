@@ -43,24 +43,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
 
     run = stageRunnerNode_run,
     around = stageRunnerNode_around,
-
-    overlay = function(other_node, label = NULL, flat = FALSE) {
-      if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
-      if (is.null(other_node)) return(FALSE)
-      if (!is.stagerunner(other_node)) 
-        other_node <- stageRunner$new(self$.context, other_node)
-
-      # Coerce the current callable object to a stageRunner so that
-      # we can append the other_node's stageRunner.
-      if (!is.stagerunner(self$callable)) 
-        self$callable <- stageRunner$new(self$.context, self$callable)
-
-      # TODO: Fancier merging here
-      if (isTRUE(flat)) {
-        if (!is.character(label)) stop("flat coalescing needs a label")
-        self$callable$stages[[label]] <- other_node
-      } else self$callable$append(other_node, label)
-    },
+    overlay = stageRunnerNode_overlay,
     transform = function(transformation) {
       if (is.stagerunner(self$callable)) self$callable$transform(transformation)
       else self$callable <- transformation(self$callable)

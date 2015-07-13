@@ -34,6 +34,7 @@ Collate:
     'special_and_lists.R'
     'special_or_lists.R'
     'stageRunnerNode-around.R'
+    'stageRunnerNode-overlay.R'
     'stageRunnerNode-run.R'
     'stageRunnerNode.R'
     'stagerunner-append.R'
