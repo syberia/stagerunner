@@ -80,6 +80,7 @@ treeSkeleton__children <- function() {
 #' stagerunner:::treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
 #' }
 treeSkeleton__find <- function(key) {
+## Currently out of service! Will be back shortly.
 #  stopifnot(is.character(key))
 #  if (length(key) == 0 || identical(key, '')) return(self$object)
 #  # Extract "foo" from "foo/bar/baz"
@@ -120,6 +121,8 @@ treeSkeleton__find <- function(key) {
 treeSkeleton_ <- R6::R6Class('treeSkeleton',
   public = list(
     object = 'ANY',
+    ## As long as we know how to get an objects parent and children,
+    ## we will be able to determine all the nice derived methods below.
     parent_caller = 'character',
     children_caller = 'character',
     .children = 'ANY',
@@ -140,6 +143,8 @@ treeSkeleton_ <- R6::R6Class('treeSkeleton',
   )
 )
 
+## Some fancy tricks to make `treeSkeleton(...)` and `treeSkeleton(...)`
+## have the same effect, just like in traditional reference classes.
 #' @export
 treeSkeleton <- structure(
   function(...) { treeSkeleton_$new(...) },
