@@ -41,21 +41,7 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
       self$executed <- FALSE
     },
 
-    run = function(..., .cached_env = NULL, .callable = self$callable) {
-      # TODO: Clean this up by using environment injection utility fn
-      correct_cache <- .cached_env %||% self$.cached_env
-      if (is.null(.callable)) FALSE
-      else if (is.stagerunner(.callable)) {
-        .callable$run(..., .cached_env = correct_cache)
-      } else {
-        tmp <- new.env(parent = environment(.callable))
-        environment(.callable) <- tmp
-        environment(.callable)$cached_env <- correct_cache
-        on.exit(environment(.callable) <- parent.env(environment(.callable)))
-        .callable(self$.context, ...)
-      }
-      self$executed <- TRUE
-    }, 
+    run = stageRunnerNode_run,
 
     # This function goes hand in hand with stageRunner$around
     around = function(other_node) {
