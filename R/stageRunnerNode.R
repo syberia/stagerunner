@@ -1,3 +1,26 @@
+## In order to give us more flexibility on the terminal nodes of a
+## stagerunner (the actual functions that will be executed on the
+## stagerunner's `context`), we wrap them in an R6 class called a
+## `[stageRunnerNode]`. This will be extremely useful if we wish to
+## dynamically allow our stagerunners to be extended or wrapped with
+## functionality.
+##
+## For example, if we have a runner such as
+##
+##    1. Import data.
+##    2. Munge data.
+##    3. Create model.
+##    4. Export model.
+##
+## we might want to run tests for each stage. To do so, we can replace
+## each terminal node, a function, with a stagerunner consisting of
+## two functions. We can do this with the `overlay` helper method:
+##
+## `runner$overlay(test_runner)`
+##
+## Here, `test_runner` is another stagerunner with the exact same
+## structure as our main runner, but with testing functions in its
+## terminal nodes.
 #' Stagerunner nodes are environment wrappers around individual stages
 #' (i.e. functions) in order to track meta-data (e.g., for caching).
 #' 
