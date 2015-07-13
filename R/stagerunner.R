@@ -5,6 +5,28 @@
 #'   stageRunnerNode.R
 NULL
 
+## We use [R6](https://github.com/wch/R6) instead of the built-in 
+## [reference classes](https://stat.ethz.ch/R-manual/R-devel/library/methods/html/refClass.html) 
+## for several reasons.
+##
+##    1. Their definition is much more compact.
+##    2. It is possible to extend R6 definitions cross-packages.
+##    3. They suppor the notion of public and private membership.
+##
+## A stagerunner is clearly represented as a reference object, rather than an
+## S3 or S4 class, as it is by nature highly mutable: every stage execution
+## triggers updates of the corresponding stage caches.
+##
+## A stagerunner is primarly defined by its **context** and its **stages**.
+## The former is an environment (or when used in conjunction with
+## [objectdiff](https://github.com/robertzk/objectdiff), a 
+## [tracked_environment](https://github.com/robertzk/objectdiff/blob/master/R/tracked_environment.R))
+## that holds the current state of the stagerunner.
+##
+## A stagerunner's stages are a nested list of either functions or
+## more stagerunners, the latter if we wish to group together logically
+## bound collections of functions (like a data preparation procedure or
+## a sequence of modeling steps).
 stageRunner_ <- R6::R6Class('stageRunner',
   active = list(context = function() self$.context),                            
   public = list(
@@ -45,6 +67,8 @@ stageRunner_ <- R6::R6Class('stageRunner',
   )
 )
 
+## A little trick to ensure that a stagerunner can be constructed both as
+## `stagerunner(...) and stagerunner$new(...)`.
 #' @export
 stageRunner <- structure(
   function(...) { stageRunner_$new(...) },
@@ -54,6 +78,8 @@ stageRunner <- structure(
 #' @export
 stagerunner <- stageRunner
 
+## To make the above trick work, we need to prevent access to everything except
+## `new`.
 #' @export
 `$.stageRunner_` <- function(...) {
   stopifnot(identical(..2, "new"))
