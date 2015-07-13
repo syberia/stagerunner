@@ -1,3 +1,14 @@
+## Stagerunners are [tree structures](https://en.wikipedia.org/wiki/Tree_(data_structure))
+## and come with a natural set of operations, like taking the predecessor,
+## successor, and root of a node. However, these are not entirely simple to
+## implement in a manner that is implementation-independent.
+##
+## Specifically, we recognize that the notion of a node successor and
+## predecessor is implementation agnostic as long as we have access
+## to class methods that provide access to a node's parent and children.
+## In this case, we can write an implementation-agnostic version that
+## works regardless of whether the object is an S3, S4, or R6
+## object.
 #' @include treeSkeleton-initialize.R treeSkeleton-predecessor.R
 #'    treeSkeleton-successor.R treeSkeleton-parent_index.R
 NULL
