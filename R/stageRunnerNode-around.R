@@ -12,8 +12,14 @@
 #' # node that is being wrapped.
 #' }
 stageRunnerNode_around <- function(other_node) {
-  if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
-  if (is.null(other_node)) return(FALSE)
+  if (is.stageRunnerNode(other_node)) {
+    other_node <- other_node$callable
+  }
+
+  if (is.null(other_node)) {
+    return(FALSE)
+  }
+
   if (!is.function(other_node)) {
     warning("Cannot apply stageRunner$around in a terminal ",
             "node except with a function. Instead, I got a ",
