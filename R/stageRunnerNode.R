@@ -41,20 +41,17 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
       self$executed <- FALSE
     },
 
-    run = stageRunnerNode_run,
-    around = stageRunnerNode_around,
-    overlay = stageRunnerNode_overlay,
-    transform = function(transformation) {
-      if (is.stagerunner(self$callable)) self$callable$transform(transformation)
-      else self$callable <- transformation(self$callable)
-    },
+    run          = stageRunnerNode_run,
+    around       = stageRunnerNode_around,
+    overlay      = stageRunnerNode_overlay,
+    transform    = stageRunnerNode_transform,
     was_executed = function() { self$executed },
-    parent   = function() { attr(self, "parent") }, # accessor_method(.parent),
-    children = function() list(),
-    show     = function() { cat("A stageRunner node containing: \n"); print(self$callable) },
+    parent       = function() { attr(self, "parent") },
+    children     = function() list(),
+    show         = function() { cat("A stageRunner node containing: \n"); print(self$callable) },
 
     # Functions which intertwine with the objectdiff package
-    index    = function() {
+    index        = function() {
       ix <- which(vapply(attr(self, "parent")$stages,
         function(x) identical(self, x), logical(1)))
       paste0(attr(self, "parent")$.prefix, ix)

@@ -25,12 +25,10 @@ Append one stageRunnerNode around another.
 }
 \examples{
 \dontrun{
-node1 <- stageRunnerNode(function(e) print(2))
-node2 <- stageRunnerNode(function(e) { print(1); yield(); print(3); })
-node1$around(node2)
-node1$run() # Will print 1 2 3
-# Notice the provided "yield" keyword, which allows calling the
-# node that is being wrapped.
+node1 <- stageRunnerNode(function(e) print(1))
+node2 <- stageRunnerNode(function(e) print(2))
+node1$overlay(node2)
+node1$run() # Will print 1 2
 }
 }
 

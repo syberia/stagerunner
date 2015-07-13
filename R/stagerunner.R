@@ -20,7 +20,7 @@ NULL
 ## A stagerunner is primarly defined by its **context** and its **stages**.
 ## The former is an environment (or when used in conjunction with
 ## [objectdiff](https://github.com/robertzk/objectdiff), a 
-## [tracked_environment](https://github.com/robertzk/objectdiff/blob/master/R/tracked_environment.R))
+## \code{\link[objectdiff]{tracked_environment}}
 ## that holds the current state of the stagerunner.
 ##
 ## A stagerunner's stages are a nested list of either `stageRunnerNode`s

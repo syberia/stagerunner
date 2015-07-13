@@ -36,6 +36,7 @@ Collate:
     'stageRunnerNode-around.R'
     'stageRunnerNode-overlay.R'
     'stageRunnerNode-run.R'
+    'stageRunnerNode-transform.R'
     'stageRunnerNode.R'
     'stagerunner-append.R'
     'stagerunner-around.R'

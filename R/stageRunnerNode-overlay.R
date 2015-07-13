@@ -28,6 +28,7 @@
 #' node2 <- stageRunnerNode(function(e) print(2))
 #' node1$overlay(node2)
 #' node1$run() # Will print 1 2
+#' }
 stageRunnerNode_overlay <- function(other_node, label = NULL, flat = FALSE) {
   if (is.stageRunnerNode(other_node)) {
     other_node <- other_node$callable
@@ -37,7 +38,6 @@ stageRunnerNode_overlay <- function(other_node, label = NULL, flat = FALSE) {
     return(FALSE)
   }
 
-  
   if (!is.stagerunner(other_node)) {
     other_node <- stageRunner$new(self$.context, other_node)
   }
@@ -56,3 +56,4 @@ stageRunnerNode_overlay <- function(other_node, label = NULL, flat = FALSE) {
     self$callable$append(other_node, label)
   }
 }
+
