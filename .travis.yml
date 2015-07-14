@@ -4,10 +4,9 @@ before_install:
 - chmod 755 ./travis-tool.sh
 - "./travis-tool.sh bootstrap"
 install:
-- "./travis-tool.sh install_deps"
 - "./travis-tool.sh github_package hadley/testthat hadley/purrr"
-- "./travis-tool.sh install_r microbenchmark knitr testthatsomemore"
-- "./travis-tool.sh github_package jimhester/covr"
+- "./travis-tool.sh install_r microbenchmark knitr testthatsomemore R6"
+- "./travis-tool.sh github_package jimhester/covr@e3e137fdf27b6e0dfba2f8d8f25b616b1fb81db9"
 - "./travis-tool.sh github_package robertzk/objectdiff"
 script: "./travis-tool.sh run_tests"
 after_failure:
@@ -26,3 +25,7 @@ notifications:
     template:
     - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
       | Details: %{build_url} | Changes: %{compare_url}"
+env:
+- global:
+  - WARNINGS_ARE_ERRORS=1
+  - _R_CHECK_FORCE_SUGGESTS_=0

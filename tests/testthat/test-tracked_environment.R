@@ -72,7 +72,7 @@ describe('tracked_environments', {
 
     test_that('there are no cached environments on non-first stages before anything is run', {
       sr <- stageRunner$new(tracked_environment(), list(force, force, force), remember = TRUE)
-      expect_identical(lapply(sr$stages[-1], `[[`, "cached_env"), list(NULL, NULL))
+      expect_identical(lapply(sr$stages[-1], `[[`, ".cached_env"), list(NULL, NULL))
     })
 
     test_that('running the first two stages updates the cache for the second stage and third stage', {

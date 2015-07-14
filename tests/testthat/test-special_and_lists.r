@@ -72,3 +72,7 @@ test_that("it preserves names according to the first list", {
     info = "special_and_lists must preserve names according to the first list")
 })
 
+test_that("it errors on invalid list or atomic logical formats", {
+  expect_error(special_and_lists(force, force), "only accepts")
+})
+

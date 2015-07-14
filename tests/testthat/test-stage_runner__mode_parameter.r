@@ -2,9 +2,9 @@ context('stageRunner mode parameter')
 
 test_that('it does not allow invalid values for the mode parameter', {
   expect_error(stageRunner(new.env(), list(), remember = TRUE, mode = 'bad'),
-               'The mode parameter')
+               "should be")
   expect_error(stageRunner(new.env(), list(), remember = TRUE, mode = NULL),
-               'The mode parameter')
+               "Please pass")
 })
 
 test_that('it allows "head" and "next" as values for the mode parameter', {

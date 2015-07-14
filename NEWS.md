@@ -1,3 +1,9 @@
+# Version 0.5.0
+
+* Refactored the `stageRunner`, `stageRunnerNode`, and `treeSkeleton`
+  reference classes to use [R6 classes](http://github.com/wch/R6), in
+  preparation for public release of the package.
+
 # Version 0.4.1
 
 * Added an `is_pre_stagerunner` helper function that returns TRUE or FALSE

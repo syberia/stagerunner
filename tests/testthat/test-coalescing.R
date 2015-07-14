@@ -1,6 +1,15 @@
 library(testthatsomemore)
 context('stageRunner coalescing')
 
+describe("invalid inputs", {
+  test_that("it fails to coalesce a vanilla runner with a tracked runner", {
+    sr1 <- stageRunner$new(new.env(), force, remember = TRUE)
+    sr2 <- stageRunner$new(objectdiff::tracked_environment(new.env()), force, remember = TRUE)
+    expect_error(sr1$coalesce(sr2), "Cannot coalesce")
+    expect_error(sr2$coalesce(sr1), "Cannot coalesce")
+  })
+})
+
 describe('with regular environments', {
 
   test_that("it can coalesce a trivial example", {
@@ -135,6 +144,27 @@ describe('with tracked_environments', {
     expect_identical(sr2$context$w, 6)
   })
 
+  test_that("coalescing works in conjunction with nested terminal nodes", {
+    sr <- stageRunner$new(new.env(), list(function(e) e$x <- 1, function(e) e$x <- 2), remember = TRUE)
+    sr$around(stageRunner$new(new.env(), list(function(e) { e$x <- 0; yield(); e$x <- 3 })))
+    sr2 <- stageRunner$new(new.env(), list(function(e) e$x <- 4, function(e) e$x <- 5))
+    sr$run(1)
+    sr2$coalesce(sr)
+    sr2$run(2)
+    expect_identical(sr2$context$x, 5)
+  })
+
+  test_that("coalescing works in conjunction with nested terminal nodes on the coalescee", {
+    sr <- stageRunner$new(new.env(), list(function(e) e$x <- 1, function(e) e$x <- 2), remember = TRUE)
+    sr$around(stageRunner$new(new.env(), list(function(e) { e$x <- 0; yield(); e$x <- 3 })))
+    sr2 <- stageRunner$new(new.env(), list(function(e) e$x <- 4, function(e) e$x <- 5), remember = TRUE)
+    sr2$run(1)
+    sr$coalesce(sr2)
+    # TODO: (RK) Fix this test.
+    # sr$run(2)
+    # expect_identical(sr$context$x, 5)
+  })
+
   test_that("it coalesces during name changes", {
     stages1 <- setNames(replicate(15, list(a = function(e) e$x <- 1)), letters[1:15])
     stages1$p <- function(e) e$y <- 2
@@ -144,8 +174,8 @@ describe('with tracked_environments', {
     sr2 <- stageRunner$new(tracked_environment(), remember = TRUE, list(foo = stages2))
     sr1$run(to = "1/15")
     sr2$coalesce(sr1)
-    browser()
     sr2$run("1/16")
     expect_identical(sr2$context$y, 2)
   })
 })
+

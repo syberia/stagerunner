@@ -1,4 +1,5 @@
 context("stageRunner")
+library(testthatsomemore)
 
 example1 <- function() {
   eval.parent(substitute({
@@ -11,6 +12,33 @@ example1 <- function() {
       list(sr2, sr3, stage_three = function(cx) cx$x <- 4))
   }))
 }
+
+describe("Invalid inputs", {
+  test_that("it cannot accept anything except an environment as the first argument", {
+    expect_error(stageRunner$new(1, force), "Please pass")
+    expect_error(stageRunner$new(force, force), "Please pass")
+    expect_error(stageRunner$new(NULL, force), "Please pass")
+  })
+
+  test_that("it cannot run a nested stage that does not exist", {
+    sr <- stageRunner$new(new.env(), force)
+    expect_error(sr$run("1/1"), "No stage with key")
+  })
+
+  test_that("it errors if you try to pass too many elements", {
+    sr <- stageRunner$new(new.env(), list(force, force))
+    expect_error(sr$run(list(1,2,3)), "Cannot reference sub-stage")
+  })
+
+  test_that("it errors if you try to pass an invalid run type", {
+    sr <- stageRunner$new(new.env(), list(force, force))
+    expect_error(sr$run(as.raw(5)), "Invalid stage")
+  })
+})
+
+test_that("it can drop the environment if it can detect a stagerunner format", {
+  testthatsomemore::assert(stageRunner$new(list(force)))
+})
 
 test_that("it runs a simple single stage correctly", {
   context <- new.env()
@@ -52,6 +80,14 @@ test_that("it runs a simple multi-step stages correctly", {
   expect_equal(scale = 1, tolerance = 0.001, 5, context$w)
 })
 
+test_that("it can use logicals to run stages", {
+  context <- new.env()
+  context$x <- 1
+  sr <- stageRunner$new(context, list(function(cx) cx$x <- 2, function(cx) cx$x <- 3))
+  sr$run(c(FALSE, TRUE))
+  expect_equal(scale = 1, tolerance = 0.001, 3, context$x) 
+})
+
 test_that("it finds a stage by full key name", {
   context <- new.env()
   context$x <- 1; context$y <- 1
@@ -88,6 +124,17 @@ test_that("it finds a stage by logical indexing", {
                                       stage_two = function(cx) cx$y <- 3))
   sr$run(c(TRUE, FALSE))
   expect_equal(scale = 1, tolerance = 0.001, 2, context$x); expect_equal(scale = 1, tolerance = 0.001, 1, context$y)
+})
+
+test_that("it finds a nested stage by partial logical indexing", {
+  context <- new.env()
+  context$x <- 1; context$y <- 1
+  sr <- stageRunner$new(context, list(stage_one = list(function(cx) cx$x <- 1, function(cx) cx$x <- 2),
+                                      stage_two = function(cx) cx$y <- 3, stage_three = function(cx) cx$z <- 4))
+  sr$run(list(1, list(FALSE, TRUE)))
+  expect_equal(scale = 1, tolerance = 0.001, 2, context$x)
+  expect_equal(scale = 1, tolerance = 0.001, 1, context$y)
+  expect_null(context$z)
 })
 
 test_that("it finds a stage by logical indexing", {
