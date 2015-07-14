@@ -1,6 +1,11 @@
 context("printing stageRunner")
 
 local({
+
+  test_that("prints stageRunnerNode (for full test coverage)", {
+    expect_output(print(stageRunnerNode$new(force)), "A stageRunner node")
+  })
+
   unnamed <- function(n) paste0(" < Unnamed \\(stage ", n, ") > ")
   wrap <- function(..., prefix = "") {
     args <- list(...)
