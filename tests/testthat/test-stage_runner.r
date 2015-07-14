@@ -70,6 +70,14 @@ test_that("it runs a simple multi-step stages correctly", {
   expect_equal(scale = 1, tolerance = 0.001, 5, context$w)
 })
 
+test_that("it can use logicals to run stages", {
+  context <- new.env()
+  context$x <- 1
+  sr <- stageRunner$new(context, list(function(cx) cx$x <- 2, function(cx) cx$x <- 3))
+  sr$run(c(FALSE, TRUE))
+  expect_equal(scale = 1, tolerance = 0.001, 3, context$x) 
+})
+
 test_that("it finds a stage by full key name", {
   context <- new.env()
   context$x <- 1; context$y <- 1
