@@ -142,4 +142,14 @@ describe('with tracked_environments', {
     expect_identical(sr2$context$z, 5)
     expect_identical(sr2$context$w, 6)
   })
+
+  test_that("coalescing works in conjunction with nested terminal nodes", {
+    sr <- stageRunner$new(new.env(), list(function(e) e$x <- 1, function(e) e$x <- 2), remember = TRUE)
+    sr$around(stageRunner$new(new.env(), list(function(e) { e$x <- 0; yield(); e$x <- 3 })))
+    sr2 <- stageRunner$new(new.env(), list(function(e) e$x <- 4, function(e) e$x <- 5))
+    sr$run(1)
+    sr2$coalesce(sr)
+    sr2$run(2)
+    expect_identical(sr2$context$x, 5)    
+  })
 })
