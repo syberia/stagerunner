@@ -6,6 +6,7 @@ describe("invalid inputs", {
     sr1 <- stageRunner$new(new.env(), force, remember = TRUE)
     sr2 <- stageRunner$new(objectdiff::tracked_environment(new.env()), force, remember = TRUE)
     expect_error(sr1$coalesce(sr2), "Cannot coalesce")
+    expect_error(sr2$coalesce(sr1), "Cannot coalesce")
   })
 })
 
@@ -162,8 +163,8 @@ describe('with tracked_environments', {
     sr2 <- stageRunner$new(tracked_environment(), remember = TRUE, list(foo = stages2))
     sr1$run(to = "1/15")
     sr2$coalesce(sr1)
-    browser()
     sr2$run("1/16")
     expect_identical(sr2$context$y, 2)
   })
 })
+
