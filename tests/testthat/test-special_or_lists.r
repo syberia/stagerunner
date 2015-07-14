@@ -72,3 +72,11 @@ test_that("it preserves names according to the first list", {
     info = "special_or_lists must preserve names according to the first list")
 })
 
+test_that("it errors on invalid list or atomic logical formats", {
+  expect_error(special_or_lists(force, force), "only accepts")
+})
+
+test_that("it gives the correct result when the latter is FALSE", {
+  expect_identical(special_or_lists(el1 <- list(list(FALSE, TRUE)), FALSE), el1)
+})
+
