@@ -9,6 +9,10 @@ test_that("it gives TRUE when keys are identical", {
   expect_true(compare_stage_keys(c(FALSE, TRUE), c(FALSE, TRUE)))
 })
 
+test_that("it gives TRUE when latter is FALSE", {
+  expect_true(compare_stage_keys(TRUE, FALSE))
+})
+
 test_that('it correctly compares two empty lists', {
   expect_true(compare_stage_keys(list(), list()))
 })
