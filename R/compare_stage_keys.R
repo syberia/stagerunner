@@ -18,7 +18,7 @@
 #' This is a helper function to implement the \code{to} parameter
 #' in the \code{run} method on a stageRunner object.
 #'
-#' @seealso \code{\link{stageRunner__run}}
+#' @seealso \code{\link{run}}
 #' @name compare_stage_keys
 #' @param key1 list
 #' @param key2 list

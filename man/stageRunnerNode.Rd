@@ -12,6 +12,9 @@ stageRunnerNode_
 
 is.stageRunnerNode(obj)
 }
+\arguments{
+\item{obj}{ANY. An object to test for class \code{stageRunnerNode}.}
+}
 \description{
 Stagerunner nodes are environment wrappers around individual stages
 (i.e. functions) in order to track meta-data (e.g., for caching).

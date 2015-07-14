@@ -27,6 +27,11 @@ NULL
 ## (wrappers for functions) or more stagerunners, the latter if we wish to
 ## group together logically bound collections of functions (like a data
 ## preparation procedure or a sequence of modeling steps).
+#' Stagerunners are parametrized sequences of linear execution.
+#' 
+#' @name stageRunner
+#' @format NULL
+#' @docType class
 stageRunner_ <- R6::R6Class('stageRunner',
   active = list(context = function() self$.context),                            
   public = list(
@@ -69,6 +74,7 @@ stageRunner_ <- R6::R6Class('stageRunner',
 
 ## A little trick to ensure that a stagerunner can be constructed both as
 ## `stagerunner(...) and stagerunner$new(...)`.
+#' @rdname stageRunner
 #' @export
 stageRunner <- structure(
   function(...) { stageRunner_$new(...) },
@@ -76,6 +82,7 @@ stageRunner <- structure(
 )
 
 #' @export
+#' @rdname stageRunner
 stagerunner <- stageRunner
 
 ## To make the above trick work, we need to prevent access to everything except

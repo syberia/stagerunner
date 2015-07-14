@@ -11,17 +11,17 @@ Authors@R: c(person("Robert", "Krzyzanowski",
     email = "technoguyrob@gmail.com", role = c("aut", "cre")))
 Depends:
     R (>= 3.0.1)
-License: MIT
+License: MIT + file LICENSE
 LazyData: true
 Imports:
-    testthat,
-    testthatsomemore,
     crayon,
     R6
 Suggests:
     knitr,
     microbenchmark,
-    objectdiff
+    objectdiff,
+    testthat,
+    testthatsomemore
 Roxygen: list(wrap = FALSE)
 Collate:
     'boolean_fill.R'

@@ -71,6 +71,7 @@ stageRunnerNode <- structure(
   ..1
 }
 
+#' @param obj ANY. An object to test for class \code{stageRunnerNode}.
 #' @export
 #' @rdname stageRunnerNode
 is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')

@@ -30,3 +30,6 @@
 #'   FAQ's: \url{http://robertzk.github.io/stagerunner/faq/}
 NULL
 
+## Since `self` is used all over the place in R6 method definitions, 
+## `R CMD CHECK` will yell at us if we do not include the line below.
+globalVariables('self')
