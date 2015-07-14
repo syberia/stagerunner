@@ -299,11 +299,6 @@ determine_run_stage <- function(stage_key, stage_index, stages, verbose, .depth)
      function(..., remember_flag = TRUE) { stage$run(...) }
     }
   } else if (is.list(stage_key[[stage_index]])) {
-    if (!is.stagerunner(stages[[stage_index]])) {
-      stop("Invalid stage key: attempted to make a nested stage reference ",
-           "to a non-existent stage")
-    }
-
     function(...) {
       stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE,
                                 verbose = verbose, .depth = .depth + 1, ...)
