@@ -19,3 +19,4 @@ describe("OOP_type_independent_method", {
   })
 })
 
+
