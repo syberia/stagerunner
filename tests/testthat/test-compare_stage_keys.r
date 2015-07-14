@@ -1,5 +1,10 @@
 context('compare_stage_keys')
 
+test_that("it gives FALSE when keys are incomparable", {
+  expect_false(compare_stage_keys("1/1", FALSE))
+  expect_false(compare_stage_keys(FALSE, "1/1"))
+})
+
 test_that('it correctly compares two empty lists', {
   expect_true(compare_stage_keys(list(), list()))
 })
