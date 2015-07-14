@@ -128,17 +128,16 @@ treeSkeleton_ <- R6::R6Class('treeSkeleton',
     .children = 'ANY',
     .parent = 'ANY',
 
-    initialize    = stagerunner:::treeSkeleton__initialize,
-    successor     = stagerunner:::treeSkeleton__successor,
-    # TODO: I don't need any more iterators, but maybe implement them later
-    predecessor  = stagerunner:::treeSkeleton__predecessor,
-    parent        = stagerunner:::treeSkeleton__parent,
-    children      = stagerunner:::treeSkeleton__children,
-    root          = stagerunner:::treeSkeleton__root,
-    first_leaf    = stagerunner:::treeSkeleton__first_leaf,
-    last_leaf     = stagerunner:::treeSkeleton__last_leaf,
-    find          = stagerunner:::treeSkeleton__find,
-    .parent_index = stagerunner:::treeSkeleton__.parent_index,
+    initialize    = treeSkeleton__initialize,
+    successor     = treeSkeleton__successor,
+    predecessor   = treeSkeleton__predecessor,
+    parent        = treeSkeleton__parent,
+    children      = treeSkeleton__children,
+    root          = treeSkeleton__root,
+    first_leaf    = treeSkeleton__first_leaf,
+    last_leaf     = treeSkeleton__last_leaf,
+    find          = treeSkeleton__find,
+    .parent_index = treeSkeleton__.parent_index,
     show          = function() { cat("treeSkeleton wrapping:\n"); print(self$object) }
   )
 )
