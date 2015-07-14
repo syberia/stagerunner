@@ -1,4 +1,5 @@
 context("stageRunner")
+library(testthatsomemore)
 
 example1 <- function() {
   eval.parent(substitute({
@@ -23,6 +24,10 @@ describe("Invalid inputs", {
     sr <- stageRunner$new(new.env(), force)
     expect_error(sr$run("1/1"), "No stage with key")
   })
+})
+
+test_that("it can drop the environment if it can detect a stagerunner format", {
+  testthatsomemore::assert(stageRunner$new(list(force)))
 })
 
 test_that("it runs a simple single stage correctly", {
