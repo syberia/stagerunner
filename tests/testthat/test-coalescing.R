@@ -1,6 +1,14 @@
 library(testthatsomemore)
 context('stageRunner coalescing')
 
+describe("invalid inputs", {
+  test_that("it fails to coalesce a vanilla runner with a tracked runner", {
+    sr1 <- stageRunner$new(new.env(), force, remember = TRUE)
+    sr2 <- stageRunner$new(tracked_environment(new.env()), force, remember = TRUE)
+    expect_error(sr1$coalesce(sr2), "Cannot coalesce")
+  })
+})
+
 describe('with regular environments', {
 
   test_that("it can coalesce a trivial example", {
