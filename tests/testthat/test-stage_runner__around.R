@@ -74,7 +74,8 @@ test_that("using around on a NULL node yields false", {
 })
 
 test_that("it can use around when both nodes are runners", {
-  sr <- stageRunner$new(new.env(), list(a = function(e) cat('2')))
-  sr$around(stageRunner$new(new.env(), list(a = function(e) { cat('1'); yield(); cat('3') })))
+  sr <- stageRunner$new(new.env(), list(list(function(e) cat('2'))))
+  sr$around(stageRunner$new(new.env(), list(list(function(e) { cat('1'); yield(); cat('3') }))))
+  expect_output(sr$run(), "^123$")
 })
 
