@@ -5,6 +5,10 @@ test_that("it gives FALSE when keys are incomparable", {
   expect_false(compare_stage_keys(FALSE, "1/1"))
 })
 
+test_that("it gives TRUE when keys are identical", {
+  expect_true(compare_stage_keys(c(FALSE, TRUE), c(FALSE, TRUE)))
+})
+
 test_that('it correctly compares two empty lists', {
   expect_true(compare_stage_keys(list(), list()))
 })

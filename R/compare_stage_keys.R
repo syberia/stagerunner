@@ -42,7 +42,6 @@ compare_stage_keys <- function(key1, key2) {
     ## If the keys specify the exact same stage in the stagerunner, there is
     ## a tie and we may as well return TRUE.
     if (is.atomic(key1) && is.atomic(key2)) {
-      stop("WTF")
       TRUE
     } else {
     ## Otherwise, one of the two keys must be another list, so we can 
