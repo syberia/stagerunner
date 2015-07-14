@@ -69,3 +69,7 @@ test_that('it throws a warning when an invalid $around operation is performed', 
                            'Cannot apply stageRunner\\$around')
 })
 
+test_that("using around on a NULL node yields false", {
+  expect_false(stageRunnerNode$new(force)$around(NULL))
+})
+
