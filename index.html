@@ -198,7 +198,7 @@ will be <code>list(T, list(T, F), F)</code>.</p>
 #' This is a helper function to implement the \code{to} parameter
 #' in the \code{run} method on a stageRunner object.
 #'
-#' @seealso \code{\link{stageRunner__run}}
+#' @seealso \code{\link{run}}
 #' @name boolean_fill
 #' @param el list. A nested list of logicals with exactly one entry \code{TRUE}.
 #' @param forward logical. \code{FALSE} for backwards, and \code{TRUE} for forwards.
@@ -303,7 +303,7 @@ of the stagerunner object we will be able to flip the keys.</p>
 #' This is a helper function to implement the \code{to} parameter
 #' in the \code{run} method on a stageRunner object.
 #'
-#' @seealso \code{\link{stageRunner__run}}
+#' @seealso \code{\link{run}}
 #' @name compare_stage_keys
 #' @param key1 list
 #' @param key2 list
@@ -864,10 +864,6 @@ normalize_stage_keys_by_index <- function(keys, stages, parent_key,
                                           key_index, normalized_keys) {
   key <- keys[[key_index]]
 
-  if (length(key) == 0) {
-    stop("Invalid stage key (cannot be of length 0)")
-  }
-
   rest_keys <- key[-1]
   key       <- key[[1]]
   
@@ -881,6 +877,7 @@ normalize_stage_key <- function(...) {
 }
 
 normalize_stage_key.logical <- function(key, key_index, normalized_keys, ...) {
+  #stop("!")
   normalized_keys[[key_index]] <- key
   normalized_keys
 }
@@ -891,7 +888,7 @@ normalize_stage_key.numeric <- function(key, keys, stages, parent_key,
   if (key > stage_length(stages)) {
     stop(sprintf(
       "Cannot reference sub-stage %s of stage %s because it only has %d stages",
-      sQuote(key), dQuote(parent_key), sQuote(stage_length(stages))
+      sQuote(key), dQuote(parent_key), stage_length(stages)
     ))
   }
 
@@ -1592,7 +1589,7 @@ runner$run()
 #' so this function is intended to replace this approach with just one function.
 #'
 #' Consider the runner
-#'   \code{sr <- stageRunner$new(some_env, list(a = function(e) print('2'))}
+#'   \code{sr1 <- stageRunner$new(some_env, list(a = function(e) print('2')))}
 #' If we run 
 #'   \code{sr2 <- stageRunner$new(some_env, list(a = function(e) {
 #'     print('1'); yield(); print('3') }))
@@ -2647,6 +2644,19 @@ NULL
         </div>
         <div class="section">
           <div class="markdown markdown-body">
+            <p>Since <code>self</code> is used all over the place in R6 method definitions, 
+<code>R CMD CHECK</code> will yell at us if we do not include the line below.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">globalVariables('self')</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
             <h1>stagerunner-run.R</h1>
 
           </div>
@@ -3142,11 +3152,6 @@ deep we currently are in the stagerunner for verbose printing.</li>
               <code class="R"><span class="spacer">     function(..., remember_flag = TRUE) { stage$run(...) }
     }
   } else if (is.list(stage_key[[stage_index]])) {
-    if (!is.stagerunner(stages[[stage_index]])) {
-      stop("Invalid stage key: attempted to make a nested stage reference ",
-           "to a non-existent stage")
-    }
-
     function(...) {
       stages[[stage_index]]$run(stage_key[[stage_index]], normalized = TRUE,
                                 verbose = verbose, .depth = .depth + 1, ...)
@@ -3265,8 +3270,6 @@ began_stage <- function(stage) {
   } else if (is.stageRunnerNode(stage)) {
     node <- treeSkeleton(stage)$predecessor()$object
     is.null(node) || node$executed
-  } else {
-    FALSE
   }
 }
 
@@ -3410,7 +3413,46 @@ stageRunner_transform <- function(transformation) {
 #'   stagerunner-show.R stagerunner-has_key.R stagerunner-internal.R
 #'   stageRunnerNode.R
 NULL
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We use <a href="https://github.com/wch/R6">R6</a> instead of the built-in 
+<a href="https://stat.ethz.ch/R-manual/R-devel/library/methods/html/refClass.html">reference classes</a> 
+for several reasons.</p>
 
+<ol>
+<li>Their definition is much more compact.</li>
+<li>It is possible to extend R6 definitions cross-packages.</li>
+<li>They suppor the notion of public and private membership.</li>
+</ol>
+
+<p>A stagerunner is clearly represented as a reference object, rather than an
+S3 or S4 class, as it is by nature highly mutable: every stage execution
+triggers updates of the corresponding stage caches.</p>
+
+<p>A stagerunner is primarly defined by its <strong>context</strong> and its <strong>stages</strong>.
+The former is an environment (or when used in conjunction with
+<a href="https://github.com/robertzk/objectdiff">objectdiff</a>, a 
+\code{\link[objectdiff]{tracked_environment}}
+that holds the current state of the stagerunner.</p>
+
+<p>A stagerunner&#39;s stages are a nested list of either <code>stageRunnerNode</code>s
+(wrappers for functions) or more stagerunners, the latter if we wish to
+group together logically bound collections of functions (like a data
+preparation procedure or a sequence of modeling steps).</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' Stagerunners are parametrized sequences of linear execution.
+#' 
+#' @name stageRunner
+#' @format NULL
+#' @docType class
 stageRunner_ <- R6::R6Class('stageRunner',
   active = list(context = function() self$.context),                            
   public = list(
@@ -3450,7 +3492,20 @@ stageRunner_ <- R6::R6Class('stageRunner',
     }
   )
 )
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>A little trick to ensure that a stagerunner can be constructed both as
+<code>stagerunner(...) and stagerunner$new(...)</code>.</p>
 
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' @rdname stageRunner
 #' @export
 stageRunner <- structure(
   function(...) { stageRunner_$new(...) },
@@ -3458,9 +3513,22 @@ stageRunner <- structure(
 )
 
 #' @export
+#' @rdname stageRunner
 stagerunner <- stageRunner
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>To make the above trick work, we need to prevent access to everything except
+<code>new</code>.</p>
 
-#' @export
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' @export
 `$.stageRunner_` <- function(...) {
   stopifnot(identical(..2, "new"))
   ..1
@@ -3482,7 +3550,7 @@ is.stageRunner <- is.stagerunner
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            <h1>stageRunnerNode.R</h1>
+            <h1>stageRunnerNode-around.R</h1>
 
           </div>
 
@@ -3499,16 +3567,355 @@ is.stageRunner <- is.stagerunner
 
           <div class="code">
             <pre>
+              <code class="R"><span class="spacer">#' Wrap a stageRunnerNode callable with another callable.
+#'
+#' @param other_node stagerunner or stageRunnerNode.
+#' @return \code{TRUE} or \code{FALSE} according as the wrapping was
+#'    successful.
+#' @examples \dontrun{
+#' node1 <- stageRunnerNode(function(e) print(2))
+#' node2 <- stageRunnerNode(function(e) { print(1); yield(); print(3); })
+#' node1$around(node2)
+#' node1$run() # Will print 1 2 3
+#' # Notice the provided "yield" keyword, which allows calling the
+#' # node that is being wrapped.
+#' }
+stageRunnerNode_around <- function(other_node) {
+  if (is.stageRunnerNode(other_node)) {
+    other_node <- other_node$callable
+  }
+
+  if (is.null(other_node)) {
+    return(FALSE)
+  }
+
+  if (!is.function(other_node)) {
+    warning("Cannot apply stageRunner$around in a terminal ",
+            "node except with a function. Instead, I got a ",
+            class(other_node)[1])
+    return(FALSE)
+  }
+
+  new_callable <- other_node
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We inject the <code>yield</code> keyword.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  environment(new_callable) <- list2env(parent = environment(new_callable), list(
+    .parent_context = self,
+    yield           = around_yield(self$callable)
+  ))
+  self$callable <- new_callable
+  TRUE
+}
+
+around_yield <- function(callable) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Constructing the yield keyword is a little bit messy. We want to pass
+the exact same parameters as the call to the original callable, so
+can grab <code>...</code> from two frames up. However, since we must also
+provide the function we are invoking with <code>yield</code> (i.e., the <code>callable)</code>,
+we have in effect two different kinds of injections.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  yield <- function() {
+    # ... lives up two frames, but the run function lives up 1,
+    # so we have to do something ugly
+    run <- eval.parent(quote(.parent_context$run))
+    args <- append(eval.parent(quote(list(...)), n = 2),
+      list(.callable = callable))
+    do.call(run, args, envir = parent.frame())
+  }</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We don&#39;t need anything except the base environment for the body of
+the <code>yield</code> keyword itself.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  environment(yield) <- list2env(list(callable = callable), parent = baseenv())
+  yield
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <h1>stageRunnerNode-overlay.R</h1>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer"></span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Consider the following runner.</p>
+
+<ol>
+<li>Import data.</li>
+<li>Munge data.</li>
+<li>Create model.</li>
+<li>Export model.</li>
+</ol>
+
+<p>Imagine we wish to add some assertions at the end of each stage,
+like ensuring that data was in fact imported and that munging performed
+some necessary operations.</p>
+
+<p>We can replace each function in the above four stages with a 
+stageRunner consisting of the original function and a new &ldquo;assertion&rdquo;
+function. This is precisely the job of the <code>around</code> method on
+<code>stageRunnerNode</code>s.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' Append one stageRunnerNode around another.
+#'
+#' @param other_node stagerunner or stageRunnerNode.
+#' @param label character. Under the hood, this will be the "stage name"
+#'    for the stage represented by the \code{other_node} in the
+#'    automatically generated new stageRunner used as this node's
+#'    callable (assuming \code{flat} is \code{FALSE}).
+#' @param flat logical. If \code{TRUE}.
+#' @return \code{TRUE} or \code{FALSE} according as the wrapping was
+#'    successful.
+#' @examples \dontrun{
+#' node1 <- stageRunnerNode(function(e) print(1))
+#' node2 <- stageRunnerNode(function(e) print(2))
+#' node1$overlay(node2)
+#' node1$run() # Will print 1 2
+#' }
+stageRunnerNode_overlay <- function(other_node, label = NULL, flat = FALSE) {
+  if (is.stageRunnerNode(other_node)) {
+    other_node <- other_node$callable
+  }
+
+  if (is.null(other_node)) { 
+    return(FALSE)
+  }
+
+  if (!is.stagerunner(other_node)) {
+    other_node <- stageRunner$new(self$.context, other_node)
+  }
+
+  # Coerce the current callable object to a stageRunner so that
+  # we can append the other_node's stageRunner.
+  if (!is.stagerunner(self$callable)) {
+    self$callable <- stageRunner$new(self$.context, self$callable)
+  }
+
+  # TODO: Fancier merging here
+  if (isTRUE(flat)) {
+    if (!is.character(label)) stop("flat coalescing needs a label")
+    self$callable$stages[[label]] <- other_node
+  } else {
+    self$callable$append(other_node, label)
+  }
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <h1>stageRunnerNode-run.R</h1>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer"></span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' Execute the callable of a stageRunnerNode.
+#'
+#' @param ... additional arguments to the \code{callable}. This allows,
+#'    stagerunner stages to be uniformly parametrized (for example,
+#'    if all stages should have a \code{verbose} parameter.
+#' @param .cached_env An internal helper that passes the cached environment
+#'    to be used for storing the results of this execution.
+#' @param .callable Another internal helper used for some recursive
+#'    metaprogramming.
+#' @return \code{TRUE} if the execution was successful, or an error otherwise.
+stageRunnerNode_run <- function(..., .cached_env = NULL, .callable = self$callable) {
+  # TODO: Clean this up by using environment injection utility fn
+  correct_cache <- .cached_env %||% self$.cached_env
+  if (is.null(.callable)) {
+    FALSE
+  } else if (is.stagerunner(.callable)) {
+    .callable$run(..., .cached_env = correct_cache)
+  } else {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If we are executing a function, we inject the \code{cached_env}
+into the environment for use by, e.g., testing functions. Ideally,
+the callable should be able to determine what the state of the runner
+looked like before execution.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    environment(.callable) <- list2env(
+      list(cached_env = correct_cache), parent = environment(.callable)
+    )</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>But once this function finishes executing, restore the environment of
+the callable to its former glory (i.e., remove the <code>cached_env</code>).</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    on.exit(environment(.callable) <- parent.env(environment(.callable)))
+    .callable(self$.context, ...)
+  }
+  self$executed <- TRUE
+}
+
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <h1>stageRunnerNode-transform.R</h1>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer"></span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>This helper method is useful when we want to apply some transformation
+to <em>all</em> terminal nodes of a stageRunner. You can think of it as 
+\code{\link{rapply}} for stageRunners.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' Transform a stageRunnerNode according to a functional.
+#'
+#' @param transformation function. An arity-1 function which takes the
+#'    \code{callable} of a \code{stageRunnerNode} and transforms it
+#'    into another callable (i.e. a function or a stagerunner). If the
+#'    original \code{callable} is a stagerunner, its terminal nodes in
+#'    turn will be transformed recursively.
+#' @return The transformed callable.
+#' @examples \dontrun{
+#' increment <- 1
+#' adder     <- function(x) x + increment
+#' node      <- stageRunnerNode$new(function(e) print(adder(1)))
+#' node$transform(function(fn) {
+#'   environment(fn)$increment <- environment(fn)$increment + 1; fn
+#' })
+#' node$run() # Prints 3, rather than 2
+#' }
+stageRunnerNode_transform <- function(transformation) {
+  if (is.stagerunner(self$callable)) {
+    self$callable$transform(transformation)
+  } else {
+    self$callable <- transformation(self$callable)
+  }
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <h1>stageRunnerNode.R</h1>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer"></span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>In order to give us more flexibility on the terminal nodes of a
+stagerunner (the actual functions that will be executed on the
+stagerunner&#39;s <code>context</code>), we wrap them in an R6 class called a
+<code>[stageRunnerNode]</code>. This will be extremely useful if we wish to
+dynamically allow our stagerunners to be extended or wrapped with
+functionality.</p>
+
+<p>For example, if we have a runner such as</p>
+
+<ol>
+<li>Import data.</li>
+<li>Munge data.</li>
+<li>Create model.</li>
+<li>Export model.</li>
+</ol>
+
+<p>we might want to run tests for each stage. To do so, we can replace
+each terminal node, a function, with a stagerunner consisting of
+two functions. We can do this with the <code>overlay</code> helper method:</p>
+
+<p><code>runner$overlay(test_runner)</code></p>
+
+<p>Here, <code>test_runner</code> is another stagerunner with the exact same
+structure as our main runner, but with testing functions in its
+terminal nodes.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
               <code class="R"><span class="spacer">#' Stagerunner nodes are environment wrappers around individual stages
 #' (i.e. functions) in order to track meta-data (e.g., for caching).
 #' 
-#' @param fn function. This will be wrapped in an environment.
-#' @param parent_obj stageRunner. The enclosing stageRunner object.
-#' @param parent_env environment. The parent environment of the created
-#'   \code{stageRunnerNode} object. The default is the calling
-#'   environment (i.e., \code{parent.frame()}).
-#' @return an environment with some additional attributes for
-#'   navigating in a tree-like structure.
 #' @name stageRunnerNode
 #' @format NULL
 #' @docType class
@@ -3526,81 +3933,17 @@ stageRunnerNode_ <- R6::R6Class('stageRunnerNode',
       self$executed <- FALSE
     },
 
-    run = function(..., .cached_env = NULL, .callable = self$callable) {
-      # TODO: Clean this up by using environment injection utility fn
-      correct_cache <- .cached_env %||% self$.cached_env
-      if (is.null(.callable)) FALSE
-      else if (is.stagerunner(.callable)) {
-        .callable$run(..., .cached_env = correct_cache)
-      } else {
-        tmp <- new.env(parent = environment(.callable))
-        environment(.callable) <- tmp
-        environment(.callable)$cached_env <- correct_cache
-        on.exit(environment(.callable) <- parent.env(environment(.callable)))
-        .callable(self$.context, ...)
-      }
-      self$executed <- TRUE
-    }, 
-
-    # This function goes hand in hand with stageRunner$around
-    around = function(other_node) {
-      if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
-      if (is.null(other_node)) return(FALSE)
-      if (!is.function(other_node)) {
-        warning("Cannot apply stageRunner$around in a terminal ",
-                "node except with a function. Instead, I got a ",
-                class(other_node)[1])
-        return(FALSE)
-      }
-
-      new_callable <- other_node
-      # Inject yield() keyword
-      yield_env <- new.env(parent = environment(new_callable))
-      yield_env$.parent_context <- self
-      yield_env$yield <- function() {
-        # ... lives up two frames, but the run function lives up 1,
-        # so we have to do something ugly
-        run <- eval.parent(quote(.parent_context$run))
-        args <- append(eval.parent(quote(list(...)), n = 2),
-          list(.callable = callable))
-        do.call(run, args, envir = parent.frame())
-      }
-      environment(yield_env$yield) <- new.env(parent = baseenv())
-      environment(yield_env$yield)$callable <- self$callable
-
-      environment(new_callable) <- yield_env
-      self$callable <- new_callable
-      TRUE
-    },
-
-    overlay = function(other_node, label = NULL, flat = FALSE) {
-      if (is.stageRunnerNode(other_node)) other_node <- other_node$callable
-      if (is.null(other_node)) return(FALSE)
-      if (!is.stagerunner(other_node)) 
-        other_node <- stageRunner$new(self$.context, other_node)
-
-      # Coerce the current callable object to a stageRunner so that
-      # we can append the other_node's stageRunner.
-      if (!is.stagerunner(self$callable)) 
-        self$callable <- stageRunner$new(self$.context, self$callable)
-
-      # TODO: Fancier merging here
-      if (isTRUE(flat)) {
-        if (!is.character(label)) stop("flat coalescing needs a label")
-        self$callable$stages[[label]] <- other_node
-      } else self$callable$append(other_node, label)
-    },
-    transform = function(transformation) {
-      if (is.stagerunner(self$callable)) self$callable$transform(transformation)
-      else self$callable <- transformation(self$callable)
-    },
+    run          = stageRunnerNode_run,
+    around       = stageRunnerNode_around,
+    overlay      = stageRunnerNode_overlay,
+    transform    = stageRunnerNode_transform,
     was_executed = function() { self$executed },
-    parent   = function() { attr(self, "parent") }, # accessor_method(.parent),
-    children = function() list(),
-    show     = function() { cat("A stageRunner node containing: \n"); print(self$callable) },
+    parent       = function() { attr(self, "parent") },
+    children     = function() list(),
+    show         = function() { cat("A stageRunner node containing: \n"); print(self$callable) },
 
     # Functions which intertwine with the objectdiff package
-    index    = function() {
+    index        = function() {
       ix <- which(vapply(attr(self, "parent")$stages,
         function(x) identical(self, x), logical(1)))
       paste0(attr(self, "parent")$.prefix, ix)
@@ -3620,6 +3963,7 @@ stageRunnerNode <- structure(
   ..1
 }
 
+#' @param obj ANY. An object to test for class \code{stageRunnerNode}.
 #' @export
 #' @rdname stageRunnerNode
 is.stageRunnerNode <- function(obj) inherits(obj, 'stageRunnerNode')
@@ -3710,7 +4054,7 @@ treeSkeleton__.parent_index <- function() {
   if (!is.null(ci <- attr(self$object, 'child_index'))) ci
   # Hack for accessing attribute modifications on a reference class object
   # See: http://stackoverflow.com/questions/22752021/why-is-r-capricious-in-its-use-of-attributes-on-reference-class-objects
-  else if (is.refClass(self$object) &&
+  else if (inherits(self$object, 'refClass') && !inherits(self$object, 'R6') &&
            !is.null(ci <- attr(attr(self$object, '.xData')$.self, 'child_index'))) ci
   else # look through the parent's children and compare to .self
     # Danger Will Robinson! This will lead to strange bugs if our tree
@@ -3749,18 +4093,50 @@ treeSkeleton__.parent_index <- function() {
 #'   in the children of its parent. (Sometimes, this cannot be computed
 #'   automatically, and should usually be provided.)
 #' @return predecessor for the wrapped object.
-treeSkeleton__predecessor<- function(index = NULL) {
-  if (is.null(p <- self$parent())) return(NULL) # no predecessor of root node
+treeSkeleton__predecessor<- function(index = NULL) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We define the predecessor of the root node as <code>NULL</code>.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  if (is.null(p <- self$parent())) return(NULL) 
 
   parent_index <- if (is.null(index)) self$.parent_index() else index
   stopifnot(is.finite(parent_index))
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If we are the first leaf in the list of our parent&#39;s children,
+our predecessor is our parent&#39;s successor</p>
 
-  # If we are the first leaf in the list of our parent's children,
-  # our predecessor is our parent's successor
-  if (parent_index == 1) {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  if (parent_index == 1) {
     p$predecessor()
-  } else {
-    p$children()[[parent_index - 1]]$last_leaf()
+  } else {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Otherwise, the predecessor is the last leaf of the previous child.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    p$children()[[parent_index - 1]]$last_leaf()
   }
 }
 </span></code>
@@ -3793,18 +4169,51 @@ treeSkeleton__predecessor<- function(index = NULL) {
 #'   in the children of its parent. (Sometimes, this cannot be computed
 #'   automatically, and should usually be provided.)
 #' @return successor for the wrapped object.
-treeSkeleton__successor <- function(index = NULL) {
-  if (is.null(p <- self$parent())) return(NULL) # no successor of root node
+treeSkeleton__successor <- function(index = NULL) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We define the successor of the root node as <code>NULL</code>.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  if (is.null(p <- self$parent())) return(NULL) # no successor of root node
 
   parent_index <- if (is.null(index)) self$.parent_index() else index
   stopifnot(is.finite(parent_index))
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If we are the last leaf in the list of our parent&#39;s children,
+our successor is our parent&#39;s successor</p>
 
-  # If we are the last leaf in the list of our parent's children,
-  # our successor is our parent's successor
-  if (parent_index == length(p$children()))
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  if (parent_index == length(p$children())) {
     p$successor()
-  else
-    p$children()[[parent_index + 1]]$first_leaf()
+  } else {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Otherwise, the successor is the first leaf of the next child node.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    p$children()[[parent_index + 1]]$first_leaf()
+  }
 }
 </span></code>
             </pre>
@@ -3824,7 +4233,18 @@ treeSkeleton__successor <- function(index = NULL) {
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            
+            <p>Stagerunners are <a href="https://en.wikipedia.org/wiki/Tree_(data_structure">tree structures</a>)
+and come with a natural set of operations, like taking the predecessor,
+successor, and root of a node. However, these are not entirely simple to
+implement in a manner that is implementation-independent.</p>
+
+<p>Specifically, we recognize that the notion of a node successor and
+predecessor is implementation agnostic as long as we have access
+to class methods that provide access to a node&#39;s parent and children.
+In this case, we can write an implementation-agnostic version that
+works regardless of whether the object is an S3, S4, or R6
+object.</p>
+
           </div>
 
           <div class="code">
@@ -3899,8 +4319,19 @@ treeSkeleton__children <- function() {
 #' sr <- stageRunner$new(new.env(), list(a = list(force, list(b = function(x) x + 1))))
 #' stagerunner:::treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
 #' }
-treeSkeleton__find <- function(key) {
-#  stopifnot(is.character(key))
+treeSkeleton__find <- function(key) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Currently out of service! Will be back shortly.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#  stopifnot(is.character(key))
 #  if (length(key) == 0 || identical(key, '')) return(self$object)
 #  # Extract "foo" from "foo/bar/baz"
 #  subkey <- regmatches(key, regexec('^[^/]+', key))[[1]]
@@ -3939,28 +4370,51 @@ treeSkeleton__find <- function(key) {
 #' @format NULL
 treeSkeleton_ <- R6::R6Class('treeSkeleton',
   public = list(
-    object = 'ANY',
-    parent_caller = 'character',
+    object = 'ANY',</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>As long as we know how to get an objects parent and children,
+we will be able to determine all the nice derived methods below.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    parent_caller = 'character',
     children_caller = 'character',
     .children = 'ANY',
     .parent = 'ANY',
 
-    initialize    = stagerunner:::treeSkeleton__initialize,
-    successor     = stagerunner:::treeSkeleton__successor,
-    # TODO: I don't need any more iterators, but maybe implement them later
-    predecessor  = stagerunner:::treeSkeleton__predecessor,
-    parent        = stagerunner:::treeSkeleton__parent,
-    children      = stagerunner:::treeSkeleton__children,
-    root          = stagerunner:::treeSkeleton__root,
-    first_leaf    = stagerunner:::treeSkeleton__first_leaf,
-    last_leaf     = stagerunner:::treeSkeleton__last_leaf,
-    find          = stagerunner:::treeSkeleton__find,
-    .parent_index = stagerunner:::treeSkeleton__.parent_index,
+    initialize    = treeSkeleton__initialize,
+    successor     = treeSkeleton__successor,
+    predecessor   = treeSkeleton__predecessor,
+    parent        = treeSkeleton__parent,
+    children      = treeSkeleton__children,
+    root          = treeSkeleton__root,
+    first_leaf    = treeSkeleton__first_leaf,
+    last_leaf     = treeSkeleton__last_leaf,
+    find          = treeSkeleton__find,
+    .parent_index = treeSkeleton__.parent_index,
     show          = function() { cat("treeSkeleton wrapping:\n"); print(self$object) }
   )
 )
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Some fancy tricks to make <code>treeSkeleton(...)</code> and <code>treeSkeleton(...)</code>
+have the same effect, just like in traditional reference classes.</p>
 
-#' @export
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' @export
 treeSkeleton <- structure(
   function(...) { treeSkeleton_$new(...) },
   class = "treeSkeleton_"
@@ -3997,7 +4451,9 @@ is.unitialized_field <- function(x) {
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            
+            <p>A handy little trick from Hadley: this will return the second argument
+if the first is <code>NULL</code>.</p>
+
           </div>
 
           <div class="code">
@@ -4014,8 +4470,19 @@ all_logical <- function(x) {
     function(y) if (is.atomic(y)) is.logical(y) else all_logical(y),
   logical(1)))
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>A helper function for printing stagerunner execution progress.</p>
 
-as.ordinal <- function(number) {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">as.ordinal <- function(number) {
   ordinals <- list('first', 'second', 'third', 'fourth', 'fifth',
     'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh',
     'twelfth', 'thirteenth', 'fourteenth', 'fifteenth',
@@ -4025,8 +4492,20 @@ as.ordinal <- function(number) {
   ordinals[number][[1]] %||%
   paste0(number, ext[[(number %% 10) + 1]])
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Print some nice messages that tell you what type the stagerunner
+constructor expects.</p>
 
-enforce_type <- function(value, expected, klass, name = deparse(substitute(value))) {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">enforce_type <- function(value, expected, klass, name = deparse(substitute(value))) {
   if (missing(value)) {
     stop(sprintf(
       "Please provide %s%s.",
@@ -4068,8 +4547,20 @@ is_any <- function(obj, klasses) {
 package_function <- function(pkg, fn) { # for when using :: breaks R CMD check
   get(fn, envir = getNamespace(pkg))
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Used in conjunction with <code>treeSkeleton</code> so that it works for S3, S4, RC,
+and R6 classes.</p>
 
-#' Call a method on an object regardless of its OOP type.
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' Call a method on an object regardless of its OOP type.
 #'
 #' @name OOP_type_independent_method 
 #' @param object any. An R object of variable OOP type (S3, S4, RC, R6).
@@ -4087,9 +4578,19 @@ OOP_type_independent_method <- function(object, method) {
     get(method)(object)
   }
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p><a href="http://stackoverflow.com/questions/22675046/transforming-a-nested-environment-into-a-nested-list/22675108#22675108">Convert an environment to a list recursively.</a></p>
 
-# Convert an environment to a list
-as.list.environment <- function(env) {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">as.list.environment <- function(env) {
   out <- base::as.list.environment(env)
   lapply(out, function(x) if (is.environment(x)) as.list(x) else x)
 }
