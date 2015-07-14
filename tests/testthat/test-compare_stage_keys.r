@@ -10,7 +10,7 @@ test_that("it gives TRUE when keys are identical", {
 })
 
 test_that("it gives TRUE when latter is FALSE", {
-  expect_true(compare_stage_keys(TRUE, FALSE))
+  expect_true(compare_stage_keys(list(FALSE, TRUE), FALSE))
 })
 
 test_that('it correctly compares two empty lists', {
