@@ -115,10 +115,6 @@ normalize_stage_keys_by_index <- function(keys, stages, parent_key,
                                           key_index, normalized_keys) {
   key <- keys[[key_index]]
 
-  if (length(key) == 0) {
-    stop("Invalid stage key (cannot be of length 0)")
-  }
-
   rest_keys <- key[-1]
   key       <- key[[1]]
   
