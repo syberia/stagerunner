@@ -142,7 +142,7 @@ normalize_stage_key.numeric <- function(key, keys, stages, parent_key,
   if (key > stage_length(stages)) {
     stop(sprintf(
       "Cannot reference sub-stage %s of stage %s because it only has %d stages",
-      sQuote(key), dQuote(parent_key), sQuote(stage_length(stages))
+      sQuote(key), dQuote(parent_key), stage_length(stages)
     ))
   }
 

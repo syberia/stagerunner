@@ -24,6 +24,16 @@ describe("Invalid inputs", {
     sr <- stageRunner$new(new.env(), force)
     expect_error(sr$run("1/1"), "No stage with key")
   })
+
+  test_that("it errors if you try to pass too many elements", {
+    sr <- stageRunner$new(new.env(), list(force, force))
+    expect_error(sr$run(list(1,2,3)), "Cannot reference sub-stage")
+  })
+
+  test_that("it errors if you try to pass an invalid run type", {
+    sr <- stageRunner$new(new.env(), list(force, force))
+    expect_error(sr$run(as.raw(5)), "Invalid stage")
+  })
 })
 
 test_that("it can drop the environment if it can detect a stagerunner format", {
