@@ -1,3 +1,5 @@
+## A handy little trick from Hadley: this will return the second argument
+## if the first is `NULL`.
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
 contains_true <- function(x) {
@@ -11,6 +13,7 @@ all_logical <- function(x) {
   logical(1)))
 }
 
+## A helper function for printing stagerunner execution progress.
 as.ordinal <- function(number) {
   ordinals <- list('first', 'second', 'third', 'fourth', 'fifth',
     'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh',
@@ -22,6 +25,8 @@ as.ordinal <- function(number) {
   paste0(number, ext[[(number %% 10) + 1]])
 }
 
+## Print some nice messages that tell you what type the stagerunner
+## constructor expects.
 enforce_type <- function(value, expected, klass, name = deparse(substitute(value))) {
   if (missing(value)) {
     stop(sprintf(
@@ -65,6 +70,8 @@ package_function <- function(pkg, fn) { # for when using :: breaks R CMD check
   get(fn, envir = getNamespace(pkg))
 }
 
+## Used in conjunction with `treeSkeleton` so that it works for S3, S4, RC,
+## and R6 classes.
 #' Call a method on an object regardless of its OOP type.
 #'
 #' @name OOP_type_independent_method 
@@ -84,7 +91,7 @@ OOP_type_independent_method <- function(object, method) {
   }
 }
 
-# Convert an environment to a list
+## [Convert an environment to a list recursively.](http://stackoverflow.com/questions/22675046/transforming-a-nested-environment-into-a-nested-list/22675108#22675108)
 as.list.environment <- function(env) {
   out <- base::as.list.environment(env)
   lapply(out, function(x) if (is.environment(x)) as.list(x) else x)
