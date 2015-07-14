@@ -126,6 +126,17 @@ test_that("it finds a stage by logical indexing", {
   expect_equal(scale = 1, tolerance = 0.001, 2, context$x); expect_equal(scale = 1, tolerance = 0.001, 1, context$y)
 })
 
+test_that("it finds a nested stage by partial logical indexing", {
+  context <- new.env()
+  context$x <- 1; context$y <- 1
+  sr <- stageRunner$new(context, list(stage_one = list(function(cx) cx$x <- 1, function(cx) cx$x <- 2),
+                                      stage_two = function(cx) cx$y <- 3, stage_three = function(cx) cx$z <- 4))
+  sr$run(list(1, list(FALSE, TRUE)))
+  expect_equal(scale = 1, tolerance = 0.001, 2, context$x)
+  expect_equal(scale = 1, tolerance = 0.001, 1, context$y)
+  expect_null(context$z)
+})
+
 test_that("it finds a stage by logical indexing", {
   context <- new.env()
   context$x <- 1; context$y <- 1

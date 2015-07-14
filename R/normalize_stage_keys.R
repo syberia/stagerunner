@@ -132,6 +132,7 @@ normalize_stage_key <- function(...) {
 }
 
 normalize_stage_key.logical <- function(key, key_index, normalized_keys, ...) {
+  #stop("!")
   normalized_keys[[key_index]] <- key
   normalized_keys
 }
