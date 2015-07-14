@@ -3,5 +3,6 @@ Stagerunner [![Build Status](https://travis-ci.org/robertzk/stagerunner.svg?bran
 
 ![stagerunner](http://i.imgur.com/5gVgx1B.png)
 
-R package for parametrizing and executing linear sequences of actions.
+Stagerunners make it simpler to write debug code that performs a linear sequence
+of actions.
 
