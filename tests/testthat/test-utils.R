@@ -13,4 +13,9 @@ describe("enforce_type", {
   })
 })
 
+describe("OOP_type_independent_method", {
+  test_that("it can get the method from a non-reference object", {
+    expect_identical(OOP_type_independent_method("base", "asNamespace"), asNamespace("base"))
+  })
+})
 
