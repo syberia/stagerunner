@@ -152,4 +152,18 @@ describe('with tracked_environments', {
     sr2$run(2)
     expect_identical(sr2$context$x, 5)    
   })
+
+  test_that("it coalesces during name changes", {
+    stages1 <- setNames(replicate(15, list(a = function(e) e$x <- 1)), letters[1:15])
+    stages1$p <- function(e) e$y <- 2
+    sr1 <- stageRunner$new(tracked_environment(), remember = TRUE, list(foo = stages1))
+    stages2 <- stages1
+    names(stages2)[16] <- 'q'
+    sr2 <- stageRunner$new(tracked_environment(), remember = TRUE, list(foo = stages2))
+    sr1$run(to = "1/15")
+    sr2$coalesce(sr1)
+    browser()
+    sr2$run("1/16")
+    expect_identical(sr2$context$y, 2)
+  })
 })
