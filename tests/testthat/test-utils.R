@@ -7,3 +7,10 @@ describe("as.ordinal", {
   })
 })
 
+describe("enforce_type", {
+  test_that("it fails if a key is missing", {
+    expect_error((function(a) enforce_type(a, "logical"))(), "Please provide")
+  })
+})
+
+
