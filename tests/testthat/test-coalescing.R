@@ -151,7 +151,18 @@ describe('with tracked_environments', {
     sr$run(1)
     sr2$coalesce(sr)
     sr2$run(2)
-    expect_identical(sr2$context$x, 5)    
+    expect_identical(sr2$context$x, 5)
+  })
+
+  test_that("coalescing works in conjunction with nested terminal nodes on the coalescee", {
+    sr <- stageRunner$new(new.env(), list(function(e) e$x <- 1, function(e) e$x <- 2), remember = TRUE)
+    sr$around(stageRunner$new(new.env(), list(function(e) { e$x <- 0; yield(); e$x <- 3 })))
+    sr2 <- stageRunner$new(new.env(), list(function(e) e$x <- 4, function(e) e$x <- 5), remember = TRUE)
+    sr2$run(1)
+    sr$coalesce(sr2)
+    # TODO: (RK) Fix this test.
+    # sr$run(2)
+    # expect_identical(sr$context$x, 5)
   })
 
   test_that("it coalesces during name changes", {
