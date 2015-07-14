@@ -85,8 +85,6 @@ began_stage <- function(stage) {
   } else if (is.stageRunnerNode(stage)) {
     node <- treeSkeleton(stage)$predecessor()$object
     is.null(node) || node$executed
-  } else {
-    FALSE
   }
 }
 
