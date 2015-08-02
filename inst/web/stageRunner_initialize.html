@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>stageRunner_initialize. stagerunner 0.5.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">stagerunner 0.5.0</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Initialize a stageRunner object.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>stagerunner_initialize(context, stages, remember&nbsp;=&nbsp;FALSE, mode&nbsp;=&nbsp;getOption("stagerunner.mode") %||% "head")</div></pre>
+
+    <h2>Arguments</h2>
+    <dl>
+      <dt>context</dt>
+      <dd>environment. The initial environment that is getting
+modified during the execution of the stages.</dd>
+      <dt>stages</dt>
+      <dd>list. The functions to execute on the <code>context</code>.</dd>
+      <dt>remember</dt>
+      <dd>logical. Whether to keep a copy of the context and its
+   contents throughout each stage for debugging purposes--this makes it
+   easy to go back and investigate a stage.
+
+   The default is <code>FALSE</code>. When set to <code>TRUE</code>, the return value
+   of the <code>run</code> method will be a list of two environments: one of what
+   the context looked like before the <code>run</code> call, and another
+   of the aftermath.</dd>
+      <dt>mode</dt>
+      <dd>character. Controls the default behavior of calling the
+<code>run</code> method for this stageRunner. The two supported options are
+"head" and "next". The former gives a stageRunner which always begins
+from the first stage if the <code>from</code> parameter to the <code>run</code>
+method is blank. Otherwise, it will begin from the previous unexecuted
+stage. The default is "head". This argument has no effect if
+<code>remember = FALSE</code>.</dd>
+    </dl>
+
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>stageRunner objects are used for executing a linear sequence of
+actions on a context (an environment). For example, if we have an
+environment <code>e</code> containing <code>x = 1, y = 2</code>, then using
+<code>stages = list(function(e) e$x <- e$x + 1, function(e) e$y <- e$y - e$x)</code>
+will cause <code>x = 2, y = 0</code> after running the stages.</p>
+  
+
+    </div>
+
+      </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>stageRunner_initialize</li><li>stagerunner_initialize</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+
+
+    
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

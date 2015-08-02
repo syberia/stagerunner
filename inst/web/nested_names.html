@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>nested_names. stagerunner 0.5.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">stagerunner 0.5.0</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Delimited names of a nested list.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>nested_names(el, delim&nbsp;=&nbsp;"/", prefix&nbsp;=&nbsp;"")</div></pre>
+
+    <h2>Arguments</h2>
+    <dl>
+      <dt>el</dt>
+      <dd>list.</dd>
+      <dt>delim</dt>
+      <dd>character. The delimiter with which to separate nested names.</dd>
+      <dt>prefix</dt>
+      <dd>character. A prefix to every name.</dd>
+    </dl>
+
+    <div class="Value">
+      <h2>Value</h2>
+
+      <p><dl>
+a list of nested names
+</dl></p>
+  
+
+    </div>
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Unnamed values will use index number instead.</p>
+  
+
+    </div>
+
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>stagerunner:::nested_names(list(a = list(b = 1, c = list(d = 2, e = 3)), f = 4, 5))
+</div>
+<div class='output'>[1] &quot;a/b&quot;   &quot;a/c/d&quot; &quot;a/c/e&quot; &quot;f&quot;     &quot;3&quot;    
+</div>
+<div class='input'># c(&#39;a/b&#39;, &#39;a/c/d&#39;, &#39;a/c/e&#39;, &#39;f&#39;, &#39;3&#39;)
+stagerunner:::nested_names(list(a = list(b = 1, c = 2), d = 2), delim = &#39; &#39;, prefix = &#39;#&#39;)
+</div>
+<div class='output'>[1] &quot;#a b&quot; &quot;#a c&quot; &quot;#d&quot;  
+</div>
+<div class='input'># c(&#39;#a b&#39;, &#39;#a c&#39;, &#39;#d&#39;)
+</div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>nested_names</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+
+
+    
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

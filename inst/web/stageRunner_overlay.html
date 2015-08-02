@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>stageRunner_overlay. stagerunner 0.5.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">stagerunner 0.5.0</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Overlaying a stageRunner object is taking another stageRunner object
+with similar stage names and adding the latter's stages as terminal stages
+to the former (for example, to support tests).</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>stageRunner_overlay(other_runner, label&nbsp;=&nbsp;NULL, flat&nbsp;=&nbsp;FALSE)</div></pre>
+
+    <h2>Arguments</h2>
+    <dl>
+      <dt>other_runner</dt>
+      <dd>stageRunner. Another stageRunner from which to overlay.</dd>
+      <dt>label</dt>
+      <dd>character. The label for the overlayed stageRunner. This refers
+to the name the former will get wrapped with when appended to the
+stages of the current stageRunner. For example, if <code>label = 'test'</code>,
+and a current terminal node is unnamed, it will becomes
+<code>list(current_node, test = other_runner_node)</code>.</dd>
+      <dt>flat</dt>
+      <dd>logical. Whether to use the <code>stageRunner$append</code> method to
+overlay, or simply overwrite the given <code>label</code>. If <code>flat = TRUE</code>,
+you must supply a <code>label</code>. The default is <code>flat = FALSE</code>.</dd>
+    </dl>
+
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Overlaying a stageRunner object is taking another stageRunner object
+with similar stage names and adding the latter's stages as terminal stages
+to the former (for example, to support tests).</p>
+  
+
+    </div>
+
+      </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>stageRunner_overlay</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+
+
+    
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>
