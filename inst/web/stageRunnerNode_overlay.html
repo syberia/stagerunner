@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>stageRunnerNode_overlay. stagerunner 0.5.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">stagerunner 0.5.0</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Append one stageRunnerNode around another.</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>stageRunnerNode_overlay(other_node, label&nbsp;=&nbsp;NULL, flat&nbsp;=&nbsp;FALSE)</div></pre>
+
+    <h2>Arguments</h2>
+    <dl>
+      <dt>other_node</dt>
+      <dd>stagerunner or stageRunnerNode.</dd>
+      <dt>label</dt>
+      <dd>character. Under the hood, this will be the "stage name"
+for the stage represented by the <code>other_node</code> in the
+automatically generated new stageRunner used as this node's
+callable (assuming <code>flat</code> is <code>FALSE</code>).</dd>
+      <dt>flat</dt>
+      <dd>logical. If <code>TRUE</code>.</dd>
+    </dl>
+
+    <div class="Value">
+      <h2>Value</h2>
+
+      <p><dl>
+<code>TRUE</code> or <code>FALSE</code> according as the wrapping was
+   successful.
+</dl></p>
+  
+
+    </div>
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>Append one stageRunnerNode around another.</p>
+  
+
+    </div>
+
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>## Not run: 
+# node1 &lt;- stageRunnerNode(function(e) print(1))
+# node2 &lt;- stageRunnerNode(function(e) print(2))
+# node1$overlay(node2)
+# node1$run() # Will print 1 2
+# ## End(Not run)
+</div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>stageRunnerNode_overlay</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+
+
+    
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

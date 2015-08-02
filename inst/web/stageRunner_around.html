@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>stageRunner_around. stagerunner 0.5.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">stagerunner 0.5.0</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Wrap a function around a stageRunner's terminal nodes</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>stageRunner_around(other_runner)</div></pre>
+
+    <h2>Arguments</h2>
+    <dl>
+      <dt>other_runner</dt>
+      <dd>stageRunner. Another stageRunner from which to create
+an around procedure. Alternatively, we could give a function or a list
+of functions.</dd>
+    </dl>
+
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>If we want to execute some behavior just before and just after executing
+terminal nodes in a stageRunner, a solution without this method would be
+to overlay two runners -- one before and one after. However, this is messy,
+so this function is intended to replace this approach with just one function.</p>
+  
+
+    </div>
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>Consider the runner
+  <code>sr1 <- stageRunner$new(some_env, list(a = function(e) print('2')))</code>
+If we run
+  <code>sr2 <- stageRunner$new(some_env, list(a = function(e) {
+    print('1'); yield(); print('3') }))
+   sr1$around(sr2)
+   sr1$run()
+ </code>
+then we will see 1, 2, and 3 printed in succession. The <code>yield()</code>
+keyword is used to specify when to execute the terminal node that
+is sandwiched in the "around" runner.</p>
+  
+
+    </div>
+
+      </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>stageRunner_around</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+
+
+    
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>
