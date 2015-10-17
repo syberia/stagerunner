@@ -378,4 +378,56 @@ test_that('it correctly figures out the next stage in a stageRunner with deeply 
 })
 
 
+### current_stage method
+test_that('it can figure out the current stage in a non-caching stageRunner', {
+  sr <- stageRunner(new.env(), list(force, force))
+  expect_identical(sr$current_stage(), FALSE)
+  sr$run(1)
+  expect_identical(sr$current_stage(), '1')
+  sr$run(2)
+  expect_identical(sr$current_stage(), '2')
+})
+
+test_that('it correctly figures out the current stage in a fresh stageRunner', {
+  sr <- stageRunner(new.env(), list(force, force), remember = TRUE)
+  expect_identical(sr$current_stage(), FALSE)
+})
+
+test_that('it correctly figures out the current stage in a stageRunner with one executed stage', {
+  sr <- stageRunner(new.env(), list(force, force), remember = TRUE)
+  sr$run(1)
+  expect_identical(sr$current_stage(), '1')
+})
+
+test_that('it correctly figures out the current stage in a stageRunner with all executed stages', {
+  sr <- stageRunner(new.env(), list(force, force), remember = TRUE)
+  sr$run()
+  expect_identical(sr$current_stage(), '2')
+})
+
+test_that('it correctly figures out the current stage in a stageRunner with nested executed stages', {
+  sr <- stageRunner(new.env(), list(force, list(force, force)))
+  sr$run(to = '2/1')
+  expect_identical(sr$current_stage(), '2/1',
+    info = 'this stageRunner should not execute the last stage')
+  sr$run('2/2')
+  expect_identical(sr$current_stage(), '2/2',
+    info = 'this stageRunner should claim to be completely done')
+})
+
+test_that('it correctly figures out the current stage in a stageRunner with deeply nested executed stages', {
+  sr <- stageRunner(new.env(),
+    list(a = force, b = list(c = list(force, d = list(force, force, force))), force))
+                                # this stage should be marked as next ^
+
+  sr$run(to = 'b/c/d/2')
+  expect_identical(sr$current_stage(), '2/1/2/2')
+})
+
+test_that('it correctly returns the furthest executed stage in a stageRunner', {
+  sr <- stageRunner(new.env(), list(force, force, force), remember = TRUE)
+  sr$run()
+  sr$run(1)
+  expect_identical(sr$current_stage(), '3')
+})
 
