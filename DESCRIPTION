@@ -41,6 +41,7 @@ Collate:
     'stagerunner-append.R'
     'stagerunner-around.R'
     'stagerunner-coalesce.R'
+    'stagerunner-current_stage.R'
     'stagerunner-has_key.R'
     'stagerunner-initialize.R'
     'stagerunner-internal.R'
