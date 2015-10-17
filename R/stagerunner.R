@@ -1,7 +1,8 @@
 #' @include stagerunner-initialize.R stagerunner-run.R stagerunner-around.R
 #'   stagerunner-coalesce.R stagerunner-overlay.R stagerunner-transform.R
-#'   stagerunner-append.R stagerunner-stage_names.R stagerunner-next_stage.R
-#'   stagerunner-show.R stagerunner-has_key.R stagerunner-internal.R
+#'   stagerunner-append.R stagerunner-stage_names.R stagerunner-current_stage.R
+#'   stagerunner-next_stage.R stagerunner-show.R stagerunner-has_key.R
+#'   stagerunner-internal.R
 #'   stageRunnerNode.R
 NULL
 
@@ -52,6 +53,7 @@ stageRunner_ <- R6::R6Class('stageRunner',
     stage_names  = stageRunner_stage_names,
     parent       = function() { self$.parent },
     children     = function() { self$stages },
+    current_stage= stageRunner_current_stage,
     next_stage   = stageRunner_next_stage,
     show         = stageRunner_show,
     has_key      = stageRunner_has_key,
