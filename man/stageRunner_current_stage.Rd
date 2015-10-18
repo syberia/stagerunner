@@ -2,7 +2,7 @@
 % Please edit documentation in R/stagerunner-current_stage.R
 \name{stageRunner_current_stage}
 \alias{stageRunner_current_stage}
-\title{}
+\title{This allows us to get the furthest executed stage.}
 \usage{
 stageRunner_current_stage()
 }
@@ -12,6 +12,6 @@ a character stage key giving the latest executed stage.
   always return the first stage key (`'1'`).
 }
 \description{
-
+This allows us to get the furthest executed stage.
 }
 
