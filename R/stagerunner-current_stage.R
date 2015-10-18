@@ -1,4 +1,4 @@
-## This allows us get the stage most recently executed.
+#' This allows us to get the furthest executed stage.
 #'
 #' @name stageRunner_current_stage
 #' @return a character stage key giving the latest executed stage.
