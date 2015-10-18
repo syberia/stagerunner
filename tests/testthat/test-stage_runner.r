@@ -418,7 +418,7 @@ test_that('it correctly figures out the current stage in a stageRunner with nest
 test_that('it correctly figures out the current stage in a stageRunner with deeply nested executed stages', {
   sr <- stageRunner(new.env(),
     list(a = force, b = list(c = list(force, d = list(force, force, force))), force))
-                                # this stage should be marked as next ^
+                      # this stage should be marked as current ^
 
   sr$run(to = 'b/c/d/2')
   expect_identical(sr$current_stage(), '2/1/2/2')
