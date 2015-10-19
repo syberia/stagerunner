@@ -8,7 +8,7 @@
 \title{Stagerunners are parametrized sequences of linear execution.}
 \format{\preformatted{function (...)  
  - attr(*, "srcref")=Class 'srcref'  atomic [1:8] 82 3 82 41 3 41 82 82
-  .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x7fb9cbd3f8e0> 
+  .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x7feac88c4408> 
  - attr(*, "class")= chr "stageRunner_"
 }}
 \usage{
