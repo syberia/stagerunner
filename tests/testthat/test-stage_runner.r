@@ -137,6 +137,17 @@ test_that("it finds a nested stage by partial logical indexing", {
   expect_null(context$z)
 })
 
+test_that("it uses exact match before regex pattern matching a key name", {
+  context <- new.env()
+  sr <- stageRunner$new(context, list(stage = function(cx) cx$x <- 3,
+                                      stage_d = function(cx) cx$x <- 5 ))
+  sr$run()
+  sr$run('stage')
+  expect_equal(3, context$x)
+  sr$run('d$')
+  expect_equal(5, context$x)
+})
+
 test_that("it finds a stage by logical indexing", {
   context <- new.env()
   context$x <- 1; context$y <- 1
