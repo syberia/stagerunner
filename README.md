@@ -3,5 +3,5 @@ Stagerunner [![Build Status](https://travis-ci.org/robertzk/stagerunner.svg?bran
 
 ![stagerunner](http://i.imgur.com/5gVgx1B.png)
 
-Stagerunners make it simpler to write debug code that performs a
+Stagerunners make it simpler to write and debug code that performs a
 linear sequence of actions.
