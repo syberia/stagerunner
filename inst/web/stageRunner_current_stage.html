@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-<title>stageRunner_next_stage. stagerunner 0.5.2</title>
+<title>stageRunner_current_stage. stagerunner 0.5.2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="">
 
@@ -47,19 +47,18 @@
         
       </header>
       
-      <h1>For stageRunners with caching, find the next unexecuted stage.</h1>
+      <h1>This allows us to get the furthest executed stage.</h1>
 
 <div class="row">
   <div class="span8">
     <h2>Usage</h2>
-    <pre><div>stageRunner_next_stage()</div></pre>
+    <pre><div>stageRunner_current_stage()</div></pre>
         
     <div class="Value">
       <h2>Value</h2>
 
       <p><dl>
-a character stage key giving the next unexecuted stage.
-  If all stages have been executed, this returns <code>FALSE</code>.
+a character stage key giving the latest executed stage.
   If the stageRunner does not have caching enabled, this will
   always return the first stage key (`'1'`).
 </dl></p>
@@ -69,13 +68,13 @@ a character stage key giving the next unexecuted stage.
     <div class="Description">
       <h2>Description</h2>
 
-      <p>For stageRunners with caching, find the next unexecuted stage.</p>
+      <p>This allows us to get the furthest executed stage.</p>
   
     </div>
       </div>
   <div class="span4">
     <!-- <ul>
-      <li>stageRunner_next_stage</li>
+      <li>stageRunner_current_stage</li>
     </ul>
     <ul>
       

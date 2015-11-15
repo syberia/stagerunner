@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-<title>normalize_stage_keys. stagerunner 0.5.0</title>
+<title>normalize_stage_keys. stagerunner 0.5.2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="">
 
@@ -32,7 +32,7 @@
     <div class="navbar">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="#">stagerunner 0.5.0</a>
+      <a class="brand" href="#">stagerunner 0.5.2</a>
       <div class="nav">
         <ul class="nav">
           <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
@@ -53,7 +53,7 @@
   <div class="span8">
     <h2>Usage</h2>
     <pre><div>normalize_stage_keys(keys, stages, to&nbsp;=&nbsp;NULL, parent_key&nbsp;=&nbsp;"")</div></pre>
-
+    
     <h2>Arguments</h2>
     <dl>
       <dt>keys</dt>
@@ -74,7 +74,7 @@ For example, if we try to reference key <code>foo/bar</code>, but a recursive
 call to <code>normalize_stage_keys</code> errors when <code>bar</code> isn't found,
 we would still like the error to display the full name (<code>foo/bar</code>).</dd>
     </dl>
-
+    
     <div class="Value">
       <h2>Value</h2>
 
@@ -88,17 +88,15 @@ would return
   <code>list(one = list(subone = TRUE), two = FALSE)</code>.
 </dl></p>
   
-
     </div>
+
     <div class="Description">
       <h2>Description</h2>
 
       <p>For example, <code>list('data/one', 2)</code> would be converted to
 <code>list('data', list('one')), 2)</code>.</p>
   
-
     </div>
-
     
     <h2 id="examples">Examples</h2>
     <pre class="examples"><div class='input'>## Not run: 
@@ -120,9 +118,7 @@ would return
     
 stageRunner__run
 
-
-
-    
+        
   </div>
 </div>
       

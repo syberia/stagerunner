@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-<title>Index. stagerunner 0.5.0</title>
+<title>Index. stagerunner 0.5.2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="Robert Krzyzanowski &lt;technoguyrob@gmail.com&gt;">
 
@@ -32,7 +32,7 @@
     <div class="navbar">
   <div class="navbar-inner">
     <div class="container">
-      <a class="brand" href="#">stagerunner 0.5.0</a>
+      <a class="brand" href="#">stagerunner 0.5.2</a>
       <div class="nav">
         <ul class="nav">
           <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
@@ -53,117 +53,175 @@
 
 <p><img src="http://i.imgur.com/5gVgx1B.png" alt="stagerunner"/></p>
 
-<p>Stagerunners make it simpler to write debug code that performs a
+<p>Stagerunners make it simpler to write and debug code that performs a
 linear sequence of actions.</p>
 
 
     <h2>Help topics</h2>
 
+    <h3>Settings functions</h3>
+    <p>These functions are used in <code>index.r</code> to configure various
+    settings that staticdocs uses when rendering a package.  This is
+    particularly useful for generating an index page that groups functions
+    into useful categories</p>
+
+    
+    <ul class="index">
+
+    </ul>
     <h3></h3>
     
     
     <ul class="index">
+        
       <li>
         <code><a href="boolean_fill.html">boolean_fill</a></code><br />Fill a nested logical list with TRUEs before or after the first TRUE</li>
+            
       <li>
         <code><a href="compare_stage_keys.html">compare_stage_keys</a></code><br />Compare two stage keys to see which one has a stage run first</li>
+            
       <li>
         <code><a href="copy_env.html">copy_env</a></code><br />Copy one environment into another recursively.</li>
+            
       <li>
         <code><a href="is_pre_stagerunner.html">is_pre_stagerunner</a></code><br />Whether or not an object can be transformed into a stageRunner.</li>
+            
       <li>
         <code><a href="is.stagerunner.html">is.stagerunner</a></code>(is.stageRunner)<br />Check whether an R object is a stageRunner object</li>
+            
       <li>
         <code><a href="nested_names.html">nested_names</a></code><br />Delimited names of a nested list.</li>
+            
       <li>
         <code><a href="normalize_stage_keys.html">normalize_stage_keys</a></code><br />Normalize a reference to stage keys</li>
+            
       <li>
         <code><a href="OOP_type_independent_method.html">OOP_type_independent_method</a></code><br />Call a method on an object regardless of its OOP type.</li>
+            
       <li>
         <code><a href="run.html">run</a></code><br />Run the stages in a stageRunner object.</li>
+            
       <li>
         <code><a href="show_message.html">show_message</a></code><br />Show a progress message when executing a stagerunner.</li>
+            
       <li>
         <code><a href="special_and_lists.html">special_and_lists</a></code><br />AND two lists together with some regards for nesting</li>
+            
       <li>
         <code><a href="special_or_lists.html">special_or_lists</a></code><br />OR two lists together with some regards for nesting</li>
+            
       <li>
         <code><a href="stagerunner.html">stageRunner</a></code>(stageRunner_, stagerunner)<br />Stagerunners are parametrized sequences of linear execution.</li>
+            
       <li>
         <code><a href="stageRunner_.before_env.html">stageRunner_.before_env</a></code><br />Get an environment representing the context directly before executing a given stage.</li>
+            
       <li>
         <code><a href="stageRunner_.clear_cache.html">stageRunner_.clear_cache</a></code><br />Clear all caches in this stageRunner, and recursively.</li>
+            
       <li>
         <code><a href="stageRunner_.mark_finished.html">stageRunner_.mark_finished</a></code><br />Mark a given stage as being finished.</li>
+            
       <li>
         <code><a href="stageRunner_.root.html">stageRunner_.root</a></code><br />Determine the root of the stageRunner.</li>
+            
       <li>
         <code><a href="stageRunner_.set_parents.html">stageRunner_.set_parents</a></code><br />Set all parents for this stageRunner, and recursively</li>
+            
       <li>
         <code><a href="stageRunner_.set_prefixes.html">stageRunner_.set_prefixes</a></code><br />Set all prefixes for child stageRunners.</li>
+            
       <li>
         <code><a href="stageRunner_append.html">stageRunner_append</a></code><br />Append one stageRunner to the end of another.</li>
+            
       <li>
         <code><a href="stageRunner_around.html">stageRunner_around</a></code><br />Wrap a function around a stageRunner's terminal nodes</li>
+            
       <li>
         <code><a href="stageRunner_coalesce.html">stageRunner_coalesce</a></code><br />Coalescing a stageRunner object is taking another stageRunner object
 </li>
+            
+      <li>
+        <code><a href="stageRunner_current_stage.html">stageRunner_current_stage</a></code><br />This allows us to get the furthest executed stage.</li>
+            
       <li>
         <code><a href="stageRunner_has_key.html">stageRunner_has_key</a></code><br />Whether or not the stageRunner has a key matching this input.</li>
+            
       <li>
         <code><a href="stageRunner_initialize.html">stageRunner_initialize</a></code>(stagerunner_initialize)<br />Initialize a stageRunner object.</li>
+            
       <li>
         <code><a href="stageRunner_next_stage.html">stageRunner_next_stage</a></code><br />For stageRunners with caching, find the next unexecuted stage.</li>
+            
       <li>
         <code><a href="stageRunner_overlay.html">stageRunner_overlay</a></code><br />Overlaying a stageRunner object is taking another stageRunner object
 </li>
+            
       <li>
         <code><a href="stageRunner_show.html">stageRunner_show</a></code><br />Generic for printing stageRunner objects.</li>
+            
       <li>
         <code><a href="stageRunner_stage_names.html">stageRunner_stage_names</a></code><br />Retrieve a flattened list of canonical stage names for a stageRunner object</li>
+            
       <li>
         <code><a href="stageRunner_transform.html">stageRunner_transform</a></code><br />Transform the callable's of the terminal nodes of a stageRunner.</li>
+            
       <li>
         <code><a href="stageRunnerNode.html">stageRunnerNode</a></code>(is.stageRunnerNode, stageRunnerNode_)<br />Stagerunner nodes are environment wrappers around individual stages
 </li>
+            
       <li>
         <code><a href="stageRunnerNode_around.html">stageRunnerNode_around</a></code><br />Wrap a stageRunnerNode callable with another callable.</li>
+            
       <li>
         <code><a href="stageRunnerNode_overlay.html">stageRunnerNode_overlay</a></code><br />Append one stageRunnerNode around another.</li>
+            
       <li>
         <code><a href="stageRunnerNode_run.html">stageRunnerNode_run</a></code><br />Execute the callable of a stageRunnerNode.</li>
+            
       <li>
         <code><a href="stageRunnerNode_transform.html">stageRunnerNode_transform</a></code><br />Transform a stageRunnerNode according to a functional.</li>
+            
       <li>
         <code><a href="treeSkeleton.html">treeSkeleton</a></code>(treeSkeleton_)<br />This class implements iterators for a tree-based structure
 </li>
+            
       <li>
         <code><a href="treeSkeleton__.parent_index.html">treeSkeleton__.parent_index</a></code><br />Find the index of the current object in the children of its parent.</li>
+            
       <li>
         <code><a href="treeSkeleton__children.html">treeSkeleton__children</a></code><br />Find the children of the current object wrapped in treeSkeletons.</li>
+            
       <li>
         <code><a href="treeSkeleton__find.html">treeSkeleton__find</a></code><br />Find the key with the given index using the names of the lists
 </li>
+            
       <li>
         <code><a href="treeSkeleton__first_leaf.html">treeSkeleton__first_leaf</a></code><br />Find the first leaf in a tree.</li>
+            
       <li>
         <code><a href="treeSkeleton__initialize.html">treeSkeleton__initialize</a></code><br />Initialize a treeSkeleton object.</li>
+            
       <li>
         <code><a href="treeSkeleton__last_leaf.html">treeSkeleton__last_leaf</a></code><br />Find the last leaf in a tree.</li>
+            
       <li>
         <code><a href="treeSkeleton__parent.html">treeSkeleton__parent</a></code><br />Find the parent of the current object wrapped in a treeSkeleton.</li>
+            
       <li>
         <code><a href="treeSkeleton__predecessor.html">treeSkeleton__predecessor</a></code><br />Attempt to find the predecessor of the current node.</li>
+            
       <li>
         <code><a href="treeSkeleton__root.html">treeSkeleton__root</a></code><br />Find the root node of the tree (the only one with no parent).</li>
+            
       <li>
         <code><a href="treeSkeleton__successor.html">treeSkeleton__successor</a></code><br />Attempt to find the successor of the current node.</li>
+    
     </ul>
   </div>
   
   <div class="span3 offset1">
-
-
+        
     <h2>Dependencies</h2>
     <ul>
       
@@ -171,7 +229,6 @@ linear sequence of actions.</p>
       <li><strong>Suggests</strong>: knitr, microbenchmark, objectdiff, testthat, testthatsomemore</li>
       
     </ul>
-
     <h2>Authors</h2>
     <ul>
       <li><a href="mailto:technoguyrob@gmail.com">Robert Krzyzanowski</a> [aut, cre]</li>
