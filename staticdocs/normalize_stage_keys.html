@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>normalize_stage_keys. stagerunner 0.5.2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">stagerunner 0.5.2</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>Normalize a reference to stage keys</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>normalize_stage_keys(keys, stages, to&nbsp;=&nbsp;NULL, parent_key&nbsp;=&nbsp;"")</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>keys</dt>
+      <dd>a list. The keys to normalize.</dd>
+      <dt>stages</dt>
+      <dd>a list. The stages we're normalizing with respect to.</dd>
+      <dt>to</dt>
+      <dd>an indexing parameter. If <code>keys</code> refers to a single stage,
+attempt to find all stages from that stage to this stage (or, if this one
+comes first, this stage to that stage). For example, if we have
+   <code>stages = list(a = list(b = 1, c = 2), d = 3, e = list(f = 4, g = 5))</code>
+where the numbers are some functions, and we call <code>normalize_stage_keys</code>
+with <code>keys = 'a/c'</code> and <code>to = 'e/f'</code>, then we would obtain a nested
+list of logicals referencing <code>"a/c", "d", "e/f"</code>.</dd>
+      <dt>parent_key</dt>
+      <dd>character. A helper for sane recursive error handling.
+For example, if we try to reference key <code>foo/bar</code>, but a recursive
+call to <code>normalize_stage_keys</code> errors when <code>bar</code> isn't found,
+we would still like the error to display the full name (<code>foo/bar</code>).</dd>
+    </dl>
+    
+    <div class="Value">
+      <h2>Value</h2>
+
+      <p><dl>
+a list. The format is nested logicals. For example, if <code>stages</code> is
+  <code>list(one = stageRunner$new(new.env(), list(subone = function(cx) 1)),
+             two = function(cx) 1)</code>
+then
+  <code>normalize_stage_keys('one/subone')</code>
+would return
+  <code>list(one = list(subone = TRUE), two = FALSE)</code>.
+</dl></p>
+  
+    </div>
+
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>For example, <code>list('data/one', 2)</code> would be converted to
+<code>list('data', list('one')), 2)</code>.</p>
+  
+    </div>
+    
+    <h2 id="examples">Examples</h2>
+    <pre class="examples"><div class='input'>## Not run: 
+#   stopifnot(identical(normalize_stage_keys(&quot;foo/bar&quot;,
+#     list(foo = list(bar = NULL, baz = NULL))),
+#     list(list(TRUE, FALSE))))
+# ## End(Not run)
+</div></pre>
+  </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>normalize_stage_keys</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+stageRunner__run
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

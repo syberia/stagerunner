@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>special_or_lists. stagerunner 0.5.2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="">
+
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/highlight.css" rel="stylesheet">
+<link href="css/staticdocs.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </head>
+
+  <body>
+    <div class="navbar">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="#">stagerunner 0.5.2</a>
+      <div class="nav">
+        <ul class="nav">
+          <li><a href="index.html"><i class="icon-home icon-white"></i> Index</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+      <header>
+        
+      </header>
+      
+      <h1>OR two lists together with some regards for nesting</h1>
+
+<div class="row">
+  <div class="span8">
+    <h2>Usage</h2>
+    <pre><div>special_or_lists(list1, list2)</div></pre>
+    
+    <h2>Arguments</h2>
+    <dl>
+      <dt>list1</dt>
+      <dd>a list.</dd>
+      <dt>list2</dt>
+      <dd>a list.</dd>
+    </dl>
+    
+    <div class="Value">
+      <h2>Value</h2>
+
+      <p><dl>
+the or'ed list.
+</dl></p>
+  
+    </div>
+
+    <div class="Description">
+      <h2>Description</h2>
+
+      <p>The structure of the lists should be the same. That is,
+as a tree, the two lists should be isomorphic. For example,
+<code>special_or_lists(list(a = FALSE, b = list(b = TRUE, c = FALSE)),
+                        list(a = FALSE, b = list(b = FALSE, c = TRUE)))</code>
+yields
+<code>list(a = FALSE, b = list(b = TRUE, c = TRUE))</code>
+and
+<code>special_or_lists(list(a = FALSE, b = list(b = TRUE, c = FALSE)),
+                        list(a = list(b = FALSE, c = TRUE), b = FALSE))</code>
+yields
+<code>list(a = list(b = FALSE, c = TRUE), b = list(b = TRUE, c = FALSE))</code></p>
+  
+    </div>
+
+    <div class="Details">
+      <h2>Details</h2>
+
+      <p>Note that lists get ORed based on *order*, not on key names (as this could
+be ambiguous), so make sure the two lists have the same comparable key orders.
+For example, <code>special_or_lists(list(a = TRUE, b = FALSE), list(b = FALSE, a = TRUE))</code>
+would mistakenly return <code>list(a = TRUE, b = TRUE)</code>.</p>
+  
+    </div>
+      </div>
+  <div class="span4">
+    <!-- <ul>
+      <li>special_or_lists</li>
+    </ul>
+    <ul>
+      
+    </ul> -->
+      
+    <h2>See also</h2>
+    
+<code><a href='special_and_lists.html'>special_and_lists</a></code>
+
+        
+  </div>
+</div>
+      
+      <footer>
+      <p class="pull-right"><a href="#">Back to top</a></p>
+<p>Built by <a href="https://github.com/hadley/staticdocs">staticdocs</a>. Styled with <a href="http://twitter.github.com/bootstrap">bootstrap</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>
