@@ -38,7 +38,6 @@ test_that('there are no cached environments on non-first stages before anything 
 test_that('there are no cached environments on non-first stages after everything is run with remember_flag = FALSE', {
   sr <- stageRunner$new(new.env(), list(force, force, force), remember = TRUE)
   sr$run(remember_flag = FALSE)
-  browser()
   expect_identical(lapply(sr$stages[-1], `[[`, ".cached_env"), list(NULL, NULL))
 })
 
