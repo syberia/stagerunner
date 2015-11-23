@@ -92,3 +92,10 @@ test_that('the environment gets restored from cache upon second execution', {
   expect_equal(envs$after$x, 2)
 })
 
+test_that("it restores the correct before environment", {
+  sr <- stageRunner$new(new.env(), list(a = function(e) e$x <-1, b = function(e) e$x <- 2,
+    c = function(e) e$x <- 3, d = function(e) e$x <- 4), remember = TRUE)
+  sr$run(1, 2)
+  sr$run(2, 4)
+})
+
