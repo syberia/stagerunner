@@ -247,7 +247,7 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
       ## `before_env`).
       if (!nested_run) { run_stage(...) }
     }
-    else if (self$remember) { run_stage(..., remember_flag = FALSE) }
+    else if (self$remember) { run_stage(..., remember_flag = remember_flag) }
     else { run_stage(...) }
 
     ## When we're done running a stage (i.e., processing a terminal node),

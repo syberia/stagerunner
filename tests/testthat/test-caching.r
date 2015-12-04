@@ -100,3 +100,12 @@ test_that("it restores the correct before environment", {
   expect_equal(envs$before$x, 1)
 })
 
+describe("remember_flag", {
+  test_that("when remember_flag is FALSE it cannot skip runs", {
+    sr <- stageRunner$new(new.env(), list(force, force, force), remember = TRUE)
+    sr$run(1)
+    sr$run(2, remember_flag = FALSE)
+    expect_error(sr$run(3), "Cannot run this stage")
+  })
+})
+

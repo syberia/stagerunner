@@ -69,6 +69,19 @@ describe('with regular environments', {
     expect_identical(sr2$context$z, 5)
     expect_identical(sr2$context$w, 6)
   })
+
+  test_that("it does not coalesce a stage when run with remember_flag = FALSE", {
+    sr1 <- stageRunner$new(new.env(), remember = TRUE,
+      list(a = function(e) e$x <- 1, b = function(e) e$y <- 2,
+           c = function(e) e$z <- 3))
+    sr2 <- stageRunner$new(new.env(), remember = TRUE,
+      list(a = function(e) e$x <- 1, b = function(e) e$y <- 4,
+           c = function(e) e$z <- 5))
+    sr1$run(1)
+    sr1$run(2, remember_flag = FALSE)
+    sr2$coalesce(sr1)
+    expect_error(sr2$run(3), "Cannot run this stage")
+  })
 })
 
 describe('with tracked_environments', {
