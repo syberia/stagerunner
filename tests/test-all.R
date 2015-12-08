@@ -1,4 +1,6 @@
 library(testthat)
 library(testthatsomemore)
 library(stagerunner)
+library(magrittr)
+library(objectdiff)
 test_check("stagerunner")
