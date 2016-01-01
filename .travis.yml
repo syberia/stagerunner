@@ -7,7 +7,6 @@ r_github_packages:
   - hadley/devtools
   - smbache/magrittr
   - hadley/testthat
-  - hadley/purrr
   - kirillseva/objectdiff@stagerunner_debug_message
   - robertzk/testthatsomemore
 
