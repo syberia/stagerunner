@@ -34,6 +34,12 @@ describe("Invalid inputs", {
     sr <- stageRunner$new(new.env(), list(force, force))
     expect_error(sr$run(as.raw(5)), "Invalid stage")
   })
+
+  test_that("it errors if you try to load a tracked_environment with ", {
+    requireNamespace("objectdiff", quietly = TRUE)
+    expect_error(stageRunner$new(objectdiff::tracked_environment(), list(a = force), remember = FALSE),
+                "Can not use tracked environments") 
+  })
 })
 
 test_that("it can drop the environment if it can detect a stagerunner format", {

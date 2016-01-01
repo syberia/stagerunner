@@ -1,4 +1,5 @@
 library(testthat)
 library(testthatsomemore)
 library(stagerunner)
+library(objectdiff)
 test_check("stagerunner")

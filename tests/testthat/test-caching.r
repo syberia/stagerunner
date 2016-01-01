@@ -35,6 +35,12 @@ test_that('there are no cached environments on non-first stages before anything 
   expect_identical(lapply(sr$stages[-1], `[[`, ".cached_env"), list(NULL, NULL))
 })
 
+test_that('there are no cached environments on non-first stages after everything is run with remember_flag = FALSE', {
+  sr <- stageRunner$new(new.env(), list(force, force, force), remember = TRUE)
+  sr$run(remember_flag = FALSE)
+  expect_identical(lapply(sr$stages[-1], `[[`, ".cached_env"), list(NULL, NULL))
+})
+
 test_that('running the first two stages updates the cache for the second stage and third stage', {
   sr <- stageRunner$new(new.env(), list(function(env) env$x <- 1, force, force), remember = TRUE)
   sr$run(c(1,2))
@@ -84,5 +90,22 @@ test_that('the environment gets restored from cache upon second execution', {
   envs <- sr$run('2/1')
   expect_equal(envs$before$x, 1)
   expect_equal(envs$after$x, 2)
+})
+
+test_that("it restores the correct before environment", {
+  sr <- stageRunner$new(new.env(), list(a = function(e) e$x <- 1, b = function(e) e$x <- 2,
+    c = function(e) e$x <- 3, d = function(e) e$x <- 4), remember = TRUE)
+  sr$run(1)
+  envs <- sr$run(2, 4)
+  expect_equal(envs$before$x, 1)
+})
+
+describe("remember_flag", {
+  test_that("when remember_flag is FALSE it cannot skip runs", {
+    sr <- stageRunner$new(new.env(), list(force, force, force), remember = TRUE)
+    sr$run(1)
+    sr$run(2, remember_flag = FALSE)
+    expect_error(sr$run(3), "Cannot run this stage")
+  })
 })
 

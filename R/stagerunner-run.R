@@ -247,7 +247,7 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
       ## `before_env`).
       if (!nested_run) { run_stage(...) }
     }
-    else if (self$remember) { run_stage(..., remember_flag = FALSE) }
+    else if (self$remember) { run_stage(..., remember_flag = remember_flag) }
     else { run_stage(...) }
 
     ## When we're done running a stage (i.e., processing a terminal node),
@@ -255,7 +255,7 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
     ## (since that node will execute starting with what's in the context now --
     ## this also ensures that running that node with a separate call to
     ## `$run` will not bump into a "you haven't executed this stage yet" error).
-    if (self$remember && !nested_run) {
+    if (self$remember && isTRUE(remember_flag) && !nested_run) {
       self$.mark_finished(stage_index)
     }
 
@@ -273,7 +273,7 @@ run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
   ## This allows the user to perform their own analysis about what happened.
   ##
   ## Otherwise, we simply return `TRUE` ([invisibly](http://stackoverflow.com/questions/11653127/what-does-the-function-invisible-do)).
-  if (self$remember && remember_flag) {
+  if (self$remember && isTRUE(remember_flag)) {
     list(before = before_env, after = self$.context)
   } else {
     invisible(TRUE)

@@ -49,6 +49,11 @@ stagerunner_initialize <- function(context, stages, remember = FALSE,
     context <- new.env(parent = parent.frame())
   }
 
+  if (identical(remember, FALSE) && is(context, "tracked_environment")) {
+    stop("Can not use tracked environments with stagerunners that have caching ",
+         "disabled (remember = FALSE)")
+  }
+
   ## The `enforce_type` helper in utils.R will print a nice and colorful error
   ## message if we have initialized our stagerunner with the wrong argument
   ## types.
