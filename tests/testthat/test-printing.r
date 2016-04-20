@@ -155,6 +155,7 @@ local({
         r2 <- runner2(); r2$coalesce(r1)
         expect_output(print(r2), wrapc(" \\* foo [\n\r]*   \\* bar [\n\r]*     \\+ baz [\n\r]*     \\* qux [\n\r]* \\- second [\n\r]*   \\- sub1 [\n\r]*   \\- sub2 ", 4))
         r2$run("1/1/2")
+        expect_output(print(r2), wrapc(" \\+ foo [\n\r]*   \\+ bar [\n\r]*     \\+ baz [\n\r]*     \\+ qux [\n\r]* \\* second [\n\r]*   \\* sub1 [\n\r]*   \\- sub2 ", 4))
       })
     })
   })
