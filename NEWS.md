@@ -1,3 +1,7 @@
+# Version 0.5.4
+
+* Added some fixes to stagerunner coalescing.
+
 # Version 0.5.0
 
 * Refactored the `stageRunner`, `stageRunnerNode`, and `treeSkeleton`
