@@ -28,7 +28,6 @@ Collate:
     'compare_stage_keys.R'
     'copy_env.R'
     'is_pre_stagerunner.R'
-    'nested_names.R'
     'normalize_stage_keys.R'
     'show_message.R'
     'special_and_lists.R'

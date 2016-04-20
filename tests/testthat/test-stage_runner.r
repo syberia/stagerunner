@@ -448,3 +448,11 @@ test_that('it correctly returns the furthest executed stage in a stageRunner', {
   expect_identical(sr$current_stage(), '3')
 })
 
+describe("$stage_name1", {
+  test_that("stage_name1 can extract names of stages", {
+    runner <- stageRunner$new(new.env(), list(foo = list(bar = list(baz = function(e) e$x <- 1, qux = function(e) e$y <- 1)),
+      second = list(sub1 = function(e) e$z <- 1, sub2 = function(e) e$w <- 1)))
+    expect_equal(runner$stage_names(), c("foo/bar/baz", "foo/bar/qux", "second/sub1", "second/sub2"))
+  })
+})
+
