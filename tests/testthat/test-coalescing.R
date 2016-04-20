@@ -1,4 +1,5 @@
 library(testthatsomemore)
+library(objectdiff)
 context('stageRunner coalescing')
 
 describe("invalid inputs", {
@@ -207,18 +208,20 @@ test_that("it can coalesce a deeper stagerunner", {
 
     r1 <- runner1(); r1$run(to = "1/1/1")
     r2 <- runner2(); r2$coalesce(r1)
+    # Ensure the executed flag has been copied over.
+    expect_true(r2$stages[[1]]$stages[[1]]$stages[[1]]$executed)
     r2$run("1/1/2")
-    expect_true(setequal(as.list(r2$context), list(x = 1, y = 2)))
+    expect_true(list_setequal(as.list(r2$context), list(x = 1, y = 2)))
 
     r1 <- runner1(); r1$run(to = 1)
     r2 <- runner2(); r2$coalesce(r1)
     r2$run("2/1")
-    expect_true(setequal(as.list(r2$context), list(x = 1, y = 1, z = 2)))
+    expect_true(list_setequal(as.list(r2$context), list(x = 1, y = 1, z = 2)))
 
     r1 <- runner1(); r1$run(to = "2/1")
     r2 <- runner2(); r2$coalesce(r1)
     r2$run("2/2")
-    expect_true(setequal(as.list(r2$context), list(x = 1, y = 1, z = 2, w = 2)))
+    expect_true(list_setequal(as.list(r2$context), list(x = 1, y = 1, z = 1, w = 2)))
   })
 
   test_that("it can coalesce deep runners with tracked environments", {
@@ -238,17 +241,19 @@ test_that("it can coalesce a deeper stagerunner", {
     r1 <- runner1(); r1$run(to = "1/1/1")
     r2 <- runner2(); r2$coalesce(r1)
     r2$run("1/1/2")
-    expect_true(setequal(as.list(r2$context), list(x = 1, y = 2)))
+    # Ensure the executed flag has been copied over.
+    expect_true(r2$stages[[1]]$stages[[1]]$stages[[1]]$executed)
+    expect_true(list_setequal(as.list(objectdiff::environment(r2$context)), list(x = 1, y = 2)))
 
     r1 <- runner1(); r1$run(to = 1)
     r2 <- runner2(); r2$coalesce(r1)
     r2$run("2/1")
-    expect_true(setequal(as.list(r2$context), list(x = 1, y = 1, z = 2)))
+    expect_true(list_setequal(as.list(objectdiff::environment(r2$context)), list(x = 1, y = 1, z = 2)))
 
     r1 <- runner1(); r1$run(to = "2/1")
     r2 <- runner2(); r2$coalesce(r1)
     r2$run("2/2")
-    expect_true(setequal(as.list(r2$context), list(x = 1, y = 1, z = 2, w = 2)))
+    expect_true(list_setequal(as.list(objectdiff::environment(r2$context)), list(x = 1, y = 1, z = 1, w = 2)))
   })
 })
 
