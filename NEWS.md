@@ -1,6 +1,7 @@
 # Version 0.5.4
 
 * Added some fixes to stagerunner coalescing.
+* Corrected printing for stagerunners that have been coalesced.
 
 # Version 0.5.0
 
