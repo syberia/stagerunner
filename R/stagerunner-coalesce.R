@@ -75,7 +75,7 @@ stageRunner_coalesce <- function(other_runner) {
     self_iterator  <- treeSkeleton(self)$root()$first_leaf()
     other_iterator <- treeSkeleton(other_runner)$root()$first_leaf()
     for (i in seq_along(common)) {
-      #self_iterator$object$executed <- other_iterator$object$executed
+      self_iterator$object$executed <- other_iterator$object$executed
       self_iterator  <- self_iterator$successor()
       other_iterator <- other_iterator$successor()
     }
