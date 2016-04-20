@@ -2,7 +2,8 @@
 #'
 #' @param list1 list.
 #' @param list2 list.
-#' @return If the lists are the same as named sets.
+#' @return TRUE if the lists are the same as named sets,
+#'    and FALSE otherwise.
 list_setequal <- function(list1, list2) {
   if (is.null(names(list1)) || is.null(names(list2))) {
     stop("Only named lists can be compared using list_setequal.")
