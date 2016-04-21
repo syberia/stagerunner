@@ -1,4 +1,5 @@
 library(testthatsomemore)
+library(objectdiff)
 context('stageRunner coalescing')
 
 describe("invalid inputs", {
@@ -189,6 +190,70 @@ describe('with tracked_environments', {
     sr2$coalesce(sr1)
     sr2$run("1/16")
     expect_identical(sr2$context$y, 2)
+  })
+})
+
+test_that("it can coalesce a deeper stagerunner", {
+  test_that("it can coalesce deep runners with vanilla environments", {
+    runner1 <- function() {
+      stageRunner$new(new.env(), list(foo = list(bar = list(baz = function(e) e$x <- 1, qux = function(e) e$y <- 1)),
+                                      second = list(sub1 = function(e) e$z <- 1, sub2 = function(e) e$w <- 1)),
+                      remember = TRUE)
+    }
+    runner2 <- function() {
+      stageRunner$new(new.env(), list(foo = list(bar = list(baz = function(e) e$x <- 2, qux = function(e) e$y <- 2)),
+                      second = list(sub1 = function(e) e$z <- 2, sub2 = function(e) e$w <- 2)),
+                      remember = TRUE)
+    }
+
+    r1 <- runner1(); r1$run(to = "1/1/1")
+    r2 <- runner2(); r2$coalesce(r1)
+    # Ensure the executed flag has been copied over.
+    expect_true(r2$stages[[1]]$stages[[1]]$stages[[1]]$executed)
+    r2$run("1/1/2")
+    expect_true(list_setequal(as.list(r2$context), list(x = 1, y = 2)))
+
+    r1 <- runner1(); r1$run(to = 1)
+    r2 <- runner2(); r2$coalesce(r1)
+    r2$run("2/1")
+    expect_true(list_setequal(as.list(r2$context), list(x = 1, y = 1, z = 2)))
+
+    r1 <- runner1(); r1$run(to = "2/1")
+    r2 <- runner2(); r2$coalesce(r1)
+    r2$run("2/2")
+    expect_true(list_setequal(as.list(r2$context), list(x = 1, y = 1, z = 1, w = 2)))
+  })
+
+  test_that("it can coalesce deep runners with tracked environments", {
+    runner1 <- function() {
+      stageRunner$new(objectdiff::tracked_environment(),
+                      list(foo = list(bar = list(baz = function(e) e$x <- 1, qux = function(e) e$y <- 1)),
+                           second = list(sub1 = function(e) e$z <- 1, sub2 = function(e) e$w <- 1)),
+                      remember = TRUE)
+    }
+    runner2 <- function() {
+      stageRunner$new(objectdiff::tracked_environment(),
+                      list(foo = list(bar = list(baz = function(e) e$x <- 2, qux = function(e) e$y <- 2)),
+                           second = list(sub1 = function(e) e$z <- 2, sub2 = function(e) e$w <- 2)),
+                      remember = TRUE)
+    }
+
+    r1 <- runner1(); r1$run(to = "1/1/1")
+    r2 <- runner2(); r2$coalesce(r1)
+    r2$run("1/1/2")
+    # Ensure the executed flag has been copied over.
+    expect_true(r2$stages[[1]]$stages[[1]]$stages[[1]]$executed)
+    expect_true(list_setequal(as.list(objectdiff::environment(r2$context)), list(x = 1, y = 2)))
+
+    r1 <- runner1(); r1$run(to = 1)
+    r2 <- runner2(); r2$coalesce(r1)
+    r2$run("2/1")
+    expect_true(list_setequal(as.list(objectdiff::environment(r2$context)), list(x = 1, y = 1, z = 2)))
+
+    r1 <- runner1(); r1$run(to = "2/1")
+    r2 <- runner2(); r2$coalesce(r1)
+    r2$run("2/2")
+    expect_true(list_setequal(as.list(objectdiff::environment(r2$context)), list(x = 1, y = 1, z = 1, w = 2)))
   })
 })
 
