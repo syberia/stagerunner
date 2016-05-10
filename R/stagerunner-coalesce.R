@@ -39,7 +39,7 @@ stageRunner_coalesce <- function(other_runner) {
   # stopifnot(remember)
   if (!isTRUE(self$remember)) return()
 
-  ## We must handle this cases: (1) integration with 
+  ## We must handle these cases: (1) integration with 
   ## [objectdiff](http://github.com/robertzk/objectdiff), and (2) vanilla
   ## R environment objects. Both are tricky.
   if (self$with_tracked_environment()) {
@@ -71,6 +71,17 @@ stageRunner_coalesce <- function(other_runner) {
     }
     self$.context  <- other_runner$.context
     for (stage in self$stages) { .context(stage) <- other_runner$.context }
+    ## Mark common executed stages.
+    self_iterator  <- treeSkeleton(self)$root()$first_leaf()
+    other_iterator <- treeSkeleton(other_runner)$root()$first_leaf()
+    for (i in seq_along(common)) {
+      self_iterator$object$executed <- other_iterator$object$executed
+      self_iterator  <- self_iterator$successor()
+      other_iterator <- other_iterator$successor()
+    }
+
+    ## Coalescing is a destructive action since the other runner will no longer
+    ## be able to perform its function after the environments are moved.
     other_runner$.context <- new.env(parent = emptyenv())
     commit_count   <- length(commits(self$.context)) 
     mismatch_count <- commit_count - (common + 1)

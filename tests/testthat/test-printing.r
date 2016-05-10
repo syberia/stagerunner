@@ -114,5 +114,53 @@ local({
     expect_output(print(sr), wrapc(" \\+ a [\n\r]* \\* b [\n\r]*   \\+ c [\n\r]*   \\* d [\n\r]*   \\- e ", 4))
   })
 
+  describe("Printing after coalescing", {
+
+    describe("With tracked environments", {
+      test_that("it updates progress after coalescing with tracked environments", {
+        runner1 <- function() {
+          stageRunner$new(objectdiff::tracked_environment(),
+                          list(foo = list(bar = list(baz = function(e) e$x <- 1, qux = function(e) e$y <- 1)),
+                               second = list(sub1 = function(e) e$z <- 1, sub2 = function(e) e$w <- 1)),
+                          remember = TRUE)
+        }
+        runner2 <- function() {
+          stageRunner$new(objectdiff::tracked_environment(),
+                          list(foo = list(bar = list(baz = function(e) e$x <- 2, qux = function(e) e$y <- 2)),
+                               second = list(sub1 = function(e) e$z <- 2, sub2 = function(e) e$w <- 2)),
+                          remember = TRUE)
+        }
+
+        r1 <- runner1(); r1$run(to = "1/1/1")
+        r2 <- runner2(); r2$coalesce(r1)
+        expect_output(print(r2), wrapc(" \\* foo [\n\r]*   \\* bar [\n\r]*     \\+ baz [\n\r]*     \\* qux [\n\r]* \\- second [\n\r]*   \\- sub1 [\n\r]*   \\- sub2 ", 4))
+        r2$run("1/1/2")
+        expect_output(print(r2), wrapc(" \\+ foo [\n\r]*   \\+ bar [\n\r]*     \\+ baz [\n\r]*     \\+ qux [\n\r]* \\* second [\n\r]*   \\* sub1 [\n\r]*   \\- sub2 ", 4))
+      })
+    })
+    describe("With vanilla environments", {
+      test_that("it updates progress after coalescing with vanilla environments", {
+        runner1 <- function() {
+          stageRunner$new(new.env(),
+                          list(foo = list(bar = list(baz = function(e) e$x <- 1, qux = function(e) e$y <- 1)),
+                               second = list(sub1 = function(e) e$z <- 1, sub2 = function(e) e$w <- 1)),
+                          remember = TRUE)
+        }
+        runner2 <- function() {
+          stageRunner$new(new.env(),
+                          list(foo = list(bar = list(baz = function(e) e$x <- 2, qux = function(e) e$y <- 2)),
+                               second = list(sub1 = function(e) e$z <- 2, sub2 = function(e) e$w <- 2)),
+                          remember = TRUE)
+        }
+
+        r1 <- runner1(); r1$run(to = "1/1/1")
+        r2 <- runner2(); r2$coalesce(r1)
+        expect_output(print(r2), wrapc(" \\* foo [\n\r]*   \\* bar [\n\r]*     \\+ baz [\n\r]*     \\* qux [\n\r]* \\- second [\n\r]*   \\- sub1 [\n\r]*   \\- sub2 ", 4))
+        r2$run("1/1/2")
+        expect_output(print(r2), wrapc(" \\+ foo [\n\r]*   \\+ bar [\n\r]*     \\+ baz [\n\r]*     \\+ qux [\n\r]* \\* second [\n\r]*   \\* sub1 [\n\r]*   \\- sub2 ", 4))
+      })
+    })
+  })
+
 })
 
