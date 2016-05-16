@@ -1,18 +1,19 @@
-language: r
-sudo: required
-warnings_are_errors: true
-
-r_github_packages:
-  - kirillseva/covr
-  - hadley/devtools
-  - smbache/magrittr
-  - hadley/testthat
-  - robertzk/objectdiff
-  - robertzk/testthatsomemore
-
+language: c
+before_install:
+- curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+- chmod 755 ./travis-tool.sh
+- "./travis-tool.sh bootstrap"
+install:
+- "./travis-tool.sh github_package hadley/testthat"
+- "./travis-tool.sh github_package robertzk/testthatsomemore"
+- "./travis-tool.sh install_r R6"
+- "./travis-tool.sh github_package jimhester/covr@e3e137fdf27b6e0dfba2f8d8f25b616b1fb81db9"
+- "./travis-tool.sh github_package robertzk/objectdiff"
+script: "./travis-tool.sh run_tests"
+after_failure:
+  - ./travis-tool.sh dump_logs
 after_success:
   - "Rscript -e 'library(covr);coveralls()'"
-
 notifications:
   email:
     on_success: change
@@ -25,3 +26,7 @@ notifications:
     template:
     - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
       | Details: %{build_url} | Changes: %{compare_url}"
+env:
+- global:
+  - WARNINGS_ARE_ERRORS=1
+  - _R_CHECK_FORCE_SUGGESTS_=0
