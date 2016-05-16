@@ -5,7 +5,8 @@ before_install:
 - "./travis-tool.sh bootstrap"
 install:
 - "./travis-tool.sh github_package hadley/testthat"
-- "./travis-tool.sh install_r testthatsomemore R6"
+- "./travis-tool.sh github_package robertzk/testthatsomemore"
+- "./travis-tool.sh install_r R6"
 - "./travis-tool.sh github_package jimhester/covr@e3e137fdf27b6e0dfba2f8d8f25b616b1fb81db9"
 - "./travis-tool.sh github_package robertzk/objectdiff"
 script: "./travis-tool.sh run_tests"
