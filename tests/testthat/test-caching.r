@@ -41,6 +41,14 @@ test_that('there are no cached environments on non-first stages after everything
   expect_identical(lapply(sr$stages[-1], `[[`, ".cached_env"), list(NULL, NULL))
 })
 
+test_that('there are no cached environments if the remember_flag option is disabled.', {
+  withr::with_options(c("stagerunner.remember" = FALSE), {
+    sr <- stageRunner$new(new.env(), list(force, force, force), remember = TRUE)
+    sr$run()
+    expect_identical(lapply(sr$stages[-1], `[[`, ".cached_env"), list(NULL, NULL))
+  })
+})
+
 test_that('running the first two stages updates the cache for the second stage and third stage', {
   sr <- stageRunner$new(new.env(), list(function(env) env$x <- 1, force, force), remember = TRUE)
   sr$run(c(1,2))
