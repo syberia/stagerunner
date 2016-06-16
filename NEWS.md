@@ -1,3 +1,9 @@
+# Version 0.5.5
+
+* Added an option `stagerunner.remember` for always switching off intermediate
+  progress, e.g., when running jobs on a machine that never needs replay
+  capability.
+
 # Version 0.5.4
 
 * Added some fixes to stagerunner coalescing.
