@@ -21,7 +21,8 @@ Suggests:
     microbenchmark,
     objectdiff,
     testthat,
-    testthatsomemore
+    testthatsomemore,
+    withr
 Roxygen: list(wrap = FALSE)
 Collate:
     'boolean_fill.R'
@@ -59,3 +60,4 @@ Collate:
     'treeSkeleton-successor.R'
     'treeSkeleton.R'
     'utils.R'
+RoxygenNote: 5.0.1.9000

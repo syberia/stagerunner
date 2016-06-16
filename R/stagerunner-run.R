@@ -156,7 +156,8 @@
 #' # This will execute all but "stage_one" (i.e., only "stage_two")
 #' sr$run(-1)
 #' stopifnot(identical(env$z, 1))
-run <- function(from = NULL, to = NULL, verbose = FALSE, remember_flag = TRUE,
+run <- function(from = NULL, to = NULL, verbose = FALSE,
+                remember_flag = getOption("stagerunner.remember", TRUE),
                 mode = self$.mode, normalized = FALSE, .depth = 1, ...) {
   ## The parameter `normalized` refers to whether the input (that is, the `from`
   ## and `to` parameters) are in the canonical nested list format. For example,
