@@ -1,3 +1,7 @@
+# Version 0.5.6
+
+* Fixed a small bug when printing runners with missing stage names.
+
 # Version 0.5.5
 
 * Added an option `stagerunner.remember` for always switching off intermediate

@@ -31,7 +31,7 @@ show_message <- function(stage_names, stage_index, begin = TRUE,
   ## If the stage was not named (i.e., only a function was given), we "impute"
   ## the name with an ordinal: "fifth", "twelfth", "21st", etc. (depending on
   ## the index of the stage).
-  if (is.null(stage_name) || stage_name == "") {
+  if (is.null(stage_name) || identical(stage_name, "") || identical(stage_name, NA_character_)) {
     stage_name <- as.ordinal(stage_index)
   }
 
