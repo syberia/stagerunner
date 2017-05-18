@@ -38,4 +38,3 @@ environment \code{e} containing \code{x = 1, y = 2}, then using
 \code{stages = list(function(e) e$x <- e$x + 1, function(e) e$y <- e$y - e$x)}
 will cause \code{x = 2, y = 0} after running the stages.
 }
-

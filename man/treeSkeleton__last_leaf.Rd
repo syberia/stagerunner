@@ -12,4 +12,3 @@ The last leaf, that is, the last terminal child node.
 \description{
 Find the last leaf in a tree.
 }
-

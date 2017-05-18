@@ -36,4 +36,3 @@ would mistakenly return \code{list(a = TRUE, b = TRUE)}.
 \seealso{
 \code{\link{special_and_lists}}
 }
-

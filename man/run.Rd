@@ -99,4 +99,3 @@ stopifnot(is.null(env$z), is.null(env$x), identical(env$y, 1))
 sr$run(-1)
 stopifnot(identical(env$z, 1))
 }
-

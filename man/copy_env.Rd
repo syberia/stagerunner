@@ -18,4 +18,3 @@ Copy one environment into another recursively.
 Both \code{to} and \code{from} must be pre-existing environments
   or this function will error.
 }
-

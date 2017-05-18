@@ -26,4 +26,3 @@ The iterators on a \code{treeSkeleton} use the standard definition of
 successor, predecessor, ancestor, etc.
 }
 \keyword{datasets}
-

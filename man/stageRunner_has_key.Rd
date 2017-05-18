@@ -15,4 +15,3 @@ stageRunner_has_key(key)
 \description{
 Whether or not the stageRunner has a key matching this input.
 }
-

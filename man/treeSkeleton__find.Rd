@@ -29,4 +29,3 @@ sr <- stageRunner$new(new.env(), list(a = list(force, list(b = function(x) x + 1
 stagerunner:::treeSkeleton$new(sr)$find('a/2/b') # function(x) x + 1
 }
 }
-

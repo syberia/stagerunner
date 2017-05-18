@@ -4,18 +4,17 @@
 \name{stageRunner}
 \alias{stageRunner}
 \alias{stageRunner_}
+\alias{stageRunner}
 \alias{stagerunner}
 \title{Stagerunners are parametrized sequences of linear execution.}
-\format{An object of class \code{stageRunner_} of length 1.}
 \usage{
 stageRunner_
 
-stageRunner
+stageRunner(...)
 
-stagerunner
+stagerunner(...)
 }
 \description{
 Stagerunners are parametrized sequences of linear execution.
 }
 \keyword{datasets}
-

@@ -30,4 +30,3 @@ treeSkeleton objects allow you to traverse a reference class object
 as if it had a tree structure, merely by knowing how to call parent
 or child nodes.
 }
-

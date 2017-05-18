@@ -15,4 +15,3 @@ Every terminal node in a stageRunner is of type stageRunnerNode.
 These each have a callable, and this method transforms those
 callables in the way given by the first argument.
 }
-

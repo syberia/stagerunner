@@ -30,4 +30,3 @@ node$transform(function(fn) {
 node$run() # Prints 3, rather than 2
 }
 }
-

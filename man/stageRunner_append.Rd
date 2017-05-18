@@ -15,4 +15,3 @@ newly appended list element).}
 \description{
 Append one stageRunner to the end of another.
 }
-

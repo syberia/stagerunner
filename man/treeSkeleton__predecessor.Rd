@@ -17,4 +17,3 @@ predecessor for the wrapped object.
 \description{
 Attempt to find the predecessor of the current node.
 }
-

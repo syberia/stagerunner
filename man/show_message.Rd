@@ -30,4 +30,3 @@ Show a progress message when executing a stagerunner.
   show_message(c('one', 'two'), 2) # Will print "Beginning one stage..."
 }
 }
-

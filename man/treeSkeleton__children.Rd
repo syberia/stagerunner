@@ -9,4 +9,3 @@ treeSkeleton__children()
 \description{
 Find the children of the current object wrapped in treeSkeletons.
 }
-

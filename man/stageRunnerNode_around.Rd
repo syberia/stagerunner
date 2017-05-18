@@ -26,4 +26,3 @@ node1$run() # Will print 1 2 3
 # node that is being wrapped.
 }
 }
-

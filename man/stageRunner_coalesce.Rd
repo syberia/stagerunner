@@ -20,4 +20,3 @@ with the former's.
 coalescing is ill-defined for stageRunner with unnamed stages,
    since it is impossible to tell when a stage has changed.
 }
-

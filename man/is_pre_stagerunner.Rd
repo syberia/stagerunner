@@ -29,4 +29,3 @@ stopifnot(!is_pre_stagerunner(NULL))
 stopifnot(!is_pre_stagerunner(5))
 stopifnot(!is_pre_stagerunner(iris))
 }
-

@@ -16,4 +16,3 @@ the full nested tree structure. This function sets up the
 \code{prefix} member of each sub-stageRunner recursively to enable
 correct remembering functionality.
 }
-

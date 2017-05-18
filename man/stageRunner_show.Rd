@@ -13,4 +13,3 @@ indentation level.}
 \description{
 Generic for printing stageRunner objects.
 }
-

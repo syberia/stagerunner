@@ -26,4 +26,3 @@ Overlaying a stageRunner object is taking another stageRunner object
 with similar stage names and adding the latter's stages as terminal stages
 to the former (for example, to support tests).
 }
-

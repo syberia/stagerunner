@@ -18,4 +18,3 @@ it will try to fetch a generic with the name \code{method} using \code{get}.}
 \description{
 Call a method on an object regardless of its OOP type.
 }
-

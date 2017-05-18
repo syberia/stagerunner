@@ -21,4 +21,3 @@ in the \code{run} method on a stageRunner object.
 \seealso{
 \code{\link{run}}
 }
-

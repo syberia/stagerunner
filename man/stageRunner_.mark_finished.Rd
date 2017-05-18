@@ -12,4 +12,3 @@ stageRunner_.mark_finished(stage_index)
 \description{
 Mark a given stage as being finished.
 }
-

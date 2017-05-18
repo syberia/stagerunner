@@ -12,4 +12,3 @@ The first leaf, that is, the first terminal child node.
 \description{
 Find the first leaf in a tree.
 }
-

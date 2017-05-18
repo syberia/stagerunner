@@ -22,4 +22,3 @@ If there is a lot of data in the remembered environment, this function
   may be computationally expensive as it has to create a new environment
   with a copy of all the relevant data.
 }
-

@@ -2,9 +2,9 @@
 % Please edit documentation in R/stageRunnerNode.R
 \docType{class}
 \name{stageRunnerNode}
-\alias{is.stageRunnerNode}
 \alias{stageRunnerNode}
 \alias{stageRunnerNode_}
+\alias{is.stageRunnerNode}
 \title{Stagerunner nodes are environment wrappers around individual stages
 (i.e. functions) in order to track meta-data (e.g., for caching).}
 \usage{
@@ -20,4 +20,3 @@ Stagerunner nodes are environment wrappers around individual stages
 (i.e. functions) in order to track meta-data (e.g., for caching).
 }
 \keyword{datasets}
-

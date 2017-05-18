@@ -14,4 +14,3 @@ a character stage key giving the latest executed stage.
 \description{
 This allows us to get the furthest executed stage.
 }
-

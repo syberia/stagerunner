@@ -30,4 +30,3 @@ then we will see 1, 2, and 3 printed in succession. The \code{yield()}
 keyword is used to specify when to execute the terminal node that
 is sandwiched in the "around" runner.
 }
-

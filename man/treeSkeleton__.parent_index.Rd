@@ -9,4 +9,3 @@ treeSkeleton__.parent_index()
 \description{
 Find the index of the current object in the children of its parent.
 }
-

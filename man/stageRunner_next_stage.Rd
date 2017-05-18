@@ -15,4 +15,3 @@ a character stage key giving the next unexecuted stage.
 \description{
 For stageRunners with caching, find the next unexecuted stage.
 }
-

@@ -15,4 +15,3 @@ For example, if we have stages
 then this method would return
   \code{list('a/b', 'a/c', 'd', 'e/f', 'e/g')}
 }
-

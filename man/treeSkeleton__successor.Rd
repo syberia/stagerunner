@@ -17,4 +17,3 @@ successor for the wrapped object.
 \description{
 Attempt to find the successor of the current node.
 }
-

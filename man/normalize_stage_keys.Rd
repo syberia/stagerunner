@@ -47,4 +47,3 @@ For example, \code{list('data/one', 2)} would be converted to
 \seealso{
 stageRunner__run
 }
-

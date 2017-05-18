@@ -25,4 +25,3 @@ stagerunner:::nested_names(list(a = list(b = 1, c = list(d = 2, e = 3)), f = 4, 
 stagerunner:::nested_names(list(a = list(b = 1, c = 2), d = 2), delim = ' ', prefix = '#')
 # c('#a b', '#a c', '#d')
 }
-

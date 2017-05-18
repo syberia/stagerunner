@@ -12,4 +12,3 @@ the root of the stageRunner
 \description{
 Determine the root of the stageRunner.
 }
-
