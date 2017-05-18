@@ -6,11 +6,21 @@ Stagerunner [![Build Status](https://travis-ci.org/syberia/stagerunner.svg?branc
 Stagerunners make it simpler to write and debug code that performs a
 linear sequence of actions.
 
+## Installation
+
+This package is in active development and not yet available from CRAN (as of May 18, 2017).
+To install the latest development builds directly from GitHub, run this instead:
+
+```R
+if (!require("devtools")) install.packages("devtools")
+devtools::install_github("syberia/stagerunner")
+```
+
 ### License
 
 This project is licensed under the MIT License:
 
-Copyright (c) 2014-2016 Syberia, Avant, Robert Krzyzanowski
+Copyright (c) 2014-2017 Syberia, Avant, Robert Krzyzanowski
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
