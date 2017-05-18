@@ -14,6 +14,9 @@ stageRunner(...)
 
 stagerunner(...)
 }
+\arguments{
+\item{...}{Arguments to pass to stagerunner initialization.}
+}
 \description{
 Stagerunners are parametrized sequences of linear execution.
 }

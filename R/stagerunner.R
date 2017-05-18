@@ -77,6 +77,7 @@ stageRunner_ <- R6::R6Class('stageRunner',
 ## A little trick to ensure that a stagerunner can be constructed both as
 ## `stagerunner(...) and stagerunner$new(...)`.
 #' @rdname stageRunner
+#' @param ... Arguments to pass to stagerunner initialization.
 #' @export
 stageRunner <- structure(
   function(...) { stageRunner_$new(...) },
