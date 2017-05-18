@@ -1,4 +1,4 @@
-Stagerunner [![Build Status](https://travis-ci.org/syberia/stagerunner.svg?branch=master)](https://travis-ci.org/syberia/stagerunner) [![Coverage Status](https://img.shields.io/coveralls/syberia/stagerunner.svg)](https://coveralls.io/r/syberia/stagerunner) [![Documentation](https://img.shields.io/badge/rocco--docs-%E2%9C%93-blue.svg)](http://syberia.github.io/stagerunner/)
+Stagerunner [![Build Status](https://travis-ci.org/syberia/stagerunner.svg?branch=master)](https://travis-ci.org/syberia/stagerunner) [![Coverage Status](https://img.shields.io/coveralls/syberia/stagerunner.svg)](https://coveralls.io/r/syberia/stagerunner) [![Documentation](https://img.shields.io/badge/rocco--docs-%E2%9C%93-blue.svg)](http://syberia.github.io/stagerunner/)[![Join the chat at https://gitter.im/syberia/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/syberia/Lobby) 
 ===========
 
 ![stagerunner](http://i.imgur.com/5gVgx1B.png)
