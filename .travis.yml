@@ -11,6 +11,27 @@ r_github_packages:
     - kirillseva/covr
     - robertzk/objectdiff
 r_binary_packages:
+    - shiny
+    - rcpp
+    - htmltools
+    - httpuv
+    - sourcetools
+    - xtable
+    - knitr
+    - evaluate
+    - stringr
+    - highr
+    - markdown
+    - yaml
+    - ggplot2
+    - microbenchmark
+    - gtable
+    - plyr
+    - reshape2
+    - scales
+    - dichromat
+    - labeling
+    - rcolorbrewer
     - r6
     - testthat
     - crayon
