@@ -11,6 +11,7 @@ r_github_packages:
     - kirillseva/covr
     - robertzk/objectdiff
 r_binary_packages:
+    - roxygen2
     - shiny
     - rcpp
     - htmltools
