@@ -1,18 +1,41 @@
-language: c
+language: r
+sudo: required
+cache: packages
 dist: trusty
-before_install:
-- curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-- chmod 755 ./travis-tool.sh
-- "./travis-tool.sh bootstrap"
-install:
-- "./travis-tool.sh github_package hadley/testthat"
-- "./travis-tool.sh github_package robertzk/testthatsomemore"
-- "./travis-tool.sh install_r R6"
-- "./travis-tool.sh github_package jimhester/covr@e3e137fdf27b6e0dfba2f8d8f25b616b1fb81db9"
-- "./travis-tool.sh github_package robertzk/objectdiff"
-script: "./travis-tool.sh run_tests"
-after_failure:
-  - ./travis-tool.sh dump_logs
+r:
+    - oldrel
+    - release
+    - devel
+r_github_packages:
+    - robertzk/testthatsomemore
+    - kirillseva/covr
+    - robertzk/objectdiff
+r_binary_packages:
+    - shiny
+    - rcpp
+    - htmltools
+    - httpuv
+    - sourcetools
+    - xtable
+    - knitr
+    - evaluate
+    - stringr
+    - highr
+    - markdown
+    - yaml
+    - ggplot2
+    - microbenchmark
+    - gtable
+    - plyr
+    - reshape2
+    - scales
+    - dichromat
+    - labeling
+    - rcolorbrewer
+    - r6
+    - testthat
+    - crayon
+
 after_success:
   - "Rscript -e 'library(covr);coveralls()'"
 notifications:
