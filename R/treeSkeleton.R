@@ -16,9 +16,9 @@ NULL
 #' Find the root node of the tree (the only one with no parent).
 #'
 #' @name treeSkeleton__root
-#' @return The root node of the tree or NULL if empty tree.
+#' @return The root node of the tree or list() if empty tree.
 treeSkeleton__root <- function() {
-  if (is.null(self$parent())) self
+  if (length(self$parent()) == 0) self
   else self$parent()
 }
 
@@ -157,7 +157,7 @@ treeSkeleton <- structure(
 }
 
 uninitialized_field <- function() {
-  structure(NULL, class = "uninitialized_field")
+  structure(list(), class = "uninitialized_field")
 }
 
 is.unitialized_field <- function(x) {

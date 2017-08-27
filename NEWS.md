@@ -1,3 +1,7 @@
+# Version 0.5.7
+
+* Resolves calling `'structure(NULL, *)'`, since this is deprecated, as NULL cannot have attributes.
+
 # Version 0.5.6
 
 * Fixed a small bug when printing runners with missing stage names.
