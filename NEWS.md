@@ -30,7 +30,7 @@
 
 # Version 0.4.0
 
-* Integration with the [objectdiff package](http://github.com/robertzk/objectdiff).
+* Integration with the [objectdiff package](http://github.com/syberia/objectdiff).
   This means passing a `tracked_environment` object as the `context` to
   a `stageRunner` will result in much smarter memory management of environment
   changes as you run its stages (objectdiff uses clever patching functions to

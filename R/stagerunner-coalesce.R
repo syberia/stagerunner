@@ -21,7 +21,7 @@
 ## without having to re-import the data.
 ##
 ## This can be inefficient for large datasets, but using the
-## [objectdiff](http://github.com/robertzk/objectdiff) package we can avoid
+## [objectdiff](http://github.com/syberia/objectdiff) package we can avoid
 ## the memory problems that may arise. For even larger datasets, we may need
 ## database-backed storage, but this is beyond the scope of stagerunners for
 ## now.
@@ -40,7 +40,7 @@ stageRunner_coalesce <- function(other_runner) {
   if (!isTRUE(self$remember)) return()
 
   ## We must handle these cases: (1) integration with 
-  ## [objectdiff](http://github.com/robertzk/objectdiff), and (2) vanilla
+  ## [objectdiff](http://github.com/syberia/objectdiff), and (2) vanilla
   ## R environment objects. Both are tricky.
   if (self$with_tracked_environment()) {
     if (!other_runner$with_tracked_environment()) {

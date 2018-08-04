@@ -4,7 +4,7 @@
 ## each step. This is highly inefficient.
 ##
 ## We attempt to solve this problem with a space-time tradeoff: the 
-## [objectdiff](http://github.com/robertzk/objectdiff) package computes
+## [objectdiff](http://github.com/syberia/objectdiff) package computes
 ## the *difference* between the environment before and after executing
 ## a given stage. By incorporating this package into a stagerunner,
 ## we can take slightly more time (by computing differences between

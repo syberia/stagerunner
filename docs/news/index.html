@@ -116,7 +116,7 @@
 <h1 class="hasAnchor">
 <a href="#version-0-4-0" class="anchor"></a>Version 0.4.0</h1>
 <ul>
-<li>Integration with the <a href="http://github.com/robertzk/objectdiff">objectdiff package</a>. This means passing a <code>tracked_environment</code> object as the <code>context</code> to a <code>stageRunner</code> will result in much smarter memory management of environment changes as you run its stages (objectdiff uses clever patching functions to record only <em>changes</em> to an environment as it is being modified; without this logic, a stageRunner has to copy an environment in full on each executed stage, which is especially expensive if you are manipulating large data sets).</li>
+<li>Integration with the <a href="http://github.com/syberia/objectdiff">objectdiff package</a>. This means passing a <code>tracked_environment</code> object as the <code>context</code> to a <code>stageRunner</code> will result in much smarter memory management of environment changes as you run its stages (objectdiff uses clever patching functions to record only <em>changes</em> to an environment as it is being modified; without this logic, a stageRunner has to copy an environment in full on each executed stage, which is especially expensive if you are manipulating large data sets).</li>
 </ul>
 </div>
     <div id="version-0-3-2" class="section level1">

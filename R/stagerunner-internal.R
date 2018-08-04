@@ -1,6 +1,6 @@
 ## This file contains some messy internal methods that are necessary
 ## for correct interoperation with the `treeSkeleton` class and
-## the [objectdiff](http://github.com/robertzk/objectdiff) package.
+## the [objectdiff](http://github.com/syberia/objectdiff) package.
 #' Clear all caches in this stageRunner, and recursively.
 #' @name stageRunner_.clear_cache
 stageRunner_.clear_cache <- function() {
