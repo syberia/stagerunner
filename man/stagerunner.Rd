@@ -4,7 +4,6 @@
 \name{stageRunner}
 \alias{stageRunner}
 \alias{stageRunner_}
-\alias{stageRunner}
 \alias{stagerunner}
 \title{Stagerunners are parametrized sequences of linear execution.}
 \usage{

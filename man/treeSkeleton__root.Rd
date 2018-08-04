@@ -7,7 +7,7 @@
 treeSkeleton__root()
 }
 \value{
-The root node of the tree or NULL if empty tree.
+The root node of the tree or list() if empty tree.
 }
 \description{
 Find the root node of the tree (the only one with no parent).
