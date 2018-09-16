@@ -68,7 +68,7 @@ stageRunner_ <- R6::R6Class('stageRunner',
     .mark_finished = stageRunner_.mark_finished,
     with_tracked_environment = function() {
       out <- is(self$context, 'tracked_environment')
-      if (out) { requireNamespace("objectdiff", quietly = TRUE) }
+      if (isTRUE(out)) { requireNamespace("objectdiff", quietly = TRUE) }
       out
     }
   )
